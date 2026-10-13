@@ -1,0 +1,22 @@
+Package: zuutforacle
+Title: zufast as an Oracle for zuutf
+Version: 0.0.1
+Authors@R: 
+    person("Pedro", "Baltazar", , "pedrobtz@gmail.com", role = c("aut", "cre"))
+Description: Not a real package and never published. It compiles zufast's
+    scalar UTF-8 validator and strict Base64 decoder, and compares them with
+    zuutf on zuutf's corpus and on a million random byte strings (design
+    §10, D12). It is built and run only by hardening.yaml, so zuutf never
+    depends on zufast.
+License: MIT + file LICENSE
+Encoding: UTF-8
+Depends: 
+    R (>= 4.1)
+Imports: 
+    zuutf
+LinkingTo: 
+    zufast,
+    zuutf
+Suggests: 
+    testthat (>= 3.0.0)
+Config/testthat/edition: 3

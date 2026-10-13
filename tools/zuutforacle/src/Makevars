@@ -1,0 +1,2 @@
+# Nothing is linked: zufast is header-only and zuutf is reached through
+# R_GetCCallable().
