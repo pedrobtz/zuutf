@@ -50,3 +50,9 @@ pak::pak("pedrobtz/zuutf")
 - [`zuutf_info()`](https://pedrobtz.github.io/zuutf/reference/zuutf_info.md)
   : Information about the bundled simdutf library
 
+# Articles
+
+### All vignettes
+
+- [Calling zuutf from
+  C](https://pedrobtz.github.io/zuutf/articles/linking.md):
