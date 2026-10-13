@@ -25,7 +25,7 @@ written. Sections marked § are in design.md.
 | 4 | [Base64](#stage-4--base64) | [#6](https://github.com/pedrobtz/zuutf/issues/6) | [#18](https://github.com/pedrobtz/zuutf/pull/18) | 2026-10-13 |
 | 5 | [The C table and the consumer fixture](#stage-5--the-c-table-and-the-consumer-fixture) | [#7](https://github.com/pedrobtz/zuutf/issues/7) | [#19](https://github.com/pedrobtz/zuutf/pull/19) | 2026-10-13 |
 | 6 | [Oracles, hostile input, fuzzing and benchmarks](#stage-6--oracles-hostile-input-fuzzing-and-benchmarks) | [#8](https://github.com/pedrobtz/zuutf/issues/8) | [#21](https://github.com/pedrobtz/zuutf/pull/21) | 2026-10-13 |
-| 7 | [v0.1.0 readiness](#stage-7--v010-readiness) | [#9](https://github.com/pedrobtz/zuutf/issues/9) | | |
+| 7 | [v0.1.0 readiness](#stage-7--v010-readiness) | [#9](https://github.com/pedrobtz/zuutf/issues/9) | | 2026-10-13 |
 
 ## Stage 0 — Package identity
 
@@ -375,6 +375,13 @@ one from its count (design §10). The fuzz targets embed R and fuzz zuutf's
 - A full-profile r-actions run is green on the release commit, every
   workflow of §12.2 included.
 - Every §14 acceptance criterion holds.
+
+**Deviations (2026-10-13).** The `pkg-cran-review` findings were all
+WARNs and are resolved in this stage's pull request: method references in
+`Description` (the simdutf papers, by their arXiv DOIs), quotes kept for
+software names only, Daniel Lemire as `ctb` and `cph`, and a CRAN
+install line in the README. `cran-comments.md` explains the Linux
+installed-size INFO and the Windows outcome.
 
 **Design.** §13, §14.
 

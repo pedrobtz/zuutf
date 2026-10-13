@@ -13,7 +13,7 @@ Sibling checkouts sit in `../`. `zucrypt` is the model for vendoring (manifest a
 
 ## Current state
 
-**2026-10-13: Stages 0–5 done.** simdutf 9.2.1 is vendored unmodified (`tools/vendor/`), compiles on every CI leg with every kernel, Windows included (design §12.1: go), and the kernel matrix forces each kernel a runner supports. Exported: `zuutf_info()`; validation and counts (`utf_valid()`, `utf_error_at()`, `utf_is_ascii()`, `utf_count()`, `utf_length_as()`); conversion (`utf_convert()`, `utf_decode()`, `utf_encode()`, `utf_detect()`); Base64 (`base64_encode()`, `base64_decode()`), with the condition classes in `R/conditions.R`; and the C table `zuutf_api_v1` (`inst/include/zuutf.h`, `src/zut_api.c`), consumed by `tools/zuutftest` in `consumer.yaml`. Stage 6 (oracles, fuzzing, benchmarks) and Stage 7 (release) remain. Tracking: parent [#1](https://github.com/pedrobtz/zuutf/issues/1), stages #2–#9, submission #10.
+**2026-10-13: Stages 0–7 done; Version 0.1.0, in `Pre-flight`.** simdutf 9.2.1 is vendored unmodified and runs every kernel on every CI leg, Windows included (design §12.1: go). The whole §5 surface is exported and documented, the C table `zuutf_api_v1` is consumed by `tools/zuutftest`, and `hardening.yaml` runs the canaries, the fuzz targets and the zufast oracle on every kernel. What remains is the submission itself (issue #10), which is the maintainer's decision. Tracking: parent [#1](https://github.com/pedrobtz/zuutf/issues/1), stages #2–#9, submission #10.
 
 Update this paragraph at the end of every stage.
 
