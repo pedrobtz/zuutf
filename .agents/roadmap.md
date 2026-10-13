@@ -24,7 +24,7 @@ written. Sections marked § are in design.md.
 | 3 | [Conversion](#stage-3--conversion) | [#5](https://github.com/pedrobtz/zuutf/issues/5) | [#17](https://github.com/pedrobtz/zuutf/pull/17) | 2026-10-13 |
 | 4 | [Base64](#stage-4--base64) | [#6](https://github.com/pedrobtz/zuutf/issues/6) | [#18](https://github.com/pedrobtz/zuutf/pull/18) | 2026-10-13 |
 | 5 | [The C table and the consumer fixture](#stage-5--the-c-table-and-the-consumer-fixture) | [#7](https://github.com/pedrobtz/zuutf/issues/7) | [#19](https://github.com/pedrobtz/zuutf/pull/19) | 2026-10-13 |
-| 6 | [Oracles, hostile input, fuzzing and benchmarks](#stage-6--oracles-hostile-input-fuzzing-and-benchmarks) | [#8](https://github.com/pedrobtz/zuutf/issues/8) | | |
+| 6 | [Oracles, hostile input, fuzzing and benchmarks](#stage-6--oracles-hostile-input-fuzzing-and-benchmarks) | [#8](https://github.com/pedrobtz/zuutf/issues/8) | [#21](https://github.com/pedrobtz/zuutf/pull/21) | |
 | 7 | [v0.1.0 readiness](#stage-7--v010-readiness) | [#9](https://github.com/pedrobtz/zuutf/issues/9) | | |
 
 ## Stage 0 — Package identity
