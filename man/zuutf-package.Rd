@@ -31,7 +31,7 @@ Authors:
 
 Other contributors:
 \itemize{
-  \item Daniel Lemire (simdutf, bundled in src/vendor/simdutf) [copyright holder]
+  \item Daniel Lemire (simdutf, bundled in src/vendor/simdutf) [contributor, copyright holder]
   \item The simdutf authors (simdutf, bundled in src/vendor/simdutf) [copyright holder]
 }
 
