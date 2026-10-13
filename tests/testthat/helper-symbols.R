@@ -37,7 +37,8 @@ exported_symbols <- function() {
     }
     rows <- dump[-seq_len(start[1L])]
     rows <- rows[grepl("^\\s*\\[\\s*[0-9]+\\]", rows)]
-    return(sub("^\\s*\\[\\s*[0-9]+\\]\\s+", "", rows))
+    # rows read "[   0] +base[   1]  0000 R_init_zuutf"; the name is last
+    return(sub("^.*[[:space:]]", "", trimws(rows)))
   }
   args <- if (sysname == "Darwin") "-gU" else c("-D", "--defined-only")
   syms <- run_tool("nm", c(args, shQuote(zuutf_dll_path())))
@@ -88,8 +89,10 @@ is_instrumented_build <- function() {
 
 # libstdc++'s template instantiations, which GCC exports as weak,
 # vague-linkage symbols whatever the visibility flags say (design §12.2):
-# mangled names in namespace std, their typeinfo, vtables and guard
-# variables.
+# mangled names in namespaces std and __gnu_cxx, their typeinfo, vtables and
+# guard variables. An unoptimised build (gctorture's) leaves inline members
+# such as __gnu_cxx::char_traits<char>::length out of line, so they appear
+# there and nowhere else.
 libstdcxx_instantiation <- function(names) {
-  grepl("^_Z(T[ISV]|GV)?N?K?St", names) | grepl("^_ZSt", names)
+  grepl("^_Z(T[ISV]|GV)?N?K?(St|9__gnu_cxx)", names)
 }

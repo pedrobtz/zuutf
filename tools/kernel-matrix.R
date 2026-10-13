@@ -47,8 +47,8 @@ exports <- tryCatch({
     dump <- system2("objdump", c("-p", shQuote(so)), stdout = TRUE)
     start <- grep("[Ordinal/Name Pointer] Table", dump, fixed = TRUE)
     rows <- if (length(start)) dump[-seq_len(start[1L])] else character()
-    sub("^\\s*\\[\\s*[0-9]+\\]\\s+", "",
-        rows[grepl("^\\s*\\[\\s*[0-9]+\\]", rows)])
+    rows <- trimws(rows[grepl("^\\s*\\[\\s*[0-9]+\\]", rows)])
+    sub("^.*[[:space:]]", "", rows)
   } else {
     a <- if (sysname == "Darwin") "-gU" else c("-D", "--defined-only")
     sub("^.*[[:space:]]", "", system2("nm", c(a, shQuote(so)), stdout = TRUE))
