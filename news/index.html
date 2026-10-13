@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">zuutf</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.0.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -15,7 +15,8 @@
     </button>
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
-      <ul class="navbar-nav me-auto"><li class="nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
+      <ul class="navbar-nav me-auto"><li class="nav-item"><a class="nav-link" href="../articles/zuutf.html">Get started</a></li>
+<li class="nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/linking.html">Calling zuutf from C</a></li>
@@ -37,24 +38,40 @@
     </div>
 
     <div class="section level2">
-<h2 class="pkg-version" data-toc-text="0.0.0.9000" id="zuutf-0009000">zuutf 0.0.0.9000<a class="anchor" aria-label="anchor" href="#zuutf-0009000"></a></h2>
-<ul><li>Bundles simdutf 9.2.1, unmodified, with every kernel it offers and the scalar <code>fallback</code> kernel on every platform.</li>
+<h2 class="pkg-version" data-toc-text="0.1.0" id="zuutf-010">zuutf 0.1.0<a class="anchor" aria-label="anchor" href="#zuutf-010"></a></h2>
+<p>First release. zuutf validates and converts text between the Unicode encodings R meets, through a bundled copy of simdutf 9.2.1, and says where the first error is.</p>
+<div class="section level3">
+<h3 id="validation-and-counts-0-1-0">Validation and counts<a class="anchor" aria-label="anchor" href="#validation-and-counts-0-1-0"></a></h3>
+<ul><li>
+<code><a href="../reference/utf_valid.html">utf_valid()</a></code>, <code><a href="../reference/utf_valid.html">utf_error_at()</a></code> and <code><a href="../reference/utf_valid.html">utf_is_ascii()</a></code> check character, raw and list-of-raw input in UTF-8, UTF-16, UTF-32 (either byte order, or chosen by a byte-order mark), Latin-1 and ASCII, and give the 1-based offset of the first error in the input’s code units.</li>
 <li>
-<code><a href="../reference/zuutf_info.html">zuutf_info()</a></code> reports the simdutf version, the kernel in use and the kernels compiled in.</li>
-<li>
-<code><a href="../reference/utf_valid.html">utf_valid()</a></code>, <code><a href="../reference/utf_valid.html">utf_error_at()</a></code> and <code><a href="../reference/utf_valid.html">utf_is_ascii()</a></code> validate character, raw and list-of-raw input in UTF-8, UTF-16, UTF-32 (either byte order, or chosen by a byte-order mark), Latin-1 and ASCII, and give the offset of the first error in the input’s code units.</li>
-<li>
-<code><a href="../reference/utf_count.html">utf_count()</a></code> counts code points and <code><a href="../reference/utf_count.html">utf_length_as()</a></code> gives the bytes a conversion will produce.</li>
-<li>Errors are classed conditions under <code>zuutf_error</code> (<code><a href="../reference/zuutf_error.html">?zuutf_error</a></code>).</li>
-<li>
-<code><a href="../reference/utf_convert.html">utf_convert()</a></code>, <code><a href="../reference/utf_convert.html">utf_decode()</a></code> and <code><a href="../reference/utf_convert.html">utf_encode()</a></code> convert between every pair of UTF-8, UTF-16, UTF-32 (either byte order) and Latin-1, with a byte-order mark read on input and never written. Ill-formed input raises an error, is replaced with U+FFFD as the WHATWG decoder does (<code>?</code> in Latin-1), or gives <code>NA</code>, as <code>invalid</code> says.</li>
+<code><a href="../reference/utf_count.html">utf_count()</a></code> counts code points; <code><a href="../reference/utf_count.html">utf_length_as()</a></code> gives the bytes a conversion will write.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="conversion-0-1-0">Conversion<a class="anchor" aria-label="anchor" href="#conversion-0-1-0"></a></h3>
+<ul><li>
+<code><a href="../reference/utf_convert.html">utf_convert()</a></code>, <code><a href="../reference/utf_convert.html">utf_decode()</a></code> and <code><a href="../reference/utf_convert.html">utf_encode()</a></code> convert between every pair of UTF-8, UTF-16LE/BE, UTF-32LE/BE and Latin-1. A byte-order mark is read on input and never written. Ill-formed input raises an error, is replaced with U+FFFD as the WHATWG decoder does (<code>?</code> in Latin-1), or gives <code>NA</code>, as <code>invalid</code> says.</li>
 <li>
 <code><a href="../reference/utf_detect.html">utf_detect()</a></code> lists the encodings bytes could be in, a byte-order mark first; <code><a href="../reference/utf_convert.html">utf_decode()</a></code> uses it by default.</li>
-<li>
-<code><a href="../reference/base64_encode.html">base64_encode()</a></code> and <code><a href="../reference/base64_encode.html">base64_decode()</a></code> cover the standard and URL alphabets (either at once on decode with <code>url = NA</code>), padding on or off, line wrapping, and forgiving (WHATWG) or strict (RFC 4648) decoding.</li>
-<li>A registered C table, <code>zuutf_api_v1</code>, in the installed header <code>zuutf.h</code>, gives other packages validation, conversion and Base64 from their own C code (<code><a href="../articles/linking.html">vignette("linking")</a></code>).</li>
 </ul></div>
-  </main></div>
+<div class="section level3">
+<h3 id="base64-0-1-0">Base64<a class="anchor" aria-label="anchor" href="#base64-0-1-0"></a></h3>
+<ul><li>
+<code><a href="../reference/base64_encode.html">base64_encode()</a></code> and <code><a href="../reference/base64_encode.html">base64_decode()</a></code> cover the standard and URL alphabets (either at once on decode with <code>url = NA</code>), padding, line wrapping, and forgiving (WHATWG) or strict (RFC 4648) decoding.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="for-other-packages-0-1-0">For other packages<a class="anchor" aria-label="anchor" href="#for-other-packages-0-1-0"></a></h3>
+<ul><li>A registered C table, <code>zuutf_api_v1</code>, declared in the installed header <code>zuutf.h</code>, gives validation, conversion and Base64 to other packages’ C code without vendoring simdutf (<code><a href="../articles/linking.html">vignette("linking")</a></code>).</li>
+</ul></div>
+<div class="section level3">
+<h3 id="errors-and-information-0-1-0">Errors and information<a class="anchor" aria-label="anchor" href="#errors-and-information-0-1-0"></a></h3>
+<ul><li>Every error is a classed condition under <code>zuutf_error</code> (<code><a href="../reference/zuutf_error.html">?zuutf_error</a></code>).</li>
+<li>
+<code><a href="../reference/zuutf_info.html">zuutf_info()</a></code> reports the simdutf version, the kernel in use and the kernels compiled in.</li>
+</ul></div>
+</div>
+  </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
+    </nav></aside></div>
 
 
     <footer><div class="pkgdown-footer-left">

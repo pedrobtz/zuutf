@@ -109,5 +109,5 @@ reports:
 ``` r
 
 zuutf::zuutf_info()$kernel
-#> [1] "icelake"
+#> [1] "haswell"
 ```

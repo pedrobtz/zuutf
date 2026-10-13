@@ -11,8 +11,8 @@
 <script src="deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="Fast Unicode Validation and Transcoding with simdutf">
-<meta name="description" content="Validates text and converts it between UTF-8, UTF-16 and UTF-32 in either byte order and Latin-1, counts characters, detects encodings, and encodes and decodes Base64, with a bundled copy of the simdutf library (&lt;https://github.com/simdutf/simdutf&gt;). simdutf chooses single instruction, multiple data (SIMD) code for the running processor at first use, so validation and conversion run at gigabytes per second. Every validation and conversion can report the position of the first ill-formed sequence, in the units of the input. Character, raw and list-of-raw input are accepted, and invalid input can raise an error, be replaced with U+FFFD, or give a missing value. The same functions are published to other packages as a registered C interface.">
-<meta property="og:description" content="Validates text and converts it between UTF-8, UTF-16 and UTF-32 in either byte order and Latin-1, counts characters, detects encodings, and encodes and decodes Base64, with a bundled copy of the simdutf library (&lt;https://github.com/simdutf/simdutf&gt;). simdutf chooses single instruction, multiple data (SIMD) code for the running processor at first use, so validation and conversion run at gigabytes per second. Every validation and conversion can report the position of the first ill-formed sequence, in the units of the input. Character, raw and list-of-raw input are accepted, and invalid input can raise an error, be replaced with U+FFFD, or give a missing value. The same functions are published to other packages as a registered C interface.">
+<meta name="description" content="Validates text and converts it between UTF-8, UTF-16 and UTF-32 in either byte order and Latin-1, counts characters, detects encodings, and encodes and decodes Base64, with a bundled copy of the simdutf library (&lt;https://github.com/simdutf/simdutf&gt;). simdutf chooses single instruction, multiple data (SIMD) code for the running processor at first use, so validation and conversion run at gigabytes per second; its methods are described by Keiser and Lemire (2021) &lt;doi:10.48550/arXiv.2010.03090&gt;, Lemire and Mula (2022) &lt;doi:10.48550/arXiv.2109.10433&gt; and Mula and Lemire (2020) &lt;doi:10.48550/arXiv.1910.05109&gt;. Every validation and conversion can report the position of the first ill-formed sequence, in the units of the input. Character, raw and list-of-raw input are accepted, and invalid input can raise an error, be replaced with U+FFFD, or give a missing value. The same functions are published to other packages as a registered C interface.">
+<meta property="og:description" content="Validates text and converts it between UTF-8, UTF-16 and UTF-32 in either byte order and Latin-1, counts characters, detects encodings, and encodes and decodes Base64, with a bundled copy of the simdutf library (&lt;https://github.com/simdutf/simdutf&gt;). simdutf chooses single instruction, multiple data (SIMD) code for the running processor at first use, so validation and conversion run at gigabytes per second; its methods are described by Keiser and Lemire (2021) &lt;doi:10.48550/arXiv.2010.03090&gt;, Lemire and Mula (2022) &lt;doi:10.48550/arXiv.2109.10433&gt; and Mula and Lemire (2020) &lt;doi:10.48550/arXiv.1910.05109&gt;. Every validation and conversion can report the position of the first ill-formed sequence, in the units of the input. Character, raw and list-of-raw input are accepted, and invalid input can raise an error, be replaced with U+FFFD, or give a missing value. The same functions are published to other packages as a registered C interface.">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -22,7 +22,7 @@
 
     <a class="navbar-brand me-2" href="index.html">zuutf</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.0.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -31,6 +31,7 @@
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto">
+<li class="nav-item"><a class="nav-link" href="articles/zuutf.html">Get started</a></li>
 <li class="nav-item"><a class="nav-link" href="reference/index.html">Reference</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
@@ -58,15 +59,68 @@
 <!-- badges: start -->
 
 <p>Every Unicode encoding R meets, validated and converted at memory speed, with the exact position of the first error.</p>
-<p>zuutf validates text and converts it between UTF-8, UTF-16 (LE and BE), UTF-32 (LE and BE) and Latin-1, counts characters, detects encodings, and encodes and decodes Base64. It does this through a bundled copy of <a href="https://github.com/simdutf/simdutf" class="external-link">simdutf</a>, which picks SIMD code for the running processor at first use. Other packages can call the same functions from C through a registered table.</p>
-<p>zuutf is in development. Nothing is exported yet; the plan to the first release is in <a href="https://github.com/pedrobtz/zuutf/blob/main/.agents/roadmap.md" class="external-link"><code>.agents/roadmap.md</code></a>.</p>
+<p>zuutf validates text and converts it between UTF-8, UTF-16 (LE and BE), UTF-32 (LE and BE) and Latin-1, counts characters, detects encodings, and encodes and decodes Base64. It does this with a bundled copy of <a href="https://github.com/simdutf/simdutf" class="external-link">simdutf</a>, which picks SIMD code for the processor at first use. Other packages can call the same functions from C through a registered table (<code><a href="articles/linking.html">vignette("linking")</a></code>).</p>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
-<p>You can install the development version of zuutf from <a href="https://github.com/pedrobtz/zuutf" class="external-link">GitHub</a> with:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"zuutf"</span><span class="op">)</span></span></code></pre></div>
+<p>The development version is on GitHub:</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># install.packages("pak")</span></span>
 <span><span class="fu">pak</span><span class="fu">::</span><span class="fu"><a href="https://pak.r-lib.org/reference/pak.html" class="external-link">pak</a></span><span class="op">(</span><span class="st">"pedrobtz/zuutf"</span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="validation-with-the-position-of-the-first-error">Validation, with the position of the first error<a class="anchor" aria-label="anchor" href="#validation-with-the-position-of-the-first-error"></a>
+</h2>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/pedrobtz/zuutf" class="external-link">zuutf</a></span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="reference/utf_valid.html">utf_valid</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"plain"</span>, <span class="st">"café"</span>, <span class="cn">NA</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1]  TRUE  TRUE    NA</span></span>
+<span></span>
+<span><span class="va">bad</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/raw.html" class="external-link">as.raw</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0x61</span>, <span class="fl">0x62</span>, <span class="fl">0xe2</span>, <span class="fl">0x82</span>, <span class="fl">0x63</span><span class="op">)</span><span class="op">)</span>   <span class="co"># a truncated euro sign</span></span>
+<span><span class="fu"><a href="reference/utf_valid.html">utf_valid</a></span><span class="op">(</span><span class="va">bad</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] FALSE</span></span>
+<span><span class="fu"><a href="reference/utf_valid.html">utf_error_at</a></span><span class="op">(</span><span class="va">bad</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] 3</span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="utf-16-from-windows-tools">UTF-16 from Windows tools<a class="anchor" aria-label="anchor" href="#utf-16-from-windows-tools"></a>
+</h2>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">bytes</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readBin.html" class="external-link">readBin</a></span><span class="op">(</span><span class="st">"export.csv"</span>, <span class="st">"raw"</span>, <span class="fu"><a href="https://rdrr.io/r/base/file.info.html" class="external-link">file.size</a></span><span class="op">(</span><span class="st">"export.csv"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="reference/utf_detect.html">utf_detect</a></span><span class="op">(</span><span class="va">bytes</span><span class="op">)</span>                 <span class="co"># the byte-order mark decides</span></span>
+<span><span class="co">#&gt; [1] "UTF-16LE"</span></span>
+<span><span class="va">text</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/utf_convert.html">utf_decode</a></span><span class="op">(</span><span class="va">bytes</span><span class="op">)</span>         <span class="co"># from = "auto"; the BOM is dropped</span></span></code></pre></div>
+<p>Ill-formed input raises a classed error by default; <code>invalid = "replace"</code> writes U+FFFD as web browsers do, and <code>invalid = "na"</code> gives <code>NA</code>:</p>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="reference/utf_convert.html">utf_decode</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/raw.html" class="external-link">as.raw</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0x61</span>, <span class="fl">0xff</span>, <span class="fl">0x62</span><span class="op">)</span><span class="op">)</span>, <span class="st">"UTF-8"</span>, invalid <span class="op">=</span> <span class="st">"replace"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "a�b"</span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="base64">Base64<a class="anchor" aria-label="anchor" href="#base64"></a>
+</h2>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">s</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/base64_encode.html">base64_encode</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/rawConversion.html" class="external-link">charToRaw</a></span><span class="op">(</span><span class="st">"hello, world"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">s</span></span>
+<span><span class="co">#&gt; [1] "aGVsbG8sIHdvcmxk"</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/rawConversion.html" class="external-link">rawToChar</a></span><span class="op">(</span><span class="fu"><a href="reference/base64_encode.html">base64_decode</a></span><span class="op">(</span><span class="va">s</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "hello, world"</span></span>
+<span><span class="fu"><a href="reference/base64_encode.html">base64_encode</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/raw.html" class="external-link">as.raw</a></span><span class="op">(</span><span class="fl">0</span><span class="op">:</span><span class="fl">63</span><span class="op">)</span>, url <span class="op">=</span> <span class="cn">TRUE</span>, pad <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
+<p>Decoding is forgiving by default, as browsers’ is; <code>forgiving = FALSE</code> reads RFC 4648 strictly.</p>
+</div>
+<div class="section level2">
+<h2 id="learn-more">Learn more<a class="anchor" aria-label="anchor" href="#learn-more"></a>
+</h2>
+<ul>
+<li>
+<code><a href="articles/zuutf.html">vignette("zuutf")</a></code>: encodings, error policies and offsets.</li>
+<li>
+<code><a href="articles/linking.html">vignette("linking")</a></code>: calling zuutf from another package’s C code.</li>
+<li>
+<code><a href="reference/zuutf_info.html">zuutf_info()</a></code>: the simdutf version and the kernel in use.</li>
+</ul>
 </div>
 </div>
   </main><aside class="col-md-3"><div class="links">

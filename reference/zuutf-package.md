@@ -26,8 +26,8 @@ Authors:
 
 Other contributors:
 
-- Daniel Lemire (simdutf, bundled in src/vendor/simdutf) \[copyright
-  holder\]
+- Daniel Lemire (simdutf, bundled in src/vendor/simdutf) \[contributor,
+  copyright holder\]
 
 - The simdutf authors (simdutf, bundled in src/vendor/simdutf)
   \[copyright holder\]
