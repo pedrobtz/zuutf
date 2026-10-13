@@ -1,0 +1,138 @@
+# Design §10: the gates beyond R CMD check.
+#
+#   canaries  each fuzz target's canary build crashes on its canary input
+#             (tools/run-fuzz): a target is trusted once it has failed
+#   fuzz      libFuzzer over zuutf's .Call glue and simdutf, R embedded,
+#             through r-actions' fuzz.yml: five minutes a target on pull
+#             requests and pushes, an hour nightly; the corpus is cached
+#   oracle    zufast's scalar validator and strict Base64 decoder against
+#             zuutf (tools/zuutforacle, D12) on the corpus, the unicode_lipsum
+#             samples and a million random strings, under every kernel the
+#             runner supports; on Windows also on UTF-16 written by
+#             PowerShell itself
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+  schedule:
+    - cron: "41 2 * * *"
+  workflow_dispatch:
+
+name: hardening
+
+permissions: read-all
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  canaries:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Install clang with libFuzzer
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y -q clang
+          v=$(clang -dumpversion | cut -d. -f1)
+          sudo apt-get install -y -q "libclang-rt-$v-dev" || true
+      - uses: r-lib/actions/setup-r@v2
+      - name: Every canary crashes
+        run: CANARY_ONLY=1 tools/run-fuzz
+
+  fuzz:
+    needs: canaries
+    strategy:
+      fail-fast: false
+      matrix:
+        target: [validate, convert, base64]
+    uses: pedrobtz/r-actions/.github/workflows/fuzz.yml@v1
+    with:
+      harness: tools/fuzz/fuzz_${{ matrix.target }}.c
+      sources: tools/fuzz/rfuzz.c src/zut_*.c src/zut_impl.cpp src/vendor/simdutf/simdutf.cpp
+      embed-r: true
+      # UBSan must stop the run, not print and carry on
+      cflags: -g -O1 -fno-omit-frame-pointer -fno-sanitize-recover=undefined -Isrc -Isrc/vendor/simdutf -Iinst/include -Itools/fuzz -DSIMDUTF_IMPLEMENTATION_FALLBACK=1
+      seed-corpus: tools/fuzz/seeds/${{ matrix.target }}
+      libfuzzer-args: -max_len=4096
+      max-total-time: ${{ github.event_name == 'schedule' && 3600 || 300 }}
+
+  oracle:
+    runs-on: ${{ matrix.os }}
+    name: oracle (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    defaults:
+      run:
+        shell: bash
+    env:
+      LIPSUM_COMMIT: b0f1d0c1cb0cb168fc08dbf0e3b7100cdec517dc
+    steps:
+      - uses: actions/checkout@v6
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          use-public-rspm: true
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          dependencies: '"hard"'
+          extra-packages: any::testthat, github::pedrobtz/zufast
+
+      - name: Install zuutf and the oracle
+        run: |
+          R CMD INSTALL --preclean .
+          R CMD INSTALL tools/zuutforacle
+
+      # The lipsum samples carry no licence of their own in unicode_lipsum
+      # (they come from simdutf8, MIT or Apache-2.0), so they are fetched at
+      # a pinned commit rather than bundled (roadmap Stage 6).
+      - name: Fetch the unicode_lipsum samples
+        run: |
+          dir="$RUNNER_TEMP/lipsum"
+          mkdir -p "$dir"
+          for lang in Arabic Chinese Emoji Hebrew Hindi Japanese Korean Latin Russian; do
+            for enc in utf8 utf16 utf32; do
+              curl -sSL --fail -o "$dir/$lang-Lipsum.$enc.txt" \
+                "https://raw.githubusercontent.com/lemire/unicode_lipsum/$LIPSUM_COMMIT/lipsum/$lang-Lipsum.$enc.txt"
+            done
+          done
+          ls "$dir" | wc -l
+          echo "ZUUTF_LIPSUM=$dir" >> "$GITHUB_ENV"
+
+      # Windows PowerShell 5.1 (powershell.exe, not pwsh) writes each of these
+      # with a BOM: Unicode is UTF-16LE, BigEndianUnicode UTF-16BE, UTF8
+      # UTF-8. These are files a Windows tool wrote, not ones built to look
+      # like them.
+      - name: UTF-16 and UTF-8 written by Windows PowerShell
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $dir = Join-Path $env:RUNNER_TEMP "powershell"
+          New-Item -ItemType Directory -Force -Path $dir | Out-Null
+          $src = (Resolve-Path tools/fixtures/sample.txt).Path
+          foreach ($enc in "Unicode", "BigEndianUnicode", "UTF8") {
+            powershell.exe -NoProfile -Command "`$t = [IO.File]::ReadAllText('$src', [Text.Encoding]::UTF8); Set-Content -NoNewline -Encoding $enc -Path '$dir\$enc.txt' -Value `$t"
+          }
+          Get-ChildItem $dir | Format-Table Name, Length
+          "ZUUTF_POWERSHELL=$dir" >> $env:GITHUB_ENV
+
+      - name: The oracle under every kernel this runner supports
+        env:
+          ZUUTF_FIXTURES: ${{ github.workspace }}/tests/testthat/fixtures
+          ZUUTF_SAMPLE: ${{ github.workspace }}/tools/fixtures/sample.txt
+        run: |
+          kernels=$(Rscript -e 'i <- zuutf::zuutf_info()$kernels; cat(i$name[i$supported])')
+          cd tools/zuutforacle/tests/testthat
+          for k in $kernels; do
+            echo "==> SIMDUTF_FORCE_IMPLEMENTATION=$k"
+            SIMDUTF_FORCE_IMPLEMENTATION=$k Rscript -e '
+              stopifnot(zuutf::zuutf_info()$kernel == Sys.getenv("SIMDUTF_FORCE_IMPLEMENTATION"))
+              library(zuutforacle)
+              res <- as.data.frame(testthat::test_dir(".", package = "zuutforacle",
+                load_package = "installed", stop_on_failure = FALSE, reporter = "summary"))
+              cat(sprintf("%d expectations, %d failed, %d skipped\n",
+                sum(res$nb), sum(res$failed), sum(res$skipped)))
+              if (sum(res$nb) == 0L || sum(res$failed) > 0L || any(res$error)) stop("oracle failed")'
+          done
