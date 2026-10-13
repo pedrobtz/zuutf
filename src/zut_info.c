@@ -2,6 +2,7 @@
 #define R_NO_REMAP
 #include <R.h>
 #include <Rinternals.h>
+#include <string.h>
 
 #include "simdutf_c.h"
 #include "zut_impl.h"
@@ -33,6 +34,10 @@ SEXP zut_info(void) {
   Rf_setAttrib(out, R_NamesSymbol, nms);
   UNPROTECT(5);
   return out;
+}
+
+SEXP zut_kernel_ok(void) {
+  return Rf_ScalarLogical(strcmp(zut_active_kernel(), "unsupported") != 0);
 }
 
 SEXP zut_probe(SEXP x) {

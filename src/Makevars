@@ -11,4 +11,5 @@ PKG_CXXFLAGS = $(CXX_VISIBILITY)
 
 # The amalgamation sits in a subdirectory, which R does not compile by
 # itself, so every object is listed.
-OBJECTS = init.o zut_info.o zut_impl.o vendor/simdutf/simdutf.o
+OBJECTS = init.o zut_count.o zut_impl.o zut_info.o zut_input.o zut_validate.o \
+          vendor/simdutf/simdutf.o
