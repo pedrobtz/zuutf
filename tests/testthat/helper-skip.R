@@ -12,7 +12,7 @@ on_cran <- function() !identical(Sys.getenv("NOT_CRAN"), "true")
 # The size of a random sweep: `full` where NOT_CRAN is set (the size a
 # roadmap exit criterion names, which CI shows), `cran` in CRAN's suite, to
 # keep it under 15 seconds (design §10), and `heavy` under ZUUTF_SKIP_HEAVY.
-sweep <- function(full, cran, heavy = cran) {
+sweep_size <- function(full, cran, heavy = cran) {
   if (heavy_skipped()) heavy else if (on_cran()) cran else full
 }
 
