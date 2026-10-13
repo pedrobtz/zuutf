@@ -42,6 +42,10 @@
 <li>
 <code><a href="../reference/utf_count.html">utf_count()</a></code> counts code points and <code><a href="../reference/utf_count.html">utf_length_as()</a></code> gives the bytes a conversion will produce.</li>
 <li>Errors are classed conditions under <code>zuutf_error</code> (<code><a href="../reference/zuutf_error.html">?zuutf_error</a></code>).</li>
+<li>
+<code><a href="../reference/utf_convert.html">utf_convert()</a></code>, <code><a href="../reference/utf_convert.html">utf_decode()</a></code> and <code><a href="../reference/utf_convert.html">utf_encode()</a></code> convert between every pair of UTF-8, UTF-16, UTF-32 (either byte order) and Latin-1, with a byte-order mark read on input and never written. Ill-formed input raises an error, is replaced with U+FFFD as the WHATWG decoder does (<code>?</code> in Latin-1), or gives <code>NA</code>, as <code>invalid</code> says.</li>
+<li>
+<code><a href="../reference/utf_detect.html">utf_detect()</a></code> lists the encodings bytes could be in, a byte-order mark first; <code><a href="../reference/utf_convert.html">utf_decode()</a></code> uses it by default.</li>
 </ul></div>
   </main></div>
 

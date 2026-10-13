@@ -65,12 +65,12 @@ of them too (an error, `?` or `NA`, as its `invalid` argument says).
 ## Examples
 
 ``` r
-utf_count(c("abc", "café", "\U0001f600", NA))
+utf_count(c("abc", "caf\u00e9", "\U0001f600", NA))
 #> [1]  3  4  1 NA
 utf_count(as.raw(c(0x3d, 0xd8, 0x00, 0xde)), "UTF-16LE")   # one emoji
 #> [1] 1
 
-utf_length_as("café", to = "UTF-16LE")   # 8 bytes
+utf_length_as("caf\u00e9", to = "UTF-16LE")   # 8 bytes
 #> [1] 8
 utf_length_as("\U0001f600", to = "UTF-16LE")  # a surrogate pair: 4 bytes
 #> [1] 4

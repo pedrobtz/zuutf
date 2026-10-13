@@ -21,3 +21,16 @@
   gives the bytes a conversion will produce.
 - Errors are classed conditions under `zuutf_error`
   ([`?zuutf_error`](https://pedrobtz.github.io/zuutf/reference/zuutf_error.md)).
+- [`utf_convert()`](https://pedrobtz.github.io/zuutf/reference/utf_convert.md),
+  [`utf_decode()`](https://pedrobtz.github.io/zuutf/reference/utf_convert.md)
+  and
+  [`utf_encode()`](https://pedrobtz.github.io/zuutf/reference/utf_convert.md)
+  convert between every pair of UTF-8, UTF-16, UTF-32 (either byte
+  order) and Latin-1, with a byte-order mark read on input and never
+  written. Ill-formed input raises an error, is replaced with U+FFFD as
+  the WHATWG decoder does (`?` in Latin-1), or gives `NA`, as `invalid`
+  says.
+- [`utf_detect()`](https://pedrobtz.github.io/zuutf/reference/utf_detect.md)
+  lists the encodings bytes could be in, a byte-order mark first;
+  [`utf_decode()`](https://pedrobtz.github.io/zuutf/reference/utf_convert.md)
+  uses it by default.

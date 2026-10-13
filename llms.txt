@@ -29,9 +29,15 @@ pak::pak("pedrobtz/zuutf")
 
 ## All functions
 
+- [`utf_convert()`](https://pedrobtz.github.io/zuutf/reference/utf_convert.md)
+  [`utf_decode()`](https://pedrobtz.github.io/zuutf/reference/utf_convert.md)
+  [`utf_encode()`](https://pedrobtz.github.io/zuutf/reference/utf_convert.md)
+  : Convert between Unicode encodings
 - [`utf_count()`](https://pedrobtz.github.io/zuutf/reference/utf_count.md)
   [`utf_length_as()`](https://pedrobtz.github.io/zuutf/reference/utf_count.md)
   : Count code points and conversion lengths
+- [`utf_detect()`](https://pedrobtz.github.io/zuutf/reference/utf_detect.md)
+  : Detect the encoding of bytes
 - [`utf_valid()`](https://pedrobtz.github.io/zuutf/reference/utf_valid.md)
   [`utf_error_at()`](https://pedrobtz.github.io/zuutf/reference/utf_valid.md)
   [`utf_is_ascii()`](https://pedrobtz.github.io/zuutf/reference/utf_valid.md)

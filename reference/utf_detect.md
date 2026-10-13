@@ -1,0 +1,42 @@
+# Detect the encoding of bytes
+
+Lists the encodings each element could be in. A byte-order mark decides
+alone; otherwise the candidates are every encoding the bytes are valid
+in, by the validators of simdutf, in the order UTF-8, UTF-16LE,
+UTF-16BE, UTF-32LE, UTF-32BE. Latin-1 is never listed, since every byte
+string is valid Latin-1, and pure ASCII text is valid UTF-16 too when
+its length is even, which is why UTF-8 comes first.
+
+## Usage
+
+``` r
+utf_detect(x)
+```
+
+## Arguments
+
+- x:
+
+  A raw vector (one element) or a list of raw vectors.
+
+## Value
+
+For a raw vector, a character vector of candidate encodings, best first,
+and `character(0)` when none fits. For a list, a list of such vectors
+(`NULL` for a `NULL` element), keeping its names.
+
+## See also
+
+[`utf_decode()`](https://pedrobtz.github.io/zuutf/reference/utf_convert.md),
+whose `from = "auto"` takes the first candidate.
+
+## Examples
+
+``` r
+utf_detect(charToRaw("hello"))
+#> [1] "UTF-8"
+utf_detect(as.raw(c(0xff, 0xfe, 0x68, 0x00)))   # a UTF-16LE BOM
+#> [1] "UTF-16LE"
+utf_detect(as.raw(c(0xff, 0xff, 0xff)))
+#> character(0)
+```

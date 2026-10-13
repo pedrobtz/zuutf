@@ -68,7 +68,7 @@ yes or no for UTF-8 only.
 ## Examples
 
 ``` r
-utf_valid(c("abc", "café", NA))
+utf_valid(c("abc", "caf\u00e9", NA))
 #> [1] TRUE TRUE   NA
 utf_valid(as.raw(c(0xc3, 0x28)))            # a truncated sequence
 #> [1] FALSE
@@ -86,6 +86,6 @@ utf_error_at(le, "UTF-16LE")                # unpaired surrogate, unit 2
 utf_valid(list(charToRaw("ok"), as.raw(0xc0), NULL))
 #> [1]  TRUE FALSE    NA
 
-utf_is_ascii(c("abc", "café"))
+utf_is_ascii(c("abc", "caf\u00e9"))
 #> [1]  TRUE FALSE
 ```
