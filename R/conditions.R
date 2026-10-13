@@ -45,10 +45,11 @@ abort_internal_error <- function(message, call = NULL) {
   stop(zuutf_condition("zuutf_internal_error", message, call = call))
 }
 
-# simdutf selects its "unsupported" stub when SIMDUTF_FORCE_IMPLEMENTATION
-# names a kernel this processor cannot run (design §10). Every function
-# would then fail in ways that look like bad input, so it is refused once,
-# up front.
+# SIMDUTF_FORCE_IMPLEMENTATION makes simdutf use the kernel it names without
+# asking the processor (design §10): an unknown name gives its "unsupported"
+# stub, which fails every call as if the input were bad, and a compiled-in
+# kernel the processor lacks dies of an illegal instruction on first use.
+# Both are refused here, before any simdutf code runs.
 check_kernel <- function(call = NULL) {
   if (!.Call(zut_kernel_ok)) {
     abort_internal_error(

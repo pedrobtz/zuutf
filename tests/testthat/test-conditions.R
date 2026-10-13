@@ -21,13 +21,18 @@ test_that("a forced kernel the processor cannot run is an internal error", {
   info <- zuutf_info()
   unsupported <- setdiff(c("icelake", "haswell", "westmere", "arm64", "nope"),
                          info$kernels$name[info$kernels$supported])[1L]
-  rscript <- file.path(R.home("bin"), "Rscript")
-  out <- withr::with_envvar(
-    c(SIMDUTF_FORCE_IMPLEMENTATION = unsupported),
-    system2(rscript, c("-e", shQuote(paste0(
-      "cat(tryCatch(zuutf::utf_valid('a'), ",
-      "zuutf_internal_error = function(e) 'internal'))"
-    ))), stdout = TRUE)
+  # a script file, not -e: Windows' cmd does not keep single quotes, and
+  # Rscript -e leaves a temporary file behind when the child fails
+  script <- withr::local_tempfile(fileext = ".R")
+  writeLines(
+    "cat(tryCatch(zuutf::utf_valid('a'), zuutf_internal_error = function(e) 'internal'))",
+    script
   )
-  expect_identical(out, "internal")
+  rscript <- file.path(R.home("bin"), "Rscript")
+  # R_TESTS is R CMD check's startup file for the test process only
+  out <- withr::with_envvar(
+    c(SIMDUTF_FORCE_IMPLEMENTATION = unsupported, R_TESTS = ""),
+    suppressWarnings(system2(rscript, shQuote(script), stdout = TRUE, stderr = TRUE))
+  )
+  expect_identical(out, "internal", info = paste(out, collapse = "\n"))
 })

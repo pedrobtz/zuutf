@@ -15,6 +15,12 @@ const char *zut_simdutf_version(void);
  * name that is unknown or that this CPU cannot run. */
 const char *zut_active_kernel(void);
 
+/* 1 when the active kernel is a real one this CPU can run. simdutf makes a
+ * kernel named by SIMDUTF_FORCE_IMPLEMENTATION active without asking the
+ * CPU, so a forced kernel the CPU lacks would die of an illegal instruction
+ * on its first call; this asks without running any of its code. */
+int zut_active_kernel_ok(void);
+
 /* The kernels compiled in, in simdutf's order, and for each its description
  * and whether this CPU can run it. Indices run from 0 to count - 1. */
 int zut_kernel_count(void);

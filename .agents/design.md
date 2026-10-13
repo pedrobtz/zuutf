@@ -493,8 +493,14 @@ message.
   vectors, and simdutf's own test inputs where their licence allows.
 - **Kernel matrix.** simdutf reads `SIMDUTF_FORCE_IMPLEMENTATION` from
   the environment on first use and makes that kernel active; an unknown
-  or unsupported name selects its `unsupported` stub, not a real kernel
-  (*verified 2026-10-13*, `simdutf.cpp`, `set_best()`). The
+  name selects its `unsupported` stub, but a kernel that is compiled in
+  and that the processor cannot run is made active anyway, and its first
+  call dies of an illegal instruction (*corrected 2026-10-13*, Stage 2: a
+  forced `icelake` on a runner without AVX-512 exited with SIGILL; `set_best()`
+  does not call `supported_by_runtime_system()`). Every R function
+  therefore checks, before any simdutf call, that the active kernel is a
+  real one the processor supports, and raises `zuutf_internal_error`
+  otherwise. The
   `kernel-matrix` job therefore runs the suite once per kernel the
   runner supports (`fallback` and `westmere` on every x86-64 leg;
   `haswell` on the GitHub runners; `icelake` where the runner has
