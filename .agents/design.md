@@ -265,7 +265,12 @@ they are, Latin-1-marked strings converted from Latin-1, native strings
 through `enc2utf8()` first, and `"bytes"`-marked strings refused with
 `zuutf_invalid_argument`; `useBytes = TRUE` on `utf_valid()`,
 `utf_error_at()` and `utf_count()` reads the bytes of any string as they
-are, which is how a caller checks a string R believes is UTF-8.
+are, which is how a caller checks a string R believes is UTF-8. Without
+`useBytes` a string's bytes are its UTF-8 form, so `encoding` must then
+be `"UTF-8"` or `"ASCII"`, and `from` of `utf_length_as()` `"UTF-8"`; any
+other name is `zuutf_invalid_argument` (Stage 2, 2026-10-13). `utf_is_ascii()` reads
+the bytes of every string as they are, since ASCII is the same in UTF-8
+and every native encoding R supports.
 
 **Base64** takes one string or one raw vector and returns one string
 (encode) or one raw vector (decode); a vector of strings is a job for
@@ -303,7 +308,9 @@ caller's `gsub()`.
 - **BOM.** `utf_decode()` and `utf_convert()` strip a leading byte-order
   mark that matches `from`; with `"UTF-16"`, `"UTF-32"` or `"auto"` they
   use it to choose. Output never carries a BOM; a caller who wants one
-  prepends it.
+  prepends it. Validation, `utf_count()` and `utf_length_as()` skip a
+  matching BOM the same way, so §9's offsets and the counts never include
+  it.
 - **UTF-32 byte order (D13).** simdutf's UTF-32 functions take native
   `char32_t`, and the C API has no UTF-32BE entry points (*verified
   2026-10-13*). The non-native order is byte-swapped in the glue into a
