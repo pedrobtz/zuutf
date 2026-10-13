@@ -588,6 +588,36 @@ A target that is missed on a kernel is recorded with the number, not
 quietly lowered; the `fallback` kernel is reported too, since it is what
 §12.1's worst case ships on Windows.
 
+**Measured** (Stage 6, 2026-10-13; `benchmarks.yaml`, 256 MB inputs, best
+of three, R 4.6.1;
+[run 38445924915](https://github.com/pedrobtz/zuutf/actions/runs/38445924915)).
+Speed-up over the baseline, for the best kernel and for `fallback`; a
+target missed is in bold:
+
+| Operation | Target | Linux, AMD EPYC (icelake / fallback) | Windows, AMD EPYC 9V74 (icelake / fallback) | macOS, Apple M1 (arm64 / fallback) |
+|---|---|---|---|---|
+| `utf_valid()` | ≥ 10× | 11.3 / **6.3** | 22.0 / 23.0 | **5.4** / **4.0** |
+| `utf_decode(from = "UTF-16LE")` | ≥ 10× | **1.9** / **1.2** | 13.1 / **7.1** | **3.4** / **2.7** |
+| `utf_convert("UTF-8", "UTF-16LE")` | ≥ 10× | **7.1** / **2.3** | 67.6 / 14.5 | 24.7 / **8.3** |
+| `base64_decode()` | ≥ 5× | 28.5 / 17.4 | 28.9 / 13.7 | 51.8 / 12.7 |
+| `base64_encode()` | ≥ 5× | **1.2** / **1.0** | **1.4** / **1.1** | **1.2** / **1.4** |
+
+In seconds, zuutf against baseline on the best kernel: `utf_valid()`
+0.024 / 0.272 (Linux), 0.01 / 0.22 (Windows), 0.033 / 0.178 (macOS);
+`utf_decode()` 0.86 / 1.65, 0.63 / 8.27, 1.33 / 4.57; `utf_convert()`
+0.16 / 1.11, 0.12 / 8.11, 0.11 / 2.74; `base64_decode()` 0.12 / 3.48,
+0.09 / 2.60, 0.04 / 2.23; `base64_encode()` 0.65 / 0.81, 0.45 / 0.61,
+0.55 / 0.68.
+
+What the misses are. `base64_encode()` and `utf_decode()` end by making
+one R string of 340 MB and 256 MB; R checks and hashes every CHARSXP it
+makes, and that, not simdutf, is most of their time, which is also what
+the baselines pay. `validUTF8()` is a fast C loop with an ASCII fast path
+(0.14 to 0.27 s for 256 MB), and glibc's and macOS's `iconv()` are much
+faster than Windows', so the ratios against them are smaller there. None
+of these targets is lowered (§11); a string-free decoding path is the
+lever if one is wanted after 0.1.0.
+
 ---
 
 ## 12. Build, portability and CRAN
