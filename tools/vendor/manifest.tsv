@@ -1,0 +1,2 @@
+source	repo	tag	commit	version_string	archive	archive_sha256	license	defines	patches
+simdutf	https://github.com/simdutf/simdutf	v9.2.1	dc3f7a8fa291f2ce793c7b0ddd458f4e67542f14	9.2.1	https://github.com/simdutf/simdutf/releases/download/v9.2.1/singleheader.zip	a1b1fc3a3a8358820438f663237e9f252ce5ad356ae283ac066dcc9212eaa4dc	MIT	-	-

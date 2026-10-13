@@ -1,0 +1,31 @@
+#!/bin/sh
+# Apply the patches the manifest lists for each source, in order, from
+# tools/patches/. Called by `fetch`; never run on its own against a tree that
+# was already patched.
+#
+#   tools/vendor/apply [source ...]
+#
+# zuutf vendors simdutf unmodified (design §8, D11), so the manifest's
+# `patches` column is "-" and this script has nothing to do. It exists so
+# that a future patch is a manifest edit plus a file in tools/patches/, not a
+# change to the pipeline.
+set -eu
+
+ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/../.." && pwd)
+cd "$ROOT"
+MANIFEST=tools/vendor/manifest.tsv
+. tools/vendor/common.sh
+
+sources=${*:-$(manifest_sources)}
+
+for src in $sources; do
+    patches=$(manifest_field "$src" patches)
+    if [ "$patches" = "-" ] || [ -z "$patches" ]; then
+        printf '    %s: no patches\n' "$src"
+        continue
+    fi
+    for p in $(printf '%s' "$patches" | tr ',' ' '); do
+        printf '    %s: applying %s\n' "$src" "$p"
+        patch -s -p1 -d "src/vendor/$src" < "tools/patches/$p"
+    done
+done
