@@ -36,6 +36,9 @@ jobs:
   gctorture:
     uses: pedrobtz/r-actions/.github/workflows/gctorture.yml@v1
     with:
+      # random sweeps shrink to what reaches every path (R7)
+      env: |
+        ZUUTF_SKIP_HEAVY=true
       profile: ${{ github.event_name == 'pull_request' && !contains(github.event.pull_request.labels.*.name, 'full-ci') && 'quick' || 'full' }}
 
   rchk:

@@ -1,6 +1,9 @@
 test_that("encoding and decoding round-trip under every alphabet and padding", {
   withr::local_seed(20261013)
-  lengths <- c(0:20, sample(21:600, 10000 - 21, TRUE))
+  # 10,000 vectors (roadmap Stage 4); under gctorture and valgrind, where
+  # each call costs thousands of collections, enough to reach every path
+  n <- if (heavy_skipped()) 300 else 10000
+  lengths <- c(0:20, sample(21:600, n - 21, TRUE))
   inputs <- lapply(lengths, function(n) as.raw(sample(0:255, n, TRUE)))
   for (url in c(FALSE, TRUE)) {
     for (pad in c(FALSE, TRUE)) {
@@ -74,9 +77,10 @@ test_that("strict decoding rejects whitespace, missing padding and extra bits", 
 })
 
 test_that("every byte value in every position of a short input", {
+  values <- if (heavy_skipped()) c(0:3, 0x3e, 0x3f, 0x7f, 0x80, 0xfe, 0xff) else 0:255
   for (n in 1:6) {
     for (pos in seq_len(n)) {
-      for (b in 0:255) {
+      for (b in values) {
         x <- as.raw(rep(0x41, n))
         x[pos] <- as.raw(b)
         for (url in c(FALSE, TRUE)) {
