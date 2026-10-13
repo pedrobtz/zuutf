@@ -239,7 +239,7 @@ utf_length_as(x, from = "UTF-8", to)  # bytes a conversion will produce, per ele
 
 # Base64
 base64_encode(x, url = FALSE, pad = TRUE, line_length = NULL)   # -> one string
-base64_decode(x, url = FALSE, forgiving = TRUE)                 # -> raw
+base64_decode(x, url = FALSE, forgiving = TRUE)                 # -> raw; url = NA: either alphabet
 
 zuutf_info()                          # simdutf version, kernels available, kernel in use, build facts
 ```
@@ -340,7 +340,9 @@ caller's `gsub()`.
   against the WHATWG test vectors. Decoding errors raise
   `zuutf_base64_error` with the `offset` of the offending character.
   `pad = FALSE` on encode omits `=`; `url = TRUE` selects the `-_`
-  alphabet on both sides.
+  alphabet on both sides, and `url = NA` on decode accepts either
+  (`SIMDUTF_BASE64_DEFAULT_OR_URL`, D18). For an input with too much
+  padding the offset is simdutf's: the first `=` of the run.
 - **Detection.** `utf_detect()` returns the BOM's encoding alone when
   there is one; otherwise every encoding the bytes are valid in, UTF-8
   first, then UTF-16LE, UTF-16BE, UTF-32LE, UTF-32BE; and `character(0)`
@@ -724,15 +726,14 @@ writes from this table.
 | D14 | Base64 shape | One string or raw vector in, one out; `forgiving` maps to simdutf's `loose`/`strict` last-chunk handling plus zuutf's whitespace check in strict mode. |
 | D15 | Name | `zuutf`, closed by creating this repository (RFC Q1). |
 | D16 | The `fallback` kernel | Compiled on every platform with `-DSIMDUTF_IMPLEMENTATION_FALLBACK=1`, so the scalar oracle exists on arm64, where simdutf would otherwise omit it (§12.2; Stage 1, 2026-10-13). |
+| D17 | Base64 prefix | `base64_encode()` and `base64_decode()`: the name users search for, and §3's prefix; decided by the maintainer in Stage 4 (2026-10-13), closing §16 Q1. |
+| D18 | Either alphabet on decode | `url = NA` accepts both alphabets through `SIMDUTF_BASE64_DEFAULT_OR_URL`; decided by the maintainer in Stage 4 (2026-10-13), closing §16 Q4. |
 
 ---
 
 ## 16. Open questions
 
-1. **`base64_` prefix.** Keep Base64 under its own prefix, or
-   `utf_base64_*`? Recommended: `base64_`, which is what users search
-   for; the package name already says which library serves it. Blocks
-   Stage 4.
+1. **`base64_` prefix.** Decided: `base64_` (D17, 2026-10-13).
 2. **zufast's SIMD validator.** Should zufast still get its own
    header-only SIMD UTF-8 validator (§3.1) once zuutf exists?
    Recommended: only if a header-only consumer (one that cannot take a
@@ -741,9 +742,8 @@ writes from this table.
    between calls is the enabler for connections and for a UTF-16
    `readLines()`; it is deferred until a consumer (`zucsv` reading
    UTF-16 exports is the likely one) asks. Blocks nothing in v0.1.0.
-4. **`"either"` alphabet on decode.** simdutf accepts both Base64
-   alphabets at once (`SIMDUTF_BASE64_DEFAULT_OR_URL`); exposing it as
-   `url = NA` is one line, but no caller has asked. Decide in Stage 4.
+4. **`"either"` alphabet on decode.** Decided: `url = NA` (D18,
+   2026-10-13).
 
 ---
 

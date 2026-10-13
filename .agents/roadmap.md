@@ -22,7 +22,7 @@ written. Sections marked § are in design.md.
 | 1 | [Vendor simdutf and the Windows go/no-go](#stage-1--vendor-simdutf-and-the-windows-gono-go) | [#3](https://github.com/pedrobtz/zuutf/issues/3) | [#14](https://github.com/pedrobtz/zuutf/pull/14) | 2026-10-13 |
 | 2 | [Validation, counts and kernel reporting](#stage-2--validation-counts-and-kernel-reporting) | [#4](https://github.com/pedrobtz/zuutf/issues/4) | [#15](https://github.com/pedrobtz/zuutf/pull/15), [#16](https://github.com/pedrobtz/zuutf/pull/16) | 2026-10-13 |
 | 3 | [Conversion](#stage-3--conversion) | [#5](https://github.com/pedrobtz/zuutf/issues/5) | [#17](https://github.com/pedrobtz/zuutf/pull/17) | 2026-10-13 |
-| 4 | [Base64](#stage-4--base64) | [#6](https://github.com/pedrobtz/zuutf/issues/6) | | |
+| 4 | [Base64](#stage-4--base64) | [#6](https://github.com/pedrobtz/zuutf/issues/6) | [#18](https://github.com/pedrobtz/zuutf/pull/18) | 2026-10-13 |
 | 5 | [The C table and the consumer fixture](#stage-5--the-c-table-and-the-consumer-fixture) | [#7](https://github.com/pedrobtz/zuutf/issues/7) | | |
 | 6 | [Oracles, hostile input, fuzzing and benchmarks](#stage-6--oracles-hostile-input-fuzzing-and-benchmarks) | [#8](https://github.com/pedrobtz/zuutf/issues/8) | | |
 | 7 | [v0.1.0 readiness](#stage-7--v010-readiness) | [#9](https://github.com/pedrobtz/zuutf/issues/9) | | |
@@ -244,6 +244,13 @@ padding, forgiving and strict decoding and line wrapping. Size: S.
   `"\n"` separators on the fixtures.
 - §15 records the decisions on Q1 and Q4.
 
+**Deviations (2026-10-13).** The WHATWG vectors are web-platform-tests'
+`fetch/data-urls/resources/base64.json`, kept as hex TSV
+(`tools/fixtures/make-base64-fixtures.py`) so the tests need no JSON
+parser. `base64enc::base64encode(linewidth = )` rounds the width down to a
+multiple of 4 and returns lines unjoined, so the comparison joins them with
+`"\n"` and uses widths that are multiples of 4.
+
 **Design.** §5, §6, §9, §16.
 
 ## Stage 5 — The C table and the consumer fixture
@@ -365,8 +372,7 @@ Size: M.
 
 ## Open questions
 
-- §16 Q1, the `base64_` prefix versus `utf_base64_*`: blocks Stage 4.
-- §16 Q4, `url = NA` for either alphabet on decode: blocks Stage 4.
+- §16 Q1 and Q4: decided in Stage 4 (D17 `base64_`, D18 `url = NA`).
 - §12.1, Windows: not a question but a measurement; Stage 1 settles it and
   every later stage depends on its outcome.
 - §16 Q2 and Q3 block nothing before 0.1.0.

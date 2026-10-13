@@ -14,6 +14,7 @@ Every error zuutf raises inherits from \code{zuutf_error}, then \code{error} and
    \code{zuutf_invalid_argument} \tab  \tab wrong type, unknown encoding name, a \code{"bytes"} string without \code{useBytes} \cr
    \code{zuutf_encoding_error} \tab \code{index}, \code{offset}, \code{encoding} \tab input that is ill-formed in its encoding under \code{invalid = "error"}, or a code point a Latin-1 target cannot represent \cr
    \code{zuutf_nul_error} \tab \code{index}, \code{offset} \tab \code{\link[=utf_decode]{utf_decode()}} meets U+0000, which an R string cannot hold \cr
+   \code{zuutf_base64_error} \tab \code{offset} \tab Base64 input that \code{\link[=base64_decode]{base64_decode()}}'s mode rejects \cr
    \code{zuutf_size_error} \tab  \tab an output longer than a string (2^31 - 1 bytes) or a raw vector can hold \cr
    \code{zuutf_internal_error} \tab  \tab a simdutf result zuutf did not expect, or a kernel forced through \code{SIMDUTF_FORCE_IMPLEMENTATION} that this processor cannot run \cr
 }

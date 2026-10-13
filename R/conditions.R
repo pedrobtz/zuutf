@@ -9,6 +9,7 @@
 #' | `zuutf_invalid_argument` | | wrong type, unknown encoding name, a `"bytes"` string without `useBytes` |
 #' | `zuutf_encoding_error` | `index`, `offset`, `encoding` | input that is ill-formed in its encoding under `invalid = "error"`, or a code point a Latin-1 target cannot represent |
 #' | `zuutf_nul_error` | `index`, `offset` | [utf_decode()] meets U+0000, which an R string cannot hold |
+#' | `zuutf_base64_error` | `offset` | Base64 input that [base64_decode()]'s mode rejects |
 #' | `zuutf_size_error` | | an output longer than a string (2^31 - 1 bytes) or a raw vector can hold |
 #' | `zuutf_internal_error` | | a simdutf result zuutf did not expect, or a kernel forced through `SIMDUTF_FORCE_IMPLEMENTATION` that this processor cannot run |
 #'
@@ -48,6 +49,10 @@ abort_nul_error <- function(message, index, offset, call = NULL) {
     "zuutf_nul_error", message,
     index = index, offset = offset, call = call
   ))
+}
+
+abort_base64_error <- function(message, offset, call = NULL) {
+  stop(zuutf_condition("zuutf_base64_error", message, offset = offset, call = call))
 }
 
 abort_size_error <- function(message, call = NULL) {

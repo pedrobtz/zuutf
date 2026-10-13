@@ -13,7 +13,7 @@ Sibling checkouts sit in `../`. `zucrypt` is the model for vendoring (manifest a
 
 ## Current state
 
-**2026-10-13: Stages 0–3 done.** simdutf 9.2.1 is vendored unmodified (`tools/vendor/`), compiles on every CI leg with every kernel, Windows included (design §12.1: go), and the kernel matrix forces each kernel a runner supports. Exported: `zuutf_info()`; validation and counts (`utf_valid()`, `utf_error_at()`, `utf_is_ascii()`, `utf_count()`, `utf_length_as()`); conversion (`utf_convert()`, `utf_decode()`, `utf_encode()`, `utf_detect()`), with the condition classes in `R/conditions.R`. Base64 (Stage 4) and the C table (Stage 5) are not built yet. Tracking: parent [#1](https://github.com/pedrobtz/zuutf/issues/1), stages #2–#9, submission #10.
+**2026-10-13: Stages 0–4 done.** simdutf 9.2.1 is vendored unmodified (`tools/vendor/`), compiles on every CI leg with every kernel, Windows included (design §12.1: go), and the kernel matrix forces each kernel a runner supports. Exported: `zuutf_info()`; validation and counts (`utf_valid()`, `utf_error_at()`, `utf_is_ascii()`, `utf_count()`, `utf_length_as()`); conversion (`utf_convert()`, `utf_decode()`, `utf_encode()`, `utf_detect()`); Base64 (`base64_encode()`, `base64_decode()`), with the condition classes in `R/conditions.R`. The C table (Stage 5) is not built yet. Tracking: parent [#1](https://github.com/pedrobtz/zuutf/issues/1), stages #2–#9, submission #10.
 
 Update this paragraph at the end of every stage.
 
@@ -53,7 +53,7 @@ Scripts arriving at the stage named: `tools/vendor/{fetch,apply,verify}` (Stage 
 
 ## Architecture
 
-Layout, from design §4. `zut_input.c` reads elements, strips BOMs and owns the scratch; `zut_view.c` sees one element as code units (aligned, UTF-32 in native order) and does every run-level operation (validate, count, length, write, the maximal subpart); `zut_validate.c`, `zut_count.c` and `zut_convert.c` loop over elements. Base64 glue arrives in Stage 4.
+Layout, from design §4. `zut_input.c` reads elements, strips BOMs and owns the scratch; `zut_view.c` sees one element as code units (aligned, UTF-32 in native order) and does every run-level operation (validate, count, length, write, the maximal subpart); `zut_validate.c`, `zut_count.c` and `zut_convert.c` loop over elements. `zut_base64.c` wraps simdutf's Base64.
 
 ```text
 R/            argument handling, encoding names, the invalid= policy, conditions

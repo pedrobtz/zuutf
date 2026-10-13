@@ -18,3 +18,6 @@
   Latin-1), or gives `NA`, as `invalid` says.
 * `utf_detect()` lists the encodings bytes could be in, a byte-order mark
   first; `utf_decode()` uses it by default.
+* `base64_encode()` and `base64_decode()` cover the standard and URL
+  alphabets (either at once on decode with `url = NA`), padding on or off,
+  line wrapping, and forgiving (WHATWG) or strict (RFC 4648) decoding.
