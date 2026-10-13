@@ -1,0 +1,66 @@
+#!/bin/sh
+# Design §10: build each libFuzzer target in tools/fuzz under ASan and UBSan,
+# against an embedded R, check that its canary build crashes on
+# tools/fuzz/canary/<target>.input, then fuzz it for FUZZ_SECONDS (default
+# 30) from its seeds. Needs clang with libFuzzer and R. Run from the
+# package root.
+#
+#   tools/run-fuzz [target ...]       targets: validate convert base64
+#   CANARY_ONLY=1 tools/run-fuzz      only prove each canary crashes (CI fuzzes
+#                                     through r-actions' fuzz.yml)
+#
+# macOS: CC=/opt/homebrew/opt/llvm/bin/clang (Apple's clang has no libFuzzer).
+set -eu
+
+CC=${CC:-clang}
+SECONDS_PER_TARGET=${FUZZ_SECONDS:-30}
+TARGETS=${*:-validate convert base64}
+TMP=$(mktemp -d)
+trap 'rm -rf "$TMP"' EXIT
+
+export R_HOME="${R_HOME:-$(R RHOME)}"
+RFLAGS=$(R CMD config --cppflags)
+# libR alone: R CMD config --ldflags adds R's build-time LIBS, which on some
+# builds name a runtime that is not installed
+LIBS="-L$R_HOME/lib -lR -Wl,-rpath,$R_HOME/lib"
+FLAGS="-g -O1 -fno-omit-frame-pointer -fsanitize=fuzzer,address,undefined -fno-sanitize=vptr,function -fno-sanitize-recover=undefined -Isrc -Isrc/vendor/simdutf -Iinst/include -Itools/fuzz -DSIMDUTF_IMPLEMENTATION_FALLBACK=1"
+SOURCES="tools/fuzz/rfuzz.c $(ls src/*.c | grep -v '^src/init\.c$') src/zut_impl.cpp src/vendor/simdutf/simdutf.cpp"
+
+status=0
+for t in $TARGETS; do
+    src=tools/fuzz/fuzz_$t.c
+    # The exit status is the canary binary's own, never a pipe's: a crash
+    # must be seen as a crash.
+    # shellcheck disable=SC2086
+    $CC $FLAGS $RFLAGS -DZUT_FUZZ_CANARY "$src" $SOURCES $LIBS -o "$TMP/canary_$t"
+    if "$TMP/canary_$t" -detect_leaks=0 "tools/fuzz/canary/$t.input" >"$TMP/canary_$t.log" 2>&1; then
+        echo "FAIL $t: the canary build did not crash on the canary input"
+        status=1
+        continue
+    fi
+    grep -q 'deadly signal\|ERROR: libFuzzer\|AddressSanitizer\|UndefinedBehaviorSanitizer' "$TMP/canary_$t.log" || {
+        echo "FAIL $t: the canary failed, but not by a trap libFuzzer saw"
+        tail -20 "$TMP/canary_$t.log"
+        status=1
+        continue
+    }
+    echo "ok $t: canary crashed"
+    [ "${CANARY_ONLY:-}" = 1 ] && continue
+
+    # shellcheck disable=SC2086
+    $CC $FLAGS $RFLAGS "$src" $SOURCES $LIBS -o "$TMP/fuzz_$t"
+    corpus=${CORPUS_DIR:+$CORPUS_DIR/$t}
+    corpus=${corpus:-$TMP/corpus_$t}
+    mkdir -p "$corpus"
+    cp tools/fuzz/seeds/"$t"/* "$corpus/"
+    mkdir -p "${ARTIFACTS:-$TMP}"
+    if "$TMP/fuzz_$t" -max_total_time="$SECONDS_PER_TARGET" -print_final_stats=1 -max_len=4096 \
+            -detect_leaks=0 -artifact_prefix="${ARTIFACTS:-$TMP}/" "$corpus" >"$TMP/fuzz_$t.log" 2>&1; then
+        echo "ok $t: $(grep -o 'stat::number_of_executed_units: *[0-9]*' "$TMP/fuzz_$t.log" | grep -o '[0-9]*$') executions, no finding"
+    else
+        echo "FAIL $t: finding"
+        tail -40 "$TMP/fuzz_$t.log"
+        status=1
+    fi
+done
+exit $status

@@ -1,0 +1,7 @@
+# Written by hand. importFrom() loads zuutf's namespace, which the C table
+# needs before R_GetCCallable() can resolve it.
+importFrom(zuutf, zuutf_info)
+useDynLib(zuutforacle, .registration = TRUE)
+export(zufast_utf8)
+export(zufast_base64_strict)
+export(random_sweep)

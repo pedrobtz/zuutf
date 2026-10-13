@@ -56,6 +56,10 @@ jobs:
           R CMD INSTALL --preclean --no-test-load .
           echo "ZUUTF_INSTALL_SECONDS=$(( $(date +%s) - start ))" >> "$GITHUB_ENV"
 
+      - name: CRAN suite under 15 seconds
+        if: runner.os == 'Linux'
+        run: Rscript tools/cran-suite-time.R
+
       - name: Test suite per kernel
         shell: bash
         run: Rscript -e 'library(zuutf); source("tools/kernel-matrix.R")'

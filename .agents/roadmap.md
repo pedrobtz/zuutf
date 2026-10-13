@@ -24,7 +24,7 @@ written. Sections marked § are in design.md.
 | 3 | [Conversion](#stage-3--conversion) | [#5](https://github.com/pedrobtz/zuutf/issues/5) | [#17](https://github.com/pedrobtz/zuutf/pull/17) | 2026-10-13 |
 | 4 | [Base64](#stage-4--base64) | [#6](https://github.com/pedrobtz/zuutf/issues/6) | [#18](https://github.com/pedrobtz/zuutf/pull/18) | 2026-10-13 |
 | 5 | [The C table and the consumer fixture](#stage-5--the-c-table-and-the-consumer-fixture) | [#7](https://github.com/pedrobtz/zuutf/issues/7) | [#19](https://github.com/pedrobtz/zuutf/pull/19) | 2026-10-13 |
-| 6 | [Oracles, hostile input, fuzzing and benchmarks](#stage-6--oracles-hostile-input-fuzzing-and-benchmarks) | [#8](https://github.com/pedrobtz/zuutf/issues/8) | | |
+| 6 | [Oracles, hostile input, fuzzing and benchmarks](#stage-6--oracles-hostile-input-fuzzing-and-benchmarks) | [#8](https://github.com/pedrobtz/zuutf/issues/8) | [#21](https://github.com/pedrobtz/zuutf/pull/21) | 2026-10-13 |
 | 7 | [v0.1.0 readiness](#stage-7--v010-readiness) | [#9](https://github.com/pedrobtz/zuutf/issues/9) | | |
 
 ## Stage 0 — Package identity
@@ -334,6 +334,15 @@ Size: M.
   kernel and the best kernel of each CI platform, and any missed target is
   recorded rather than lowered.
 - `native-checks.yaml`, `kernel-matrix` and `consumer.yaml` stay green.
+
+**Deviations (2026-10-13).** The `unicode_lipsum` samples are fetched at
+a pinned commit by `hardening.yaml`, not bundled: that repository has no
+licence of its own. The "UTF-16 files written by Windows tools" are
+written by Windows PowerShell 5.1 on the Windows oracle leg each run,
+rather than committed. simdutf's own tests generate inputs in code, so
+nothing of theirs is taken. zufast reports no offset, so the oracle derives
+one from its count (design §10). The fuzz targets embed R and fuzz zuutf's
+`.Call` glue with simdutf, as zubin's R targets do.
 
 **Design.** §10, §11.
 

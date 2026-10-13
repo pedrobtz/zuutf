@@ -507,14 +507,23 @@ message.
   `zuf_utf8_count()` and strict Base64 decoder in a CI-only fixture
   (`tools/zuutforacle`, `LinkingTo: zufast`, built by `hardening.yaml`;
   D12): validation results, counts and error offsets must agree on every
-  corpus file and on a million random byte strings. simdutf's own
+  corpus file and on a million random byte strings. zufast reports
+  validity and the code points before the first error, not an offset;
+  since the bytes before the error are valid, the fixture walks that many
+  code points to find where the bad sequence starts, which is what zuutf
+  reports (Stage 6, 2026-10-13). simdutf's own
   `fallback` kernel is the oracle for its SIMD kernels, run through the
   kernel matrix below.
 - **Corpus** (`tests/testthat/fixtures/`, each file with provenance in a
-  `MANIFEST.tsv`): Markus Kuhn's UTF-8 stress test, `unicode_lipsum`
-  samples in many scripts, UTF-16 files written by Windows tools with and
-  without BOM, UTF-32 in both byte orders, the WHATWG Base64 test
-  vectors, and simdutf's own test inputs where their licence allows.
+  `MANIFEST.tsv`): Markus Kuhn's UTF-8 stress test and its WHATWG
+  replacement, a multi-script sample in UTF-8, UTF-16 and UTF-32 in both
+  byte orders with and without BOM, and the WHATWG and RFC 4648 Base64
+  vectors. Beside it, in `hardening.yaml` only: the `unicode_lipsum`
+  samples, fetched at a pinned commit because that repository carries no
+  licence of its own (the samples come from simdutf8, MIT or Apache-2.0),
+  and UTF-16 and UTF-8 files that Windows PowerShell 5.1 writes on the
+  Windows runner. simdutf's own tests generate their inputs in code, so
+  there is no data of theirs to take (Stage 6, 2026-10-13).
 - **Kernel matrix.** simdutf reads `SIMDUTF_FORCE_IMPLEMENTATION` from
   the environment on first use and makes that kernel active; an unknown
   name selects its `unsupported` stub, but a kernel that is compiled in
@@ -542,12 +551,23 @@ message.
   rchk and LTO from `native-checks.yaml`; libFuzzer targets for
   `validate`, `convert` and `base64_decode` in the family's fuzz shape
   (`zufuzz` is a skeleton as of 2026-10-13, so the targets are built
-  the way zucbor's are until it ships).
+  the way zubin's are until it ships). The targets embed R and drive
+  zuutf's own `.Call` entry points, so what is fuzzed is the glue R calls,
+  simdutf included; each checks invariants (a replaced result is valid in
+  its target, a conversion under `"error"` round-trips, what decodes
+  re-encodes canonically) and has a canary build that must crash on its
+  canary input before the target is trusted (`tools/run-fuzz`).
 - **Symbols.** `test-abi.R` greps the installed shared object for
   exports: `R_init_zuutf` and, on Linux with GCC, libstdc++ template
   instantiations only, as zufft accepts them (R3, §12.2).
 - CRAN suite under 15 s; everything above the corpus and the oracle check
-  is behind `ZUUTF_SLOW_TESTS` (R7).
+  is behind `ZUUTF_SLOW_TESTS` (R7). In the CRAN suite the hostile sweeps
+  run on the kernel in use, since the kernel-matrix job runs the whole
+  suite once per kernel; `ZUUTF_SLOW_TESTS` runs them on every kernel in
+  process too. `ZUUTF_SKIP_HEAVY` shrinks the random sweeps for gctorture,
+  and `ZUUTF_TIMING_TESTS` turns on an elapsed-time check, meaningful only
+  against an installed package, since `devtools::load_all()` compiles
+  with `-O0`.
 
 ---
 
@@ -567,6 +587,36 @@ Measured by `tools/run-benchmarks` in Stage 6 and recorded here, on a
 A target that is missed on a kernel is recorded with the number, not
 quietly lowered; the `fallback` kernel is reported too, since it is what
 §12.1's worst case ships on Windows.
+
+**Measured** (Stage 6, 2026-10-13; `benchmarks.yaml`, 256 MB inputs, best
+of three, R 4.6.1;
+[run 38445924915](https://github.com/pedrobtz/zuutf/actions/runs/38445924915)).
+Speed-up over the baseline, for the best kernel and for `fallback`; a
+target missed is in bold:
+
+| Operation | Target | Linux, AMD EPYC (icelake / fallback) | Windows, AMD EPYC 9V74 (icelake / fallback) | macOS, Apple M1 (arm64 / fallback) |
+|---|---|---|---|---|
+| `utf_valid()` | ≥ 10× | 11.3 / **6.3** | 22.0 / 23.0 | **5.4** / **4.0** |
+| `utf_decode(from = "UTF-16LE")` | ≥ 10× | **1.9** / **1.2** | 13.1 / **7.1** | **3.4** / **2.7** |
+| `utf_convert("UTF-8", "UTF-16LE")` | ≥ 10× | **7.1** / **2.3** | 67.6 / 14.5 | 24.7 / **8.3** |
+| `base64_decode()` | ≥ 5× | 28.5 / 17.4 | 28.9 / 13.7 | 51.8 / 12.7 |
+| `base64_encode()` | ≥ 5× | **1.2** / **1.0** | **1.4** / **1.1** | **1.2** / **1.4** |
+
+In seconds, zuutf against baseline on the best kernel: `utf_valid()`
+0.024 / 0.272 (Linux), 0.01 / 0.22 (Windows), 0.033 / 0.178 (macOS);
+`utf_decode()` 0.86 / 1.65, 0.63 / 8.27, 1.33 / 4.57; `utf_convert()`
+0.16 / 1.11, 0.12 / 8.11, 0.11 / 2.74; `base64_decode()` 0.12 / 3.48,
+0.09 / 2.60, 0.04 / 2.23; `base64_encode()` 0.65 / 0.81, 0.45 / 0.61,
+0.55 / 0.68.
+
+What the misses are. `base64_encode()` and `utf_decode()` end by making
+one R string of 340 MB and 256 MB; R checks and hashes every CHARSXP it
+makes, and that, not simdutf, is most of their time, which is also what
+the baselines pay. `validUTF8()` is a fast C loop with an ASCII fast path
+(0.14 to 0.27 s for 256 MB), and glibc's and macOS's `iconv()` are much
+faster than Windows', so the ratios against them are smaller there. None
+of these targets is lowered (§11); a string-free decoding path is the
+lever if one is wanted after 0.1.0.
 
 ---
 
