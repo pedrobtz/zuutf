@@ -11,3 +11,10 @@
 * `utf_count()` counts code points and `utf_length_as()` gives the bytes a
   conversion will produce.
 * Errors are classed conditions under `zuutf_error` (`?zuutf_error`).
+* `utf_convert()`, `utf_decode()` and `utf_encode()` convert between every
+  pair of UTF-8, UTF-16, UTF-32 (either byte order) and Latin-1, with a
+  byte-order mark read on input and never written. Ill-formed input raises
+  an error, is replaced with U+FFFD as the WHATWG decoder does (`?` in
+  Latin-1), or gives `NA`, as `invalid` says.
+* `utf_detect()` lists the encodings bytes could be in, a byte-order mark
+  first; `utf_decode()` uses it by default.

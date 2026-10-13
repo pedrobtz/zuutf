@@ -21,7 +21,7 @@ written. Sections marked § are in design.md.
 | 0 | [Package identity](#stage-0--package-identity) | [#2](https://github.com/pedrobtz/zuutf/issues/2) | [#12](https://github.com/pedrobtz/zuutf/pull/12) | 2026-10-13 |
 | 1 | [Vendor simdutf and the Windows go/no-go](#stage-1--vendor-simdutf-and-the-windows-gono-go) | [#3](https://github.com/pedrobtz/zuutf/issues/3) | [#14](https://github.com/pedrobtz/zuutf/pull/14) | 2026-10-13 |
 | 2 | [Validation, counts and kernel reporting](#stage-2--validation-counts-and-kernel-reporting) | [#4](https://github.com/pedrobtz/zuutf/issues/4) | [#15](https://github.com/pedrobtz/zuutf/pull/15), [#16](https://github.com/pedrobtz/zuutf/pull/16) | 2026-10-13 |
-| 3 | [Conversion](#stage-3--conversion) | [#5](https://github.com/pedrobtz/zuutf/issues/5) | | |
+| 3 | [Conversion](#stage-3--conversion) | [#5](https://github.com/pedrobtz/zuutf/issues/5) | | 2026-10-13 |
 | 4 | [Base64](#stage-4--base64) | [#6](https://github.com/pedrobtz/zuutf/issues/6) | | |
 | 5 | [The C table and the consumer fixture](#stage-5--the-c-table-and-the-consumer-fixture) | [#7](https://github.com/pedrobtz/zuutf/issues/7) | | |
 | 6 | [Oracles, hostile input, fuzzing and benchmarks](#stage-6--oracles-hostile-input-fuzzing-and-benchmarks) | [#8](https://github.com/pedrobtz/zuutf/issues/8) | | |
@@ -202,6 +202,15 @@ encoding §5 names, and errors are classed. Size: S.
 - `utf_detect()` returns the BOM's encoding alone when a BOM is present,
   and the §6 order otherwise, on the fixtures.
 - Kernel matrix and native checks green.
+
+**Deviations (2026-10-13).** `utf_detect()` runs simdutf's five
+validators rather than `detect_encodings`, which never reports a
+big-endian candidate (design §6). The "replace" fixtures for the stress
+test come from Node's WHATWG `TextDecoder`, and CPython gives the same
+bytes. iconv() cannot judge failure on a list of raw vectors, since it
+returns a failed element unchanged, so Latin-1 targets are compared on
+text Latin-1 can hold (design §10). `zuutf_size_error` is implemented but
+not tested, because a test would need a 2 GB input.
 
 **Design.** §5, §6, §9.
 
