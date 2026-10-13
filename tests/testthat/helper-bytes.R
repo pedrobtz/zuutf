@@ -46,3 +46,36 @@ random_code_points <- function(n) {
   cp[classes == 4] <- sample(0x10000:0x10ffff, sum(classes == 4), TRUE)
   cp
 }
+
+read_fixture <- function(name) {
+  path <- test_path("fixtures", name)
+  readBin(path, "raw", file.size(path))
+}
+
+# iconv()'s name for each of zuutf's.
+iconv_name <- c(
+  "UTF-8" = "UTF-8", "UTF-16LE" = "UTF-16LE", "UTF-16BE" = "UTF-16BE",
+  "UTF-32LE" = "UTF-32LE", "UTF-32BE" = "UTF-32BE", "Latin-1" = "latin1"
+)
+
+# iconv() of a list of raw vectors, NULL where it fails.
+iconv_raw <- function(x, from, to) {
+  iconv(x, iconv_name[[from]], iconv_name[[to]], toRaw = TRUE)
+}
+
+# The test texts as raw vectors in `enc`, from UTF-8 strings.
+encode_all <- function(texts, enc) {
+  lapply(texts, function(t) iconv(enc2utf8(t), "UTF-8", iconv_name[[enc]], toRaw = TRUE)[[1L]])
+}
+
+conversion_texts <- function(n = 200) {
+  sample <- rawToChar(read_fixture("sample.utf8.txt"))
+  Encoding(sample) <- "UTF-8"
+  lines <- strsplit(sample, "\n", fixed = TRUE)[[1L]]
+  random <- vapply(seq_len(n), function(i) {
+    intToUtf8(random_code_points(sample(0:120, 1)))
+  }, "")
+  c("", "a", lines, sample, random)
+}
+
+conversion_encodings <- c("UTF-8", "UTF-16LE", "UTF-16BE", "UTF-32LE", "UTF-32BE", "Latin-1")

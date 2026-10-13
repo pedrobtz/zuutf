@@ -249,7 +249,9 @@ or a list of raw vectors (one element each); `NULL` elements of a list
 and `NA` strings give `NA` results. Functions that return one value per
 element return a vector of that length; `utf_convert()` and
 `utf_encode()` return a raw vector for one-element input and a list of
-raw otherwise, like `iconv(toRaw = TRUE)`.
+raw otherwise, like `iconv(toRaw = TRUE)`: one-element input is a raw
+vector, or a single string for `utf_encode()`, and a list stays a list
+whatever its length (Stage 3, 2026-10-13).
 
 **Encoding names.** `"UTF-8"`, `"UTF-16LE"`, `"UTF-16BE"`, `"UTF-32LE"`,
 `"UTF-32BE"`, `"Latin-1"`, `"ASCII"` (validation only), matched without
@@ -258,7 +260,9 @@ regard to case or hyphens (`"utf8"` is `"UTF-8"`). `"UTF-16"` and
 without one the input is big-endian, as RFC 2781 and `iconv()` read it
 (*verified 2026-10-13*: `iconv(x, "UTF-16", "UTF-8")` on bytes without a
 BOM decodes them big-endian). `from = "auto"` (the default of
-`utf_decode()`) applies `utf_detect()` and takes its first candidate.
+`utf_decode()`, and accepted by `utf_convert()`) applies `utf_detect()`
+and takes its first candidate, or UTF-8 when there is none, so that the
+`invalid` policy decides (Stage 3, 2026-10-13).
 
 **Character input** is taken as its marked encoding: UTF-8 strings as
 they are, Latin-1-marked strings converted from Latin-1, native strings
@@ -304,7 +308,10 @@ caller's `gsub()`.
 - **NUL.** R strings cannot hold U+0000. Decoding a sequence that
   contains it to `character` raises `zuutf_nul_error` with the index and
   offset, under every `invalid` policy, because the input is valid
-  Unicode and only R refuses it; `utf_convert()` to raw keeps it.
+  Unicode and only R refuses it; `utf_convert()` to raw keeps it. Under
+  `"error"` the earlier of the NUL and an ill-formed sequence decides the
+  condition; under `"na"` an ill-formed element is `NA` whatever else it
+  holds (Stage 3, 2026-10-13).
 - **BOM.** `utf_decode()` and `utf_convert()` strip a leading byte-order
   mark that matches `from`; with `"UTF-16"`, `"UTF-32"` or `"auto"` they
   use it to choose. Output never carries a BOM; a caller who wants one
@@ -335,9 +342,12 @@ caller's `gsub()`.
   `pad = FALSE` on encode omits `=`; `url = TRUE` selects the `-_`
   alphabet on both sides.
 - **Detection.** `utf_detect()` returns the BOM's encoding alone when
-  there is one; otherwise every encoding simdutf's `detect_encodings`
-  bitmask admits, UTF-8 first, then UTF-16LE, UTF-16BE, UTF-32LE,
-  UTF-32BE; and `character(0)` when none fits. It never guesses Latin-1,
+  there is one; otherwise every encoding the bytes are valid in, UTF-8
+  first, then UTF-16LE, UTF-16BE, UTF-32LE, UTF-32BE; and `character(0)`
+  when none fits. simdutf's `detect_encodings` tries UTF-8, UTF-16LE and
+  UTF-32LE only and never reports a big-endian candidate (*verified
+  2026-10-13*, `simdutf.cpp`, every kernel), so zuutf runs simdutf's five
+  validators itself (Stage 3). It never guesses Latin-1,
   which every byte string satisfies.
 
 ---
@@ -479,7 +489,11 @@ message.
 
 - **Oracles.** R's `validUTF8()`, `iconv()` and `utf8ToInt()` in the
   CRAN suite: validation results must agree, and conversions must be
-  byte-identical where `iconv()` succeeds. zufast's `zuf_utf8_valid()`,
+  byte-identical where `iconv()` succeeds. On a list of raw vectors with
+  `toRaw = TRUE`, `iconv()` returns a failed element unchanged rather
+  than `NULL` (*verified 2026-10-13*, R 4.6.1, macOS libiconv: `"cœ"` to
+  `"latin1"`), so the tests decide where it can succeed from the input,
+  not from its result. zufast's `zuf_utf8_valid()`,
   `zuf_utf8_count()` and strict Base64 decoder in a CI-only fixture
   (`tools/zuutforacle`, `LinkingTo: zufast`, built by `hardening.yaml`;
   D12): validation results, counts and error offsets must agree on every

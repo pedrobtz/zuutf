@@ -48,10 +48,10 @@ above U+00FF included, since a conversion writes one byte for each of
 them too (an error, \verb{?} or \code{NA}, as its \code{invalid} argument says).
 }
 \examples{
-utf_count(c("abc", "café", "\U0001f600", NA))
+utf_count(c("abc", "caf\u00e9", "\U0001f600", NA))
 utf_count(as.raw(c(0x3d, 0xd8, 0x00, 0xde)), "UTF-16LE")   # one emoji
 
-utf_length_as("café", to = "UTF-16LE")   # 8 bytes
+utf_length_as("caf\u00e9", to = "UTF-16LE")   # 8 bytes
 utf_length_as("\U0001f600", to = "UTF-16LE")  # a surrogate pair: 4 bytes
 utf_length_as(as.raw(c(0x63, 0xe9)), from = "Latin-1", to = "UTF-8")
 }

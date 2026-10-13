@@ -12,3 +12,4 @@
 ^src/.*\.dll$
 ^src/.*\.dylib$
 ^src/vendor/.*\.o$
+^\.gitattributes$

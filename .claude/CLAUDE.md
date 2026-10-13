@@ -13,7 +13,7 @@ Sibling checkouts sit in `../`. `zucrypt` is the model for vendoring (manifest a
 
 ## Current state
 
-**2026-10-13: Stages 0–2 done.** simdutf 9.2.1 is vendored unmodified (`tools/vendor/`), compiles on every CI leg with every kernel, Windows included (design §12.1: go), and the kernel matrix forces each kernel a runner supports. Exported: `zuutf_info()`, `utf_valid()`, `utf_error_at()`, `utf_is_ascii()`, `utf_count()`, `utf_length_as()`, with the condition classes in `R/conditions.R`. Conversion (Stage 3), Base64 (Stage 4) and the C table (Stage 5) are not built yet. Tracking: parent [#1](https://github.com/pedrobtz/zuutf/issues/1), stages #2–#9, submission #10.
+**2026-10-13: Stages 0–3 done.** simdutf 9.2.1 is vendored unmodified (`tools/vendor/`), compiles on every CI leg with every kernel, Windows included (design §12.1: go), and the kernel matrix forces each kernel a runner supports. Exported: `zuutf_info()`; validation and counts (`utf_valid()`, `utf_error_at()`, `utf_is_ascii()`, `utf_count()`, `utf_length_as()`); conversion (`utf_convert()`, `utf_decode()`, `utf_encode()`, `utf_detect()`), with the condition classes in `R/conditions.R`. Base64 (Stage 4) and the C table (Stage 5) are not built yet. Tracking: parent [#1](https://github.com/pedrobtz/zuutf/issues/1), stages #2–#9, submission #10.
 
 Update this paragraph at the end of every stage.
 
@@ -53,7 +53,7 @@ Scripts arriving at the stage named: `tools/vendor/{fetch,apply,verify}` (Stage 
 
 ## Architecture
 
-Layout, from design §4. `zut_input.c` (element access, BOM stripping, the aligned and byte-swapped scratch) and `zut_validate.c`/`zut_count.c` exist; conversion and Base64 glue arrive in Stages 3–4.
+Layout, from design §4. `zut_input.c` reads elements, strips BOMs and owns the scratch; `zut_view.c` sees one element as code units (aligned, UTF-32 in native order) and does every run-level operation (validate, count, length, write, the maximal subpart); `zut_validate.c`, `zut_count.c` and `zut_convert.c` loop over elements. Base64 glue arrives in Stage 4.
 
 ```text
 R/            argument handling, encoding names, the invalid= policy, conditions
@@ -75,6 +75,8 @@ R validates arguments and picks the encoding; C loops over elements and calls si
 - **No R API call between a simdutf call and the use of its result**, and no R error through a C++ frame. `R_CheckUserInterrupt()` runs between elements only.
 - **Output is sized by simdutf's length functions and allocated once**; a `_safe` variant with explicit capacity is used wherever the C API has one.
 - **Offsets are 1-based, in the input's units, after any BOM.**
+- **`SIMDUTF_FORCE_IMPLEMENTATION` is trusted by simdutf without a CPU check.** A compiled-in kernel the processor lacks dies of SIGILL on first use; `check_kernel()` in `R/conditions.R` must run before every `.Call` that reaches simdutf.
+- **Never type `\u` escapes through the tools as text to be written.** They have arrived as literal characters before; build them in a script (`chr(92)`), and keep R sources and tests ASCII outside comments.
 - **The C table's header includes `<stddef.h>` and `<stdint.h>` only** and must compile standalone as C99 and C++17.
 
 ## Naming

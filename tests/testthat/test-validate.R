@@ -57,7 +57,7 @@ test_that("utf_error_at() gives the first error's offset in bytes", {
   expect_identical(utf_error_at(charToRaw("abc")), NA_integer_)
   expect_identical(utf_error_at(bytes(0xff)), 1L)
   expect_identical(utf_error_at(bytes(0x61, 0x62, 0x63, 0xc3, 0x28)), 4L)
-  expect_identical(utf_error_at(c(charToRaw("café"), bytes(0xff))), 6L)
+  expect_identical(utf_error_at(c(charToRaw("caf\u00e9"), bytes(0xff))), 6L)
   # two errors: the first counts
   expect_identical(utf_error_at(bytes(0x61, 0xff, 0x62, 0xff)), 2L)
   # past a 64-byte block
@@ -79,7 +79,7 @@ test_that("a matching byte-order mark is skipped and offsets start after it", {
 })
 
 test_that("UTF-16 is checked in either byte order", {
-  text <- "aé中\U0001f600"
+  text <- "a\u00e9\u4e2d\U0001f600"
   expect_true(utf_valid(utf16le(text), "UTF-16LE"))
   expect_true(utf_valid(utf16be(text), "UTF-16BE"))
   # a lone high surrogate, a lone low surrogate, a reversed pair
@@ -94,7 +94,7 @@ test_that("UTF-16 is checked in either byte order", {
 })
 
 test_that("UTF-32 is checked in either byte order", {
-  text <- "aé中\U0001f600"
+  text <- "a\u00e9\u4e2d\U0001f600"
   expect_true(utf_valid(utf32le(text), "UTF-32LE"))
   expect_true(utf_valid(utf32be(text), "UTF-32BE"))
   above <- c(utf32le("a"), bytes(0x00, 0x00, 0x11, 0x00))
@@ -107,7 +107,7 @@ test_that("UTF-32 is checked in either byte order", {
 })
 
 test_that("\"UTF-16\" and \"UTF-32\" take the byte order from the BOM", {
-  text <- "aé\U0001f600"
+  text <- "a\u00e9\U0001f600"
   expect_true(utf_valid(c(bom[["UTF-16LE"]], utf16le(text)), "UTF-16"))
   expect_true(utf_valid(c(bom[["UTF-16BE"]], utf16be(text)), "UTF-16"))
   expect_true(utf_valid(utf16be(text), "UTF-16"))          # no BOM: BE
@@ -152,12 +152,12 @@ test_that("character input is taken in its marked encoding", {
   expect_true(utf_valid(b, "Latin-1", useBytes = TRUE))
   expect_error(utf_valid("a", "UTF-16LE"), class = "zuutf_invalid_argument")
   # useBytes reads the bytes of any string, in any encoding
-  s <- utf8_string(utf16le("中文"))
+  s <- utf8_string(utf16le("\u4e2d\u6587"))
   expect_true(utf_valid(s, "UTF-16LE", useBytes = TRUE))
 })
 
 test_that("every encoding name is matched without regard to case or hyphens", {
-  text <- "aé"
+  text <- "a\u00e9"
   inputs <- list(
     "UTF-8" = charToRaw(enc2utf8(text)), "utf8" = charToRaw(enc2utf8(text)),
     "UTF-16LE" = utf16le(text), "utf16le" = utf16le(text),

@@ -38,7 +38,7 @@
 #'   only.
 #' @export
 #' @examples
-#' utf_valid(c("abc", "café", NA))
+#' utf_valid(c("abc", "caf\u00e9", NA))
 #' utf_valid(as.raw(c(0xc3, 0x28)))            # a truncated sequence
 #' utf_error_at(as.raw(c(0x61, 0x62, 0xff)))   # third byte
 #'
@@ -50,7 +50,7 @@
 #' # several byte strings at once
 #' utf_valid(list(charToRaw("ok"), as.raw(0xc0), NULL))
 #'
-#' utf_is_ascii(c("abc", "café"))
+#' utf_is_ascii(c("abc", "caf\u00e9"))
 utf_valid <- function(x, encoding = "UTF-8", useBytes = FALSE) {
   call <- sys.call()
   encoding <- match_encoding(encoding, enc_validate, "encoding", call)

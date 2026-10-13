@@ -19,7 +19,8 @@ typedef enum {
   ZUT_LATIN1 = 6,
   ZUT_ASCII = 7,
   ZUT_UTF16 = 8, /* a BOM decides; big-endian without one */
-  ZUT_UTF32 = 9
+  ZUT_UTF32 = 9,
+  ZUT_AUTO = 10  /* conversion input only: utf_detect()'s first candidate */
 } zut_enc;
 
 /* Element i of a character vector, a raw vector (one element) or a list of

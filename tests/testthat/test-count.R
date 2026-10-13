@@ -26,7 +26,7 @@ test_that("utf_count() is NA where the element is invalid or missing", {
 
 test_that("utf_length_as() gives the bytes a conversion produces", {
   withr::local_seed(20261013)
-  texts <- c("", "abc", "café", "中文", "\U0001f600",
+  texts <- c("", "abc", "caf\u00e9", "\u4e2d\u6587", "\U0001f600",
              vapply(1:200, function(i) intToUtf8(random_code_points(sample(0:100, 1))), ""))
   encoders <- list(
     "UTF-8" = function(t) charToRaw(enc2utf8(t)),
@@ -55,7 +55,7 @@ test_that("utf_length_as() reads Latin-1 and the BOM-chosen orders", {
   expect_identical(utf_length_as(latin1, "Latin-1", "Latin-1"), 3L)
   le <- c(bom[["UTF-16LE"]], utf16le("\U0001f600"))
   expect_identical(utf_length_as(le, "UTF-16", "UTF-8"), 4L)
-  expect_identical(utf_length_as("é", to = "UTF-16BE"), 2L)
+  expect_identical(utf_length_as("\u00e9", to = "UTF-16BE"), 2L)
 })
 
 test_that("utf_length_as() is NA for invalid input and checks its names", {

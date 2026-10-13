@@ -35,4 +35,6 @@ match_encoding <- function(name, allowed, arg, call = NULL) {
   hit
 }
 
-encoding_code <- function(name) zut_encodings[[name]]
+# "auto" is conversion input only (utf_detect()'s first candidate), so it is
+# not among zut_encodings and no other argument accepts it.
+encoding_code <- function(name) if (name == "auto") 10L else zut_encodings[[name]]

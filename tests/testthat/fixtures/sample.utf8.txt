@@ -1,0 +1,14 @@
+zuutf fixture text, written for this package (2026-10-13).
+English: The quick brown fox jumps over the lazy dog.
+Français : Le cœur déçu mais l'âme plutôt naïve, Louÿs rêva de crapaüter.
+Deutsch: Falsches Üben von Xylophonmusik quält jeden größeren Zwerg.
+Ελληνικά: Ξεσκεπάζω την ψυχοφθόρα βδελυγμία.
+Русский: Съешь же ещё этих мягких французских булок, да выпей чаю.
+עברית: דג סקרן שט בים מאוכזב ולפתע מצא חברה.
+العربية: صِف خَلقَ خَودِ كَمِثلِ الشَمسِ إِذ بَزَغَت.
+हिन्दी: ऋषियों को सताने वाले दुष्ट राक्षसों के राजा रावण का सर्वनाश करने वाले विष्णुवतार भगवान श्रीराम।
+日本語: いろはにほへと ちりぬるを わかよたれそ つねならむ。
+中文: 我能吞下玻璃而不伤身体。
+한국어: 키스의 고유조건은 입술끼리 만나야 하고 특별한 기술은 필요치 않다.
+Emoji: 😀 🎉 👩‍💻 🇵🇹 and a mathematical 𝔘𝔫𝔦𝔠𝔬𝔡𝔢.
+Combining: é is an e and U+0301 COMBINING ACUTE ACCENT; é is precomposed.

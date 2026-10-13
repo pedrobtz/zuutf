@@ -7,7 +7,9 @@
 #' | Class | Fields | Raised when |
 #' |---|---|---|
 #' | `zuutf_invalid_argument` | | wrong type, unknown encoding name, a `"bytes"` string without `useBytes` |
-#' | `zuutf_encoding_error` | `index`, `offset`, `encoding` | input that is ill-formed in its encoding |
+#' | `zuutf_encoding_error` | `index`, `offset`, `encoding` | input that is ill-formed in its encoding under `invalid = "error"`, or a code point a Latin-1 target cannot represent |
+#' | `zuutf_nul_error` | `index`, `offset` | [utf_decode()] meets U+0000, which an R string cannot hold |
+#' | `zuutf_size_error` | | an output longer than a string (2^31 - 1 bytes) or a raw vector can hold |
 #' | `zuutf_internal_error` | | a simdutf result zuutf did not expect, or a kernel forced through `SIMDUTF_FORCE_IMPLEMENTATION` that this processor cannot run |
 #'
 #' `index` is the 1-based element of the input, `offset` the 1-based
@@ -39,6 +41,17 @@ abort_encoding_error <- function(message, index, offset, encoding, call = NULL) 
     "zuutf_encoding_error", message,
     index = index, offset = offset, encoding = encoding, call = call
   ))
+}
+
+abort_nul_error <- function(message, index, offset, call = NULL) {
+  stop(zuutf_condition(
+    "zuutf_nul_error", message,
+    index = index, offset = offset, call = call
+  ))
+}
+
+abort_size_error <- function(message, call = NULL) {
+  stop(zuutf_condition("zuutf_size_error", message, call = call))
 }
 
 abort_internal_error <- function(message, call = NULL) {
