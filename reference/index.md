@@ -2,6 +2,9 @@
 
 ## All functions
 
+- [`base64_encode()`](https://pedrobtz.github.io/zuutf/reference/base64_encode.md)
+  [`base64_decode()`](https://pedrobtz.github.io/zuutf/reference/base64_encode.md)
+  : Encode and decode Base64
 - [`utf_convert()`](https://pedrobtz.github.io/zuutf/reference/utf_convert.md)
   [`utf_decode()`](https://pedrobtz.github.io/zuutf/reference/utf_convert.md)
   [`utf_encode()`](https://pedrobtz.github.io/zuutf/reference/utf_convert.md)

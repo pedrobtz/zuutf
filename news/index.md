@@ -34,3 +34,9 @@
   lists the encodings bytes could be in, a byte-order mark first;
   [`utf_decode()`](https://pedrobtz.github.io/zuutf/reference/utf_convert.md)
   uses it by default.
+- [`base64_encode()`](https://pedrobtz.github.io/zuutf/reference/base64_encode.md)
+  and
+  [`base64_decode()`](https://pedrobtz.github.io/zuutf/reference/base64_encode.md)
+  cover the standard and URL alphabets (either at once on decode with
+  `url = NA`), padding on or off, line wrapping, and forgiving (WHATWG)
+  or strict (RFC 4648) decoding.
