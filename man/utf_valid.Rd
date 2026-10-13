@@ -54,7 +54,7 @@ A leading byte-order mark that matches \code{encoding} is skipped. With
 without one the input is big-endian.
 }
 \examples{
-utf_valid(c("abc", "café", NA))
+utf_valid(c("abc", "caf\u00e9", NA))
 utf_valid(as.raw(c(0xc3, 0x28)))            # a truncated sequence
 utf_error_at(as.raw(c(0x61, 0x62, 0xff)))   # third byte
 
@@ -66,7 +66,7 @@ utf_error_at(le, "UTF-16LE")                # unpaired surrogate, unit 2
 # several byte strings at once
 utf_valid(list(charToRaw("ok"), as.raw(0xc0), NULL))
 
-utf_is_ascii(c("abc", "café"))
+utf_is_ascii(c("abc", "caf\u00e9"))
 }
 \seealso{
 \code{\link[=utf_count]{utf_count()}}; \code{\link[=validUTF8]{validUTF8()}}, which answers yes or no for UTF-8
