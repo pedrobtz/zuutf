@@ -18,7 +18,7 @@ written. Sections marked § are in design.md.
 
 | Stage | Title | Issue | Pull request | Done |
 | --- | --- | --- | --- | --- |
-| 0 | [Package identity](#stage-0--package-identity) | [#2](https://github.com/pedrobtz/zuutf/issues/2) | | 2026-10-13 |
+| 0 | [Package identity](#stage-0--package-identity) | [#2](https://github.com/pedrobtz/zuutf/issues/2) | [#12](https://github.com/pedrobtz/zuutf/pull/12) | 2026-10-13 |
 | 1 | [Vendor simdutf and the Windows go/no-go](#stage-1--vendor-simdutf-and-the-windows-gono-go) | [#3](https://github.com/pedrobtz/zuutf/issues/3) | | |
 | 2 | [Validation, counts and kernel reporting](#stage-2--validation-counts-and-kernel-reporting) | [#4](https://github.com/pedrobtz/zuutf/issues/4) | | |
 | 3 | [Conversion](#stage-3--conversion) | [#5](https://github.com/pedrobtz/zuutf/issues/5) | | |
