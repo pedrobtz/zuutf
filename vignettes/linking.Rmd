@@ -1,0 +1,121 @@
+---
+title: "Calling zuutf from C"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Calling zuutf from C}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+```
+
+zuutf publishes its validation, transcoding and Base64 to other packages as
+a registered table of C functions, `zuutf_api_v1`. A package that uses it
+gets the SIMD kernels of simdutf in its own C code without vendoring
+simdutf, and without linking anything: the functions live in the shared
+object of zuutf
+and are found at run time.
+
+## DESCRIPTION
+
+The consumer needs the header of zuutf to compile, and the namespace of
+zuutf loaded to run, so it declares both:
+
+```
+Imports: zuutf
+LinkingTo: zuutf
+```
+
+## NAMESPACE
+
+`Imports:` alone does not load a namespace. Until that of zuutf is loaded,
+`R_GetCCallable()` finds nothing, so the consumer imports something real:
+
+```
+importFrom(zuutf, zuutf_info)
+```
+
+With roxygen, that is `#' @importFrom zuutf zuutf_info` anywhere in the
+package.
+
+## C
+
+In exactly one C file, after the R headers, define `ZUUTF_DEFINE_API_GET`
+before including `<zuutf.h>`. That emits a static `zuutf_api_get()`, which
+resolves the table once and caches it:
+
+```c
+#include <R.h>
+#include <Rinternals.h>
+#include <R_ext/Rdynload.h>
+
+#define ZUUTF_DEFINE_API_GET
+#include <zuutf.h>
+
+SEXP mypkg_valid_utf8(SEXP x) {
+  const zuutf_api *api = zuutf_api_get();
+  zuutf_result r = api->validate_utf8((const char *) RAW(x), (size_t) XLENGTH(x));
+  return Rf_ScalarLogical(r.error == ZUUTF_ERR_SUCCESS);
+}
+```
+
+Other C files include `<zuutf.h>` alone for the types. The header includes
+`<stddef.h>` and `<stdint.h>` and nothing else: no simdutf header and no R
+header, so it compiles as C99 or C++17 anywhere.
+
+## Results, capacities and errors
+
+Validation and conversion members return a `zuutf_result`. `error` is
+`ZUUTF_ERR_SUCCESS` (0) or one of the `ZUUTF_ERR_*` codes; `count` is the
+number of units read or written on success, the 0-based offset of the first
+error in input units on an input error, and the capacity that would have
+been enough on `ZUUTF_ERR_OUTPUT_BUFFER_TOO_SMALL`.
+
+Members that write take the capacity of the output and never write past it.
+The length members say how much to allocate:
+
+```c
+size_t need = api->utf8_length_from_utf16le(src, n);   /* bytes */
+char *out = (char *) R_alloc(need ? need : 1, 1);
+zuutf_result r = api->utf16le_to_utf8(src, n, out, need);
+if (r.error != ZUUTF_ERR_SUCCESS) {
+  Rf_error("invalid UTF-16 at unit %zu", r.count + 1);
+}
+```
+
+Conversion members expect valid input and report the first error; they
+replace nothing. For replacement with U+FFFD, call `utf_convert()` from R.
+
+Base64 members take `ZUUTF_BASE64_*` flags: `ZUUTF_BASE64_URL` for the
+`-_` alphabet, `ZUUTF_BASE64_NO_PAD` to encode without `=`,
+`ZUUTF_BASE64_STRICT` for RFC 4648 decoding instead of forgiving, and
+`ZUUTF_BASE64_EITHER` to decode either alphabet.
+
+## Versions
+
+The table only grows. Members are appended, never reordered or removed, so
+a consumer built against an older header keeps working with a newer zuutf.
+A consumer that uses a member added after 0.1.0 checks for it first:
+
+```c
+if (ZUUTF_API_HAS(api, some_later_member)) {
+  /* ... */
+}
+```
+
+If another public type ever changes shape, the registered name changes to
+`zuutf_api_v2`, and a stale consumer fails loudly in `R_GetCCallable()`
+instead of misreading results.
+
+## Threads
+
+Every member is a pure function of its arguments and none calls into R, so
+a consumer may call them from its own threads. The first call in a process
+detects the CPU, which simdutf makes thread-safe. The kernel in use is the
+one `zuutf_info()` reports:
+
+```{r}
+zuutf::zuutf_info()$kernel
+```
