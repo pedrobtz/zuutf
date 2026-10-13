@@ -29,7 +29,11 @@ SEXP zut_length_as(SEXP x, SEXP from, SEXP to) {
       continue;
     }
     zut_view v;
-    zut_view_make(&v, &scratch, zut_strip_bom(enc, &p, &n), p, n);
+    /* zut_strip_bom() advances p and n, so it runs first: the order in
+     * which C evaluates arguments is unspecified, and GCC reads p and n
+     * before the call where clang reads them after it */
+    zut_enc e = zut_strip_bom(enc, &p, &n);
+    zut_view_make(&v, &scratch, e, p, n);
     if (!zut_view_validate(&v, 0, &err) || v.partial) {
       dbl[i] = NA_REAL;
       continue;
