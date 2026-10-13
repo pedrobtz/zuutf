@@ -28,8 +28,11 @@ Depends:
     R (>= 4.1)
 Suggests: 
     base64enc,
+    knitr,
+    rmarkdown,
     testthat (>= 3.0.0),
     withr
+VignetteBuilder: knitr
 Config/testthat/edition: 3
 Encoding: UTF-8
 Language: en-GB

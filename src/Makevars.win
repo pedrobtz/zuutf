@@ -5,11 +5,11 @@
 # hidden (R3).
 CXX_STD = CXX17
 
-PKG_CPPFLAGS = -Ivendor/simdutf -DSIMDUTF_IMPLEMENTATION_FALLBACK=1
+PKG_CPPFLAGS = -Ivendor/simdutf -I../inst/include -DSIMDUTF_IMPLEMENTATION_FALLBACK=1
 PKG_CFLAGS = $(C_VISIBILITY)
 PKG_CXXFLAGS = $(CXX_VISIBILITY)
 
 # The amalgamation sits in a subdirectory, which R does not compile by
 # itself, so every object is listed.
-OBJECTS = init.o zut_base64.o zut_convert.o zut_count.o zut_impl.o zut_info.o zut_input.o \
+OBJECTS = init.o zut_api.o zut_base64.o zut_convert.o zut_count.o zut_impl.o zut_info.o zut_input.o \
           zut_validate.o zut_view.o vendor/simdutf/simdutf.o

@@ -13,3 +13,5 @@
 ^src/.*\.dylib$
 ^src/vendor/.*\.o$
 ^\.gitattributes$
+^doc$
+^Meta$

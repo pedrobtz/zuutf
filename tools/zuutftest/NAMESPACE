@@ -1,0 +1,16 @@
+# Written by hand; this fixture has no roxygen pass.
+#
+# The importFrom() is not decoration: `Imports: zuutf` alone does not load
+# zuutf's namespace, and until it is loaded R_GetCCallable() finds nothing.
+# A real consumer must be set up this way, so the fixture is.
+importFrom(zuutf, zuutf_info)
+
+useDynLib(zuutftest, .registration = TRUE)
+
+export(api_struct_size)
+export(api_kernel)
+export(api_validate)
+export(api_count_utf8)
+export(api_convert)
+export(api_base64_encode)
+export(api_base64_decode)

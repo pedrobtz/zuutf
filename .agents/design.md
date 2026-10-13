@@ -385,7 +385,15 @@ typedef struct {
 ```
 
 The member list is a sketch; the member order that is ABI is the one in
-`inst/include/zuutf.h`. Rules, all `zuxml`'s (its design §15):
+`inst/include/zuutf.h`. As shipped in Stage 5 (2026-10-13) it differs from
+the sketch in three places: `base64_encode` takes an output capacity and
+returns a `zuutf_result`, like every member that writes;
+`base64_decoded_max_length` is added so a consumer can size the decode
+buffer; and the Base64 `flags` are `ZUUTF_BASE64_URL`, `_NO_PAD`, `_STRICT`
+and `_EITHER`. On `ZUUTF_ERR_OUTPUT_BUFFER_TOO_SMALL`, `count` is the
+capacity that would have been enough. The table is reached through a
+getter registered as `zuutf_api_v1`, as zuxml's is. Rules, all `zuxml`'s
+(its design §15):
 
 - `struct_size` is the sole version discriminator for the table. A
   consumer compares it against the offset of the member it wants

@@ -4,6 +4,7 @@
 #include <R_ext/Rdynload.h>
 #include <R_ext/Visibility.h>
 
+#include "zut_api.h"
 #include "zut_r.h"
 
 static const R_CallMethodDef call_methods[] = {
@@ -24,4 +25,5 @@ void attribute_visible R_init_zuutf(DllInfo *dll) {
   R_registerRoutines(dll, NULL, call_methods, NULL, NULL);
   R_useDynamicSymbols(dll, FALSE);
   R_forceSymbols(dll, TRUE);
+  zut_register_api();
 }

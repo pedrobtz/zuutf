@@ -12,6 +12,28 @@
 
 #include <cstring>
 
+#include "simdutf_c.h"
+#include "zuutf.h"
+
+// The installed header mirrors simdutf's error codes (design §7); a
+// re-vendor that renumbers them fails here, not in a consumer.
+static_assert(ZUUTF_ERR_SUCCESS == SIMDUTF_ERROR_SUCCESS, "ZUUTF_ERR_SUCCESS");
+static_assert(ZUUTF_ERR_HEADER_BITS == SIMDUTF_ERROR_HEADER_BITS, "ZUUTF_ERR_HEADER_BITS");
+static_assert(ZUUTF_ERR_TOO_SHORT == SIMDUTF_ERROR_TOO_SHORT, "ZUUTF_ERR_TOO_SHORT");
+static_assert(ZUUTF_ERR_TOO_LONG == SIMDUTF_ERROR_TOO_LONG, "ZUUTF_ERR_TOO_LONG");
+static_assert(ZUUTF_ERR_OVERLONG == SIMDUTF_ERROR_OVERLONG, "ZUUTF_ERR_OVERLONG");
+static_assert(ZUUTF_ERR_TOO_LARGE == SIMDUTF_ERROR_TOO_LARGE, "ZUUTF_ERR_TOO_LARGE");
+static_assert(ZUUTF_ERR_SURROGATE == SIMDUTF_ERROR_SURROGATE, "ZUUTF_ERR_SURROGATE");
+static_assert(ZUUTF_ERR_INVALID_BASE64_CHARACTER == SIMDUTF_ERROR_INVALID_BASE64_CHARACTER,
+              "ZUUTF_ERR_INVALID_BASE64_CHARACTER");
+static_assert(ZUUTF_ERR_BASE64_INPUT_REMAINDER == SIMDUTF_ERROR_BASE64_INPUT_REMAINDER,
+              "ZUUTF_ERR_BASE64_INPUT_REMAINDER");
+static_assert(ZUUTF_ERR_BASE64_EXTRA_BITS == SIMDUTF_ERROR_BASE64_EXTRA_BITS,
+              "ZUUTF_ERR_BASE64_EXTRA_BITS");
+static_assert(ZUUTF_ERR_OUTPUT_BUFFER_TOO_SMALL == SIMDUTF_ERROR_OUTPUT_BUFFER_TOO_SMALL,
+              "ZUUTF_ERR_OUTPUT_BUFFER_TOO_SMALL");
+static_assert(ZUUTF_ERR_OTHER == SIMDUTF_ERROR_OTHER, "ZUUTF_ERR_OTHER");
+
 namespace {
 
 const simdutf::implementation *kernel_at(int i) {

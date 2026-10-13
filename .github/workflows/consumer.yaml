@@ -1,0 +1,84 @@
+# The consumer fixture (design §7, alignment rule R10.4): tools/zuutftest is
+# a package with Imports + LinkingTo on zuutf and a real importFrom(),
+# compiled against the INSTALLED header with nothing linked, calling every
+# member of zuutf_api_v1. Bespoke, like zucrypt's: what a package publishes
+# is specific to it, and R CMD check never builds a consumer.
+#
+# The fixture is copied out of the source tree before it is installed, so
+# only the installed inst/include/zuutf.h can satisfy its #include, and the
+# installed header is compiled standalone as C99 and C++17 under -Werror.
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    types: [opened, synchronize, reopened, labeled]
+  workflow_dispatch:
+
+name: consumer
+
+permissions: read-all
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  consumer:
+    runs-on: ${{ matrix.os }}
+    name: consumer (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    # `R CMD INSTALL` is a shell command line; on Windows the default pwsh
+    # resolves `R` to its own alias, so every step uses Rtools' bash.
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          use-public-rspm: true
+
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          dependencies: '"hard"'
+          extra-packages: any::testthat
+
+      - name: Install zuutf
+        run: R CMD INSTALL --preclean .
+
+      - name: The installed header compiles standalone
+        run: |
+          inc=$(Rscript -e 'cat(system.file("include", package = "zuutf"))')
+          cc=$(R CMD config CC | awk '{print $1}')
+          cxx=$(R CMD config CXX17 | awk '{print $1}')
+          for std in c99 c17; do
+            $cc -std=$std -Wall -Wextra -Wpedantic -Werror -fsyntax-only -x c "$inc/zuutf.h"
+          done
+          $cxx -std=c++17 -Wall -Wextra -Wpedantic -Werror -fsyntax-only -x c++ "$inc/zuutf.h"
+          echo "zuutf.h compiles as C99, C17 and C++17 with nothing else included"
+
+      - name: Install the fixture from outside the source tree
+        run: |
+          dest="$RUNNER_TEMP/consumer"
+          mkdir -p "$dest"
+          cp -R tools/zuutftest "$dest/"
+          cd "$dest"
+          R CMD INSTALL zuutftest
+
+      # Fails when zero tests ran: a fixture that silently stopped being
+      # found would otherwise be a green job that proved nothing.
+      - name: Run the fixture's tests against the installed packages
+        shell: Rscript {0}
+        run: |
+          setwd(file.path(Sys.getenv("RUNNER_TEMP"), "consumer", "zuutftest", "tests", "testthat"))
+          library(zuutftest)
+          res <- as.data.frame(testthat::test_dir(".", package = "zuutftest",
+            load_package = "installed", stop_on_failure = FALSE, reporter = "summary"))
+          n <- sum(res$nb)
+          cat(sprintf("ran %d expectations in %d tests\n", n, nrow(res)))
+          if (nrow(res) == 0L || n == 0L) stop("no tests ran: the fixture proved nothing")
+          if (sum(res$failed) > 0L || any(res$error)) stop("consumer fixture failed")

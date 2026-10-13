@@ -1,0 +1,21 @@
+Package: zuutftest
+Title: Consumer Fixture for the zuutf C Table
+Version: 0.0.1
+Authors@R: 
+    person("Pedro", "Baltazar", , "pedrobtz@gmail.com", role = c("aut", "cre"))
+Description: Not a real package and never published. It proves that
+    zuutf's registered C table can be consumed from another package's C
+    code: LinkingTo for the header, Imports plus a real importFrom() in
+    NAMESPACE so that zuutf's namespace is loaded and the callable resolves.
+    It is built and run only by consumer.yaml.
+License: MIT + file LICENSE
+Encoding: UTF-8
+Depends: 
+    R (>= 4.1)
+Imports: 
+    zuutf
+LinkingTo: 
+    zuutf
+Suggests: 
+    testthat (>= 3.0.0)
+Config/testthat/edition: 3
