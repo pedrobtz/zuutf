@@ -1,0 +1,63 @@
+#' Conditions raised by zuutf
+#'
+#' Every error zuutf raises inherits from `zuutf_error`, then `error` and
+#' `condition`, so a caller can catch all of them, or one kind, with
+#' [tryCatch()]. Test code should match on the class, never on the message.
+#'
+#' | Class | Fields | Raised when |
+#' |---|---|---|
+#' | `zuutf_invalid_argument` | | wrong type, unknown encoding name, a `"bytes"` string without `useBytes` |
+#' | `zuutf_encoding_error` | `index`, `offset`, `encoding` | input that is ill-formed in its encoding |
+#' | `zuutf_internal_error` | | a simdutf result zuutf did not expect, or a kernel forced through `SIMDUTF_FORCE_IMPLEMENTATION` that this processor cannot run |
+#'
+#' `index` is the 1-based element of the input, `offset` the 1-based
+#' position of the first error in the input's code units (bytes for UTF-8,
+#' Latin-1 and ASCII; 16-bit units for UTF-16; 32-bit units for UTF-32),
+#' counted after any byte-order mark, and `encoding` the name of the encoding.
+#'
+#' @name zuutf_error
+#' @examples
+#' tryCatch(
+#'   utf_valid("abc", encoding = "EBCDIC"),
+#'   zuutf_invalid_argument = function(e) class(e)
+#' )
+NULL
+
+zuutf_condition <- function(class, message, ..., call = NULL) {
+  structure(
+    class = c(class, "zuutf_error", "error", "condition"),
+    list(message = message, call = call, ...)
+  )
+}
+
+abort_invalid_argument <- function(message, call = NULL) {
+  stop(zuutf_condition("zuutf_invalid_argument", message, call = call))
+}
+
+abort_encoding_error <- function(message, index, offset, encoding, call = NULL) {
+  stop(zuutf_condition(
+    "zuutf_encoding_error", message,
+    index = index, offset = offset, encoding = encoding, call = call
+  ))
+}
+
+abort_internal_error <- function(message, call = NULL) {
+  stop(zuutf_condition("zuutf_internal_error", message, call = call))
+}
+
+# simdutf selects its "unsupported" stub when SIMDUTF_FORCE_IMPLEMENTATION
+# names a kernel this processor cannot run (design §10). Every function
+# would then fail in ways that look like bad input, so it is refused once,
+# up front.
+check_kernel <- function(call = NULL) {
+  if (!.Call(zut_kernel_ok)) {
+    abort_internal_error(
+      paste0(
+        "simdutf has no usable kernel: SIMDUTF_FORCE_IMPLEMENTATION is \"",
+        Sys.getenv("SIMDUTF_FORCE_IMPLEMENTATION"),
+        "\", which this processor cannot run or simdutf does not know"
+      ),
+      call = call
+    )
+  }
+}
