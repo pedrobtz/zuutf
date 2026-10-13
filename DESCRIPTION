@@ -1,14 +1,36 @@
 Package: zuutf
-Title: What the Package Does (One Line, Title Case)
+Title: Fast Unicode Validation and Transcoding with 'simdutf'
 Version: 0.0.0.9000
-Authors@R: 
-    person("First", "Last", , "first.last@example.com", role = c("aut", "cre"))
-Description: What the package does (one paragraph).
+Authors@R: c(
+    person("Pedro", "Baltazar", , "pedrobtz@gmail.com",
+           role = c("aut", "cre", "cph")),
+    person("Daniel", "Lemire", role = "cph",
+           comment = "simdutf, bundled in src/vendor/simdutf"),
+    person("The simdutf contributors", role = "cph",
+           comment = "simdutf, bundled in src/vendor/simdutf"))
+Description: Validates text and converts it between 'UTF-8', 'UTF-16'
+    and 'UTF-32' in either byte order and 'Latin-1', counts characters,
+    detects encodings, and encodes and decodes 'Base64', with a bundled
+    copy of the 'simdutf' library (<https://github.com/simdutf/simdutf>).
+    'simdutf' chooses single instruction, multiple data (SIMD) code for
+    the running processor at first use, so validation and conversion run
+    at gigabytes per second. Every validation and conversion can report
+    the position of the first ill-formed sequence, in the units of the
+    input. Character, raw and list-of-raw input are accepted, and invalid
+    input can raise an error, be replaced with U+FFFD, or give a missing
+    value. The same functions are published to other packages as a
+    registered C interface.
 License: MIT + file LICENSE
-Encoding: UTF-8
-Roxygen: list(markdown = TRUE)
-RoxygenNote: 8.1.0
+URL: https://github.com/pedrobtz/zuutf, https://pedrobtz.github.io/zuutf/
+BugReports: https://github.com/pedrobtz/zuutf/issues
+Depends: 
+    R (>= 4.1)
 Suggests: 
-    testthat (>= 3.0.0)
+    testthat (>= 3.0.0),
+    withr
 Config/testthat/edition: 3
-URL: https://pedrobtz.github.io/zuutf/
+Encoding: UTF-8
+Language: en-GB
+Roxygen: list(markdown = TRUE)
+Config/roxygen2/version: 8.1.0
+SystemRequirements: C++17
