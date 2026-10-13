@@ -15,8 +15,19 @@ split_lines <- function(raw) {
   Map(function(a, b) raw[seq_len(b - a) + a - 1L], starts, ends)
 }
 
+# zuutf skips a leading byte-order mark (design §6) and zufast reads it as
+# U+FEFF, so zufast is given the bytes after it
+strip_utf8_bom <- function(b) {
+  if (length(b) >= 3 && identical(b[1:3], as.raw(c(0xef, 0xbb, 0xbf)))) b[-(1:3)] else b
+}
+
+# unicode_lipsum's UTF-16 and UTF-32 files carry one more U+FEFF than its
+# UTF-8 files (Emoji-Lipsum.utf16.txt starts ff fe ff fe), so the texts are
+# compared without leading U+FEFF
+drop_feff <- function(s) sub(paste0("^", intToUtf8(0xfeff), "+"), "", s)
+
 expect_agree <- function(x, label) {
-  z <- zufast_utf8(x)
+  z <- zufast_utf8(lapply(x, strip_utf8_bom))
   expect_identical(zuutf::utf_valid(x), z$valid, info = label)
   expect_identical(as.numeric(zuutf::utf_error_at(x)), z$offset, info = label)
   expect_identical(as.numeric(zuutf::utf_count(x)), z$count, info = label)
@@ -92,13 +103,14 @@ test_that("the unicode_lipsum samples agree with zufast and with their own UTF-1
     raw8 <- read_bytes(f)
     expect_agree(list(raw8), basename(f))
     expect_agree(split_lines(raw8), paste(basename(f), "by line"))
-    text <- zuutf::utf_decode(raw8, "UTF-8")
+    text <- drop_feff(zuutf::utf_decode(raw8, "UTF-8"))
     raw16 <- read_bytes(sub("utf8", "utf16", f, fixed = TRUE))
     raw32 <- read_bytes(sub("utf8", "utf32", f, fixed = TRUE))
-    expect_identical(zuutf::utf_decode(raw16, "UTF-16LE"), text, info = basename(f))
-    expect_identical(zuutf::utf_decode(raw32, "UTF-32LE"), text, info = basename(f))
-    expect_identical(zuutf::utf_convert(raw8, "UTF-8", "UTF-16LE"),
-                     zuutf::utf_convert(raw16, "UTF-16LE", "UTF-16LE"), info = basename(f))
+    expect_identical(drop_feff(zuutf::utf_decode(raw16, "UTF-16LE")), text, info = basename(f))
+    expect_identical(drop_feff(zuutf::utf_decode(raw32, "UTF-32LE")), text, info = basename(f))
+    expect_identical(zuutf::utf_encode(text, "UTF-16LE"),
+                     zuutf::utf_encode(drop_feff(zuutf::utf_decode(raw16)), "UTF-16LE"),
+                     info = basename(f))
   }
 })
 
