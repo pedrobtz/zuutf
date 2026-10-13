@@ -1,0 +1,61 @@
+# The kernel matrix (design §10, §12.1): the test suite once per simdutf
+# kernel each runner supports, forced with SIMDUTF_FORCE_IMPLEMENTATION
+# before R starts, on Linux, Windows (Rtools' GCC, the §12.1 go/no-go) and
+# macOS (arm64). Each leg also reports install time, object size and the
+# export list for design §12.2.
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    types: [opened, synchronize, reopened, labeled]
+
+name: kernel-matrix
+
+permissions: read-all
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  kernel-matrix:
+    runs-on: ${{ matrix.os }}
+    name: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          use-public-rspm: true
+
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          dependencies: '"hard"'
+          extra-packages: any::testthat, any::withr
+
+      - name: CPU
+        shell: bash
+        run: |
+          case "$RUNNER_OS" in
+            Linux) grep -m1 'model name' /proc/cpuinfo
+                   grep -m1 -o -w 'avx2\|avx512vbmi2' /proc/cpuinfo | sort -u || true ;;
+            macOS) sysctl -n machdep.cpu.brand_string ;;
+            Windows) powershell -Command "(Get-CimInstance Win32_Processor).Name" ;;
+          esac
+
+      - name: Install with timing
+        shell: bash
+        run: |
+          cxx=$(R CMD config CXX17)
+          echo "ZUUTF_CXX_VERSION=$($cxx --version | head -1)" >> "$GITHUB_ENV"
+          start=$(date +%s)
+          R CMD INSTALL --preclean --no-test-load .
+          echo "ZUUTF_INSTALL_SECONDS=$(( $(date +%s) - start ))" >> "$GITHUB_ENV"
+
+      - name: Test suite per kernel
+        shell: bash
+        run: Rscript -e 'library(zuutf); source("tools/kernel-matrix.R")'
