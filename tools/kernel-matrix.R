@@ -55,6 +55,16 @@ exports <- tryCatch({
   }
 }, error = function(e) NA_character_)
 
+if (sysname == "Windows") {
+  # the raw import table, so a format change shows up in the log
+  dump <- system2("objdump", c("-p", shQuote(so)), stdout = TRUE)
+  at <- grep("DLL Name:", dump, fixed = TRUE)
+  if (length(at)) {
+    cat("\nobjdump -p import table (first block):\n")
+    writeLines(dump[at[1L] + 0:6])
+  }
+}
+
 facts <- c(
   platform = R.version$platform,
   compiler = Sys.getenv("ZUUTF_CXX_VERSION", "?"),

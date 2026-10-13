@@ -21,6 +21,25 @@ run_tool <- function(tool, args) {
   out
 }
 
+# The imported names in objdump -p output: under each "DLL Name:" line, a
+# header line naming "Member-Name", then one row per import up to a blank
+# line, with the name last.
+pe_imports <- function(dump) {
+  dump <- sub("\r$", "", dump)
+  names <- character()
+  in_block <- FALSE
+  for (line in dump) {
+    if (grepl("Member-Name", line, fixed = TRUE)) {
+      in_block <- TRUE
+    } else if (in_block && !nzchar(trimws(line))) {
+      in_block <- FALSE
+    } else if (in_block) {
+      names <- c(names, sub("^.*[[:space:]]", "", trimws(line)))
+    }
+  }
+  names
+}
+
 # objdump -p output for a Windows DLL.
 pe_dump <- function() {
   run_tool("objdump", c("-p", shQuote(zuutf_dll_path())))
@@ -57,9 +76,7 @@ exported_symbols <- function() {
 referenced_symbols <- function() {
   sysname <- Sys.info()[["sysname"]]
   if (sysname == "Windows") {
-    dump <- pe_dump()
-    rows <- dump[grepl("^\\s+[0-9a-f]+\\s+[0-9]+\\s+\\S+\\s*$", dump)]
-    return(sub("^\\s+[0-9a-f]+\\s+[0-9]+\\s+(\\S+)\\s*$", "\\1", rows))
+    return(pe_imports(pe_dump()))
   }
   syms <- run_tool("nm", c("-u", shQuote(zuutf_dll_path())))
   names <- sub("^.*[[:space:]]", "", trimws(syms))
