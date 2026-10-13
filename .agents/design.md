@@ -426,6 +426,12 @@ The member list is a sketch; the member order that is ABI is the one in
   `SIMDUTF_FORCE_IMPLEMENTATION` once, on first use (§10). The
   `native-checks` job greps the installed object for `printf`, `abort`,
   `exit` and `stderr` so a future release cannot bring them in silently.
+  On Windows the check allows `abort`, `exit`, `_exit` and
+  `__acrt_iob_func` (UCRT's access to `stderr`): Rtools links the C++
+  runtime into every C++ DLL statically, and its `std::terminate` path
+  imports them whatever the package does; the Linux and macOS objects,
+  linked to a shared C++ runtime, reference none of the four, which is what
+  shows the vendored code does not (*verified 2026-10-13*, CI).
 - **Standard library.** The amalgamation includes `<limits>`,
   `<type_traits>`, `<cstdint>`, `<array>`, `<tuple>`, `<utility>`,
   `<initializer_list>` and `<climits>` only; it needs the C++ runtime for

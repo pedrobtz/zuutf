@@ -122,7 +122,9 @@ function proves the kernels work. Size: M.
 `-DSIMDUTF_IMPLEMENTATION_FALLBACK=1` (design D16), so the `fallback` kernel
 exists on arm64 and the kernel matrix runs it on macOS beside `arm64`.
 `src/Makevars` lists `OBJECTS`, and `src/zuutf-win.def` limits the Windows
-DLL's exports to `R_init_zuutf`.
+DLL's exports to `R_init_zuutf`. On Windows `test-vendor.R` allows the four
+imports Rtools' statically linked C++ runtime brings (`abort`, `exit`,
+`_exit`, `__acrt_iob_func`) and still fails on any other (design §8).
 
 **Design.** §4, §8, §10 (kernel matrix), §12.
 

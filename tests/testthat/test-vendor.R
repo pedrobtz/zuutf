@@ -12,7 +12,15 @@ test_that("the shared object references no stdio, abort or exit", {
   expect_true("R_registerRoutines" %in% names)
   banned <- c("printf", "puts", "putchar", "abort", "exit", "_exit",
               "stderr", "stdout", "__stderrp", "__stdoutp", "__acrt_iob_func")
-  expect_identical(intersect(names, banned), character())
+  found <- intersect(names, banned)
+  if (Sys.info()[["sysname"]] == "Windows") {
+    # Rtools links the C++ runtime into the DLL statically, and its
+    # std::terminate path imports these four whatever the package's own code
+    # does (design §8). The Linux and macOS legs, where libstdc++ and libc++
+    # are shared libraries, see the package's own references and allow none.
+    found <- setdiff(found, c("abort", "exit", "_exit", "__acrt_iob_func"))
+  }
+  expect_identical(found, character())
 })
 
 test_that("the compiled-in simdutf is the manifest's version", {
