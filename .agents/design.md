@@ -552,7 +552,17 @@ correct under Rtools, zuutf ships the scalar `fallback` kernel alone on
 Windows, which is still correct and still faster than `iconv()`, and
 the outcome is recorded here with the numbers.
 
-**Outcome:** pending Stage 1.
+**Outcome (2026-10-13, Stage 1): go, with every kernel.** The
+amalgamation compiles under Rtools 4.5's GCC 14.3.0 with CRAN's flags and
+no `-D` switch, and on the `windows-latest` runner (Intel Xeon Platinum
+8573C, which has AVX-512 VBMI2) the kernel-matrix job forced `icelake`,
+`haswell`, `westmere` and `fallback` in turn, confirmed each with
+`zuutf_info()$kernel`, and passed the whole suite on each, including the
+probe against `validUTF8()` at every length from 1 to 130 and 4090 to
+4100 bytes. `Makevars.win` therefore carries no
+`SIMDUTF_IMPLEMENTATION_<KERNEL>=0`. The corpus and oracle tests of
+Stages 2–6 run on the same matrix, so a MinGW-only miscompilation that the
+probe misses would still surface there.
 
 ### 12.2 Everywhere
 
@@ -597,8 +607,21 @@ the outcome is recorded here with the numbers.
   library it exports **zero** symbols. On Linux with GCC, libstdc++
   template instantiations may still appear in the export list, as in
   zufft; they are accepted (R3; a version script needs a per-platform
-  linker flag that portable `Makevars` cannot select). Stage 1 records
-  the Linux and Windows numbers beside these.
+  linker flag that portable `Makevars` cannot select). Measured in CI on
+  2026-10-13 (kernel-matrix job, `R CMD INSTALL` of the whole package, R
+  4.6.1, the toolchains' default flags):
+
+  | Runner | Compiler | Install | Shared object | Exports |
+  |---|---|---|---|---|
+  | `macos-latest` (Apple M1) | Apple clang 21.0.0 | 7 s | 483 KB | `R_init_zuutf` |
+  | `ubuntu-latest` (AMD EPYC 9V45) | GCC 13.3.0 | 17 s | 6.6 MB | `R_init_zuutf` |
+  | `windows-latest` (Xeon Platinum 8573C) | GCC 14.3.0 (Rtools 4.5) | 26 s | 582 KB | `R_init_zuutf` |
+
+  The Linux object is large because R's default `CXXFLAGS` there carry
+  `-g`; R CMD check reports it as INFO ("installed size is 6.7Mb"), not a
+  NOTE. The unoptimised gctorture build on GCC also exports
+  `__gnu_cxx::char_traits<char>::eq` and `::length`, the libstdc++
+  instantiations this section accepts.
 - Static initialisation: simdutf's implementation singletons are
   function-local statics, initialised thread-safely on first use, so
   nothing runs at `dlopen` and nothing depends on initialisation order.
