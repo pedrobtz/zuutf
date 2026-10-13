@@ -79,3 +79,15 @@ conversion_texts <- function(n = 200) {
 }
 
 conversion_encodings <- c("UTF-8", "UTF-16LE", "UTF-16BE", "UTF-32LE", "UTF-32BE", "Latin-1")
+
+# Base64 fixtures: hex TSV, read as text.
+read_tsv_fixture <- function(name) {
+  utils::read.delim(test_path("fixtures", name), colClasses = "character",
+                    na.strings = "NA", quote = "")
+}
+
+hex_raw <- function(h) {
+  if (is.na(h)) return(NULL)
+  if (!nzchar(h)) return(raw())
+  as.raw(strtoi(substring(h, seq(1, nchar(h), 2), seq(2, nchar(h), 2)), 16L))
+}
