@@ -3,7 +3,7 @@
 
 <!-- badges: start -->
 [![R-CMD-check](https://github.com/pedrobtz/zuutf/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/pedrobtz/zuutf/actions/workflows/R-CMD-check.yaml)
-[![coverage](https://raw.githubusercontent.com/pedrobtz/zuutf/main/.github/badges/coverage.svg)](https://github.com/pedrobtz/zuutf/actions/workflows/coverage.yaml)
+[![coverage](https://raw.githubusercontent.com/pedrobtz/zuutf/gh-pages/badges/coverage.svg)](https://github.com/pedrobtz/zuutf/actions/workflows/coverage.yaml)
 <!-- badges: end -->
 
 Every Unicode encoding R meets, validated and converted at memory speed,
