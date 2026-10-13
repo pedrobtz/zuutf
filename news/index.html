@@ -37,6 +37,11 @@
 <ul><li>Bundles simdutf 9.2.1, unmodified, with every kernel it offers and the scalar <code>fallback</code> kernel on every platform.</li>
 <li>
 <code><a href="../reference/zuutf_info.html">zuutf_info()</a></code> reports the simdutf version, the kernel in use and the kernels compiled in.</li>
+<li>
+<code><a href="../reference/utf_valid.html">utf_valid()</a></code>, <code><a href="../reference/utf_valid.html">utf_error_at()</a></code> and <code><a href="../reference/utf_valid.html">utf_is_ascii()</a></code> validate character, raw and list-of-raw input in UTF-8, UTF-16, UTF-32 (either byte order, or chosen by a byte-order mark), Latin-1 and ASCII, and give the offset of the first error in the input’s code units.</li>
+<li>
+<code><a href="../reference/utf_count.html">utf_count()</a></code> counts code points and <code><a href="../reference/utf_count.html">utf_length_as()</a></code> gives the bytes a conversion will produce.</li>
+<li>Errors are classed conditions under <code>zuutf_error</code> (<code><a href="../reference/zuutf_error.html">?zuutf_error</a></code>).</li>
 </ul></div>
   </main></div>
 
