@@ -35,6 +35,10 @@ SEXP zut_info(void) {
   return out;
 }
 
+SEXP zut_kernel_ok(void) {
+  return Rf_ScalarLogical(zut_active_kernel_ok());
+}
+
 SEXP zut_probe(SEXP x) {
   if (TYPEOF(x) != RAWSXP) {
     Rf_error("`x` must be a raw vector");

@@ -32,6 +32,11 @@ const char *zut_active_kernel(void) {
   return simdutf::get_active_implementation()->name().data();
 }
 
+int zut_active_kernel_ok(void) {
+  const simdutf::implementation *impl = simdutf::get_active_implementation();
+  return impl->name() != "unsupported" && impl->supported_by_runtime_system();
+}
+
 int zut_kernel_count(void) {
   return static_cast<int>(simdutf::get_available_implementations().size());
 }

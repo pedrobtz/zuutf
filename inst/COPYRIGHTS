@@ -37,3 +37,16 @@ Licence (MIT):
   DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
   OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
   USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+
+Test fixtures
+=============
+
+tests/testthat/fixtures/ holds third-party test data, each file listed with
+its source, licence and SHA-256 in tests/testthat/fixtures/MANIFEST.tsv:
+
+  UTF-8-test.txt   Markus Kuhn, "UTF-8 decoder capability and stress
+                   test", 2015-08-28, https://www.cl.cam.ac.uk/~mgk25/ucs/,
+                   licensed under CC BY 4.0
+                   (https://creativecommons.org/licenses/by/4.0/),
+                   included unmodified.

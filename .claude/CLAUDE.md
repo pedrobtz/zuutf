@@ -13,7 +13,7 @@ Sibling checkouts sit in `../`. `zucrypt` is the model for vendoring (manifest a
 
 ## Current state
 
-**2026-10-13: Stages 0–1 done.** simdutf 9.2.1 is vendored unmodified (`tools/vendor/`), compiles on every CI leg with every kernel, Windows included (design §12.1: go), and the kernel matrix forces each kernel a runner supports. `zuutf_info()` is the only export; the `utf_` and `base64_` functions arrive from Stage 2. Tracking: parent [#1](https://github.com/pedrobtz/zuutf/issues/1), stages #2–#9, submission #10.
+**2026-10-13: Stages 0–2 done.** simdutf 9.2.1 is vendored unmodified (`tools/vendor/`), compiles on every CI leg with every kernel, Windows included (design §12.1: go), and the kernel matrix forces each kernel a runner supports. Exported: `zuutf_info()`, `utf_valid()`, `utf_error_at()`, `utf_is_ascii()`, `utf_count()`, `utf_length_as()`, with the condition classes in `R/conditions.R`. Conversion (Stage 3), Base64 (Stage 4) and the C table (Stage 5) are not built yet. Tracking: parent [#1](https://github.com/pedrobtz/zuutf/issues/1), stages #2–#9, submission #10.
 
 Update this paragraph at the end of every stage.
 
@@ -53,7 +53,7 @@ Scripts arriving at the stage named: `tools/vendor/{fetch,apply,verify}` (Stage 
 
 ## Architecture
 
-Planned layout, from design §4; only `src/init.c` and `R/zuutf-package.R` exist yet.
+Layout, from design §4. `zut_input.c` (element access, BOM stripping, the aligned and byte-swapped scratch) and `zut_validate.c`/`zut_count.c` exist; conversion and Base64 glue arrive in Stages 3–4.
 
 ```text
 R/            argument handling, encoding names, the invalid= policy, conditions

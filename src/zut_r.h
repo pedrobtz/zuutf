@@ -7,5 +7,8 @@
 SEXP zut_info(void);
 SEXP zut_probe(SEXP x);
 SEXP zut_force_kernel_r(SEXP name);
+SEXP zut_kernel_ok(void);
+SEXP zut_validate(SEXP x, SEXP encoding, SEXP what);
+SEXP zut_length_as(SEXP x, SEXP from, SEXP to);
 
 #endif

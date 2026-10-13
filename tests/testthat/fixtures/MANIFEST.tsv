@@ -1,0 +1,2 @@
+file	source	licence	sha256	retrieved	description
+UTF-8-test.txt	https://www.cl.cam.ac.uk/~mgk25/ucs/examples/UTF-8-test.txt	CC BY 4.0, Markus Kuhn	b51cfe9a8d2689c90b10a13a3624092d546e0837c6ff835b6e5d713c5749c8c6	2026-10-13	Markus Kuhn's UTF-8 decoder capability and stress test (2015-08-28), unmodified; one case per line
