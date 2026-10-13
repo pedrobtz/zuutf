@@ -1,6 +1,13 @@
 ^LICENSE\.md$
 ^\.agents$
+^\.claude$
 ^\.github$
+^tools$
 ^_pkgdown\.yml$
-^docs$
 ^pkgdown$
+^docs$
+^cran-comments\.md$
+^src/.*\.o$
+^src/.*\.so$
+^src/.*\.dll$
+^src/.*\.dylib$
