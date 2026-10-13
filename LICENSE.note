@@ -1,0 +1,28 @@
+zuutf is licensed under the MIT licence (see LICENSE and LICENSE.md).
+
+It bundles the simdutf library (https://github.com/simdutf/simdutf) in
+src/vendor/simdutf/, taken unmodified from the single-header release
+artefact of a pinned upstream release. simdutf is dual-licensed under the
+Apache License 2.0 and the MIT licence, at the user's choice; zuutf takes
+it under the MIT licence.
+
+
+zuutf
+=====
+
+Copyright (c) 2026 Pedro Baltazar
+
+Covers everything in the package except src/vendor/. Full text in
+LICENSE.md; CRAN's YEAR/COPYRIGHT HOLDER form is in LICENSE.
+
+
+simdutf
+=======
+
+Copyright (c) Daniel Lemire and the simdutf contributors
+
+Bundled in src/vendor/simdutf/ under the MIT licence. The pinned release,
+the SHA-256 of its archive and the import procedure are recorded in
+tools/vendor/manifest.tsv in the source repository,
+https://github.com/pedrobtz/zuutf; inst/COPYRIGHTS gives the copyright
+holders and the licence text.
