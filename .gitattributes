@@ -1,0 +1,4 @@
+# Test fixtures are bytes: line endings, BOMs and encodings are what the
+# tests check, so git must never convert them (Windows checkouts did).
+tests/testthat/fixtures/** binary
+tools/fixtures/sample.txt binary
