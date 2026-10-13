@@ -507,14 +507,23 @@ message.
   `zuf_utf8_count()` and strict Base64 decoder in a CI-only fixture
   (`tools/zuutforacle`, `LinkingTo: zufast`, built by `hardening.yaml`;
   D12): validation results, counts and error offsets must agree on every
-  corpus file and on a million random byte strings. simdutf's own
+  corpus file and on a million random byte strings. zufast reports
+  validity and the code points before the first error, not an offset;
+  since the bytes before the error are valid, the fixture walks that many
+  code points to find where the bad sequence starts, which is what zuutf
+  reports (Stage 6, 2026-10-13). simdutf's own
   `fallback` kernel is the oracle for its SIMD kernels, run through the
   kernel matrix below.
 - **Corpus** (`tests/testthat/fixtures/`, each file with provenance in a
-  `MANIFEST.tsv`): Markus Kuhn's UTF-8 stress test, `unicode_lipsum`
-  samples in many scripts, UTF-16 files written by Windows tools with and
-  without BOM, UTF-32 in both byte orders, the WHATWG Base64 test
-  vectors, and simdutf's own test inputs where their licence allows.
+  `MANIFEST.tsv`): Markus Kuhn's UTF-8 stress test and its WHATWG
+  replacement, a multi-script sample in UTF-8, UTF-16 and UTF-32 in both
+  byte orders with and without BOM, and the WHATWG and RFC 4648 Base64
+  vectors. Beside it, in `hardening.yaml` only: the `unicode_lipsum`
+  samples, fetched at a pinned commit because that repository carries no
+  licence of its own (the samples come from simdutf8, MIT or Apache-2.0),
+  and UTF-16 and UTF-8 files that Windows PowerShell 5.1 writes on the
+  Windows runner. simdutf's own tests generate their inputs in code, so
+  there is no data of theirs to take (Stage 6, 2026-10-13).
 - **Kernel matrix.** simdutf reads `SIMDUTF_FORCE_IMPLEMENTATION` from
   the environment on first use and makes that kernel active; an unknown
   name selects its `unsupported` stub, but a kernel that is compiled in
@@ -542,12 +551,23 @@ message.
   rchk and LTO from `native-checks.yaml`; libFuzzer targets for
   `validate`, `convert` and `base64_decode` in the family's fuzz shape
   (`zufuzz` is a skeleton as of 2026-10-13, so the targets are built
-  the way zucbor's are until it ships).
+  the way zubin's are until it ships). The targets embed R and drive
+  zuutf's own `.Call` entry points, so what is fuzzed is the glue R calls,
+  simdutf included; each checks invariants (a replaced result is valid in
+  its target, a conversion under `"error"` round-trips, what decodes
+  re-encodes canonically) and has a canary build that must crash on its
+  canary input before the target is trusted (`tools/run-fuzz`).
 - **Symbols.** `test-abi.R` greps the installed shared object for
   exports: `R_init_zuutf` and, on Linux with GCC, libstdc++ template
   instantiations only, as zufft accepts them (R3, §12.2).
 - CRAN suite under 15 s; everything above the corpus and the oracle check
-  is behind `ZUUTF_SLOW_TESTS` (R7).
+  is behind `ZUUTF_SLOW_TESTS` (R7). In the CRAN suite the hostile sweeps
+  run on the kernel in use, since the kernel-matrix job runs the whole
+  suite once per kernel; `ZUUTF_SLOW_TESTS` runs them on every kernel in
+  process too. `ZUUTF_SKIP_HEAVY` shrinks the random sweeps for gctorture,
+  and `ZUUTF_TIMING_TESTS` turns on an elapsed-time check, meaningful only
+  against an installed package, since `devtools::load_all()` compiles
+  with `-O0`.
 
 ---
 

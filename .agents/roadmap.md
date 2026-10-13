@@ -335,6 +335,15 @@ Size: M.
   recorded rather than lowered.
 - `native-checks.yaml`, `kernel-matrix` and `consumer.yaml` stay green.
 
+**Deviations (2026-10-13).** The `unicode_lipsum` samples are fetched at
+a pinned commit by `hardening.yaml`, not bundled: that repository has no
+licence of its own. The "UTF-16 files written by Windows tools" are
+written by Windows PowerShell 5.1 on the Windows oracle leg each run,
+rather than committed. simdutf's own tests generate inputs in code, so
+nothing of theirs is taken. zufast reports no offset, so the oracle derives
+one from its count (design §10). The fuzz targets embed R and fuzz zuutf's
+`.Call` glue with simdutf, as zubin's R targets do.
+
 **Design.** §10, §11.
 
 ## Stage 7 — v0.1.0 readiness
