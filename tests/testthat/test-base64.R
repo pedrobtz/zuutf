@@ -17,7 +17,7 @@ test_that("encoding and decoding round-trip under every alphabet and padding", {
     }
   }
   # strict decoding takes what padded encoding writes
-  for (x in inputs[1:500]) {
+  for (x in head(inputs, 500)) {
     expect_identical(base64_decode(base64_encode(x), forgiving = FALSE), x)
   }
 })
