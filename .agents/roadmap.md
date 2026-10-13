@@ -117,6 +117,13 @@ function proves the kernels work. Size: M.
 - design.md §12.1 has an **Outcome** paragraph and §12.2 has the measured
   numbers for Linux and Windows beside the macOS ones.
 
+**Deviations (2026-10-13).** `PKG_CPPFLAGS` is `-Ivendor/simdutf`, not
+`-Isrc/vendor/simdutf`: the compiler runs inside `src/`. It also carries
+`-DSIMDUTF_IMPLEMENTATION_FALLBACK=1` (design D16), so the `fallback` kernel
+exists on arm64 and the kernel matrix runs it on macOS beside `arm64`.
+`src/Makevars` lists `OBJECTS`, and `src/zuutf-win.def` limits the Windows
+DLL's exports to `R_init_zuutf`.
+
 **Design.** §4, §8, §10 (kernel matrix), §12.
 
 ## Stage 2 — Validation, counts and kernel reporting

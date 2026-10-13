@@ -130,8 +130,8 @@ live here.
 | Language | en-GB (R2) |
 | Test switches | `ZUUTF_SKIP_HEAVY`, `ZUUTF_SLOW_TESTS`, `ZUUTF_TIMING_TESTS` (R7) |
 
-`zut_` is free: no sibling's `src/` or `inst/include/` uses it (to be
-*verified* in Stage 1, as zudedup did for `zdd_`).
+`zut_` is free: no sibling's `src/` or `inst/include/` uses it
+(*verified 2026-10-13*, a search of every `zu*` checkout).
 
 ### 3.1 Relationships, as decided rather than as hoped
 
@@ -557,9 +557,25 @@ the outcome is recorded here with the numbers.
 ### 12.2 Everywhere
 
 - `src/Makevars`: `CXX_STD = CXX17`, `PKG_CXXFLAGS = $(CXX_VISIBILITY)`,
-  `PKG_CFLAGS = $(C_VISIBILITY)`, `PKG_CPPFLAGS = -Isrc/vendor/simdutf`;
-  `Makevars.win` the same plus any §12.1 `-D` switches; no `configure`,
-  no GNU make, no system library. `SystemRequirements: C++17`.
+  `PKG_CFLAGS = $(C_VISIBILITY)`,
+  `PKG_CPPFLAGS = -Ivendor/simdutf -DSIMDUTF_IMPLEMENTATION_FALLBACK=1`
+  (the compiler runs in `src/`, so the path is relative to it), and an
+  explicit `OBJECTS` list, because R compiles no subdirectory of `src/` by
+  itself; `Makevars.win` the same plus any §12.1 `-D` switches, and
+  `src/zuutf-win.def` exporting `R_init_zuutf` alone, since a PE DLL has no
+  visibility attributes. No `configure`, no GNU make, no system library.
+  `SystemRequirements: C++17`.
+- **The `fallback` kernel is compiled everywhere (D16).** simdutf leaves it
+  out when some SIMD kernel can always run, which on arm64 is always:
+  without the switch an arm64 build has the `arm64` kernel alone
+  (*verified 2026-10-13*, `simdutf.cpp`, `SIMDUTF_IMPLEMENTATION_FALLBACK`).
+  `-DSIMDUTF_IMPLEMENTATION_FALLBACK=1` keeps the scalar kernel in every
+  build, so §1's "a scalar fallback everywhere" holds and §10's oracle runs
+  on the arm64 legs too.
+- `-pedantic` reports two `-Wextra-semi` warnings per kernel (a stray `;`
+  after two declarations in each kernel's class; *verified 2026-10-13*,
+  Apple clang 21). R CMD check does not count `-Wextra-semi` among its
+  significant warnings, so no patch is needed (D11 stands).
 - No compiler flags beyond CRAN's: simdutf compiles every x86-64 kernel
   with function-level target attributes
   (`SIMDUTF_TARGET_REGION("avx2,bmi,lzcnt,popcnt")` and the like;
@@ -649,6 +665,7 @@ writes from this table.
 | D13 | UTF-32 byte order | Both orders accepted; the non-native one byte-swapped in the glue, since the C API is native-only. |
 | D14 | Base64 shape | One string or raw vector in, one out; `forgiving` maps to simdutf's `loose`/`strict` last-chunk handling plus zuutf's whitespace check in strict mode. |
 | D15 | Name | `zuutf`, closed by creating this repository (RFC Q1). |
+| D16 | The `fallback` kernel | Compiled on every platform with `-DSIMDUTF_IMPLEMENTATION_FALLBACK=1`, so the scalar oracle exists on arm64, where simdutf would otherwise omit it (§12.2; Stage 1, 2026-10-13). |
 
 ---
 
