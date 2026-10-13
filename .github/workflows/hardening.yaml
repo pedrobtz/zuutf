@@ -52,10 +52,12 @@ jobs:
       harness: tools/fuzz/fuzz_${{ matrix.target }}.c
       sources: tools/fuzz/rfuzz.c src/zut_*.c src/zut_impl.cpp src/vendor/simdutf/simdutf.cpp
       embed-r: true
-      # UBSan must stop the run, not print and carry on. vptr is off: it
-      # needs clang's C++ UBSan runtime, which fuzz.yml's C driver does not
-      # link, and simdutf.cpp is C++; every other UBSan check stays on.
-      cflags: -g -O1 -fno-omit-frame-pointer -fno-sanitize-recover=undefined -fno-sanitize=vptr -Isrc -Isrc/vendor/simdutf -Iinst/include -Itools/fuzz -DSIMDUTF_IMPLEMENTATION_FALLBACK=1
+      # UBSan must stop the run, not print and carry on
+      cflags: -g -O1 -fno-omit-frame-pointer -fno-sanitize-recover=undefined -Isrc -Isrc/vendor/simdutf -Iinst/include -Itools/fuzz -DSIMDUTF_IMPLEMENTATION_FALLBACK=1
+      # every UBSan check but vptr and function, which need clang's C++ UBSan
+      # runtime; fuzz.yml appends -fsanitize=<this> after cflags, so a
+      # -fno-sanitize=vptr there would be undone
+      sanitizers: fuzzer,address,alignment,bool,builtin,bounds,enum,float-cast-overflow,integer-divide-by-zero,nonnull-attribute,null,object-size,pointer-overflow,return,returns-nonnull-attribute,shift,signed-integer-overflow,unreachable,vla-bound
       seed-corpus: tools/fuzz/seeds/${{ matrix.target }}
       libfuzzer-args: -max_len=4096
       max-total-time: ${{ github.event_name == 'schedule' && 3600 || 300 }}
@@ -127,14 +129,19 @@ jobs:
         run: |
           kernels=$(Rscript -e 'i <- zuutf::zuutf_info()$kernels; cat(i$name[i$supported])')
           cd tools/zuutforacle/tests/testthat
+          # every kernel runs even after one fails, so a log names them all;
+          # the location reporter shows which test was running at a crash
+          failed=""
           for k in $kernels; do
             echo "==> SIMDUTF_FORCE_IMPLEMENTATION=$k"
             SIMDUTF_FORCE_IMPLEMENTATION=$k Rscript -e '
               stopifnot(zuutf::zuutf_info()$kernel == Sys.getenv("SIMDUTF_FORCE_IMPLEMENTATION"))
               library(zuutforacle)
               res <- as.data.frame(testthat::test_dir(".", package = "zuutforacle",
-                load_package = "installed", stop_on_failure = FALSE, reporter = "summary"))
+                load_package = "installed", stop_on_failure = FALSE, reporter = "location"))
               cat(sprintf("%d expectations, %d failed, %d skipped\n",
                 sum(res$nb), sum(res$failed), sum(res$skipped)))
-              if (sum(res$nb) == 0L || sum(res$failed) > 0L || any(res$error)) stop("oracle failed")'
+              if (sum(res$nb) == 0L || sum(res$failed) > 0L || any(res$error)) stop("oracle failed")' \
+              || { echo "::error::oracle failed under $k (exit $?)"; failed="$failed $k"; }
           done
+          [ -z "$failed" ] || { echo "failed kernels:$failed"; exit 1; }
