@@ -13,7 +13,7 @@ Sibling checkouts sit in `../`. `zucrypt` is the model for vendoring (manifest a
 
 ## Current state
 
-**2026-10-13: Stage 0 done.** The package has its identity (`DESCRIPTION`, licences, package documentation) and a registration-only `src/init.c`. Nothing of simdutf is vendored and no function is exported. Tracking: parent [#1](https://github.com/pedrobtz/zuutf/issues/1), stages #2–#9, submission #10.
+**2026-10-13: Stages 0–1 done.** simdutf 9.2.1 is vendored unmodified (`tools/vendor/`), compiles on every CI leg with every kernel, Windows included (design §12.1: go), and the kernel matrix forces each kernel a runner supports. `zuutf_info()` is the only export; the `utf_` and `base64_` functions arrive from Stage 2. Tracking: parent [#1](https://github.com/pedrobtz/zuutf/issues/1), stages #2–#9, submission #10.
 
 Update this paragraph at the end of every stage.
 

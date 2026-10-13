@@ -1,0 +1,22 @@
+# The vendored simdutf (design §8): src/vendor/simdutf must match
+# tools/vendor/manifest.tsv and tools/vendor/checksums.sha256, unpatched,
+# and a pull request that touches src/vendor must update both files.
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+
+name: vendor
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  vendor:
+    uses: pedrobtz/r-actions/.github/workflows/vendor.yml@v1
+    with:
+      vendor-dir: src/vendor

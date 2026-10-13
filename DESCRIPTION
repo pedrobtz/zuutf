@@ -6,7 +6,7 @@ Authors@R: c(
            role = c("aut", "cre", "cph")),
     person("Daniel", "Lemire", role = "cph",
            comment = "simdutf, bundled in src/vendor/simdutf"),
-    person("The simdutf contributors", role = "cph",
+    person("The simdutf authors", role = "cph",
            comment = "simdutf, bundled in src/vendor/simdutf"))
 Description: Validates text and converts it between 'UTF-8', 'UTF-16'
     and 'UTF-32' in either byte order and 'Latin-1', counts characters,
@@ -21,6 +21,7 @@ Description: Validates text and converts it between 'UTF-8', 'UTF-16'
     value. The same functions are published to other packages as a
     registered C interface.
 License: MIT + file LICENSE
+Copyright: See inst/COPYRIGHTS.
 URL: https://github.com/pedrobtz/zuutf, https://pedrobtz.github.io/zuutf/
 BugReports: https://github.com/pedrobtz/zuutf/issues
 Depends: 

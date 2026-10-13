@@ -11,3 +11,4 @@
 ^src/.*\.so$
 ^src/.*\.dll$
 ^src/.*\.dylib$
+^src/vendor/.*\.o$

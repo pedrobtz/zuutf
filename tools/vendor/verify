@@ -1,0 +1,89 @@
+#!/bin/sh
+# Offline check that the vendored tree is exactly what the manifest describes.
+#
+# Fails if a vendored file was edited, added or removed without going through
+# `tools/vendor/fetch`, if the version compiled in disagrees with the
+# manifest, or if the manifest's archive checksum disagrees with the one the
+# design records (§8). Needs no network and no compiler; run by vendor.yaml.
+set -eu
+
+ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/../.." && pwd)
+cd "$ROOT"
+MANIFEST=tools/vendor/manifest.tsv
+. tools/vendor/common.sh
+
+status=0
+sums=tools/vendor/checksums.sha256
+
+if [ ! -f "$sums" ]; then
+    echo "FAIL missing $sums; run tools/vendor/fetch" >&2
+    exit 1
+fi
+
+# 1. every recorded file still hashes to the recorded value
+while read -r want path; do
+    [ -n "$want" ] || continue
+    if [ ! -f "$path" ]; then
+        printf 'FAIL missing vendored file: %s\n' "$path" >&2
+        status=1
+        continue
+    fi
+    got=$(sha256_of "$path")
+    if [ "$got" != "$want" ]; then
+        printf 'FAIL modified vendored file: %s\n      expected %s\n      got      %s\n' \
+            "$path" "$want" "$got" >&2
+        status=1
+    fi
+done < "$sums"
+
+for src in $(manifest_sources); do
+    # 2. the tree is exactly the keep list, in both directions: the checksum
+    # file says "these files are unmodified", not "these are the files we
+    # meant to keep"
+    kept=$(for f in $(archive_members "$src") $(licence_files "$src"); do
+        echo "src/vendor/$src/$f"; done | LC_ALL=C sort)
+    present=$(vendored_files "$src")
+    if [ "$kept" != "$present" ]; then
+        printf 'FAIL src/vendor/%s holds other files than the keep list\n' "$src" >&2
+        printf '  kept:\n%s\n  present:\n%s\n' "$kept" "$present" >&2
+        status=1
+    fi
+    recorded=$(awk '{ print $2 }' "$sums" | grep "^src/vendor/$src/" | LC_ALL=C sort)
+    if [ "$kept" != "$recorded" ]; then
+        printf 'FAIL %s does not record exactly the keep list of %s\n' "$sums" "$src" >&2
+        status=1
+    fi
+
+    # 3. no patches: the manifest says none and there is no patch directory
+    patches=$(manifest_field "$src" patches)
+    if [ "$patches" != "-" ]; then
+        printf 'FAIL %s lists patches (%s); design D11 says none\n' "$src" "$patches" >&2
+        status=1
+    fi
+done
+
+if [ -d tools/patches ]; then
+    echo "FAIL tools/patches exists; design D11 vendors simdutf unmodified" >&2
+    status=1
+fi
+
+# 4. the compiled-in version is the manifest's
+want=$(manifest_field simdutf version_string)
+got=$(sed -n 's/^#define SIMDUTF_VERSION "\(.*\)"$/\1/p' src/vendor/simdutf/simdutf.h)
+if [ "$got" != "$want" ]; then
+    printf 'FAIL simdutf.h says version %s, the manifest %s\n' "$got" "$want" >&2
+    status=1
+fi
+
+# 5. the archive checksum is the one the design records
+sha=$(manifest_field simdutf archive_sha256)
+if ! grep -q "$sha" .agents/design.md; then
+    printf 'FAIL design.md section 8 does not record archive sha256 %s\n' "$sha" >&2
+    status=1
+fi
+
+if [ "$status" -eq 0 ]; then
+    printf 'ok: %s vendored files match tools/vendor/manifest.tsv\n' \
+        "$(wc -l < "$sums" | tr -d ' ')"
+fi
+exit "$status"

@@ -19,10 +19,11 @@ LICENSE.md; CRAN's YEAR/COPYRIGHT HOLDER form is in LICENSE.
 simdutf
 =======
 
-Copyright (c) Daniel Lemire and the simdutf contributors
+Copyright 2021 The simdutf authors (principal author: Daniel Lemire)
 
 Bundled in src/vendor/simdutf/ under the MIT licence. The pinned release,
 the SHA-256 of its archive and the import procedure are recorded in
 tools/vendor/manifest.tsv in the source repository,
 https://github.com/pedrobtz/zuutf; inst/COPYRIGHTS gives the copyright
-holders and the licence text.
+holders and the licence text, and src/vendor/simdutf/LICENSE-MIT is
+upstream's own copy.

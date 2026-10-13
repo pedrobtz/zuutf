@@ -1,0 +1,73 @@
+#!/bin/sh
+# Fetch, verify, trim and record a vendored source.
+#
+#   tools/vendor/fetch [source ...]      (default: every source in the manifest)
+#
+# Network is required. This is a maintainer script; it is never run during
+# R CMD INSTALL or R CMD check: an install downloads and generates nothing
+# (design §8, §12.2). Afterwards `tools/vendor/verify` re-checks the result
+# offline.
+set -eu
+
+ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/../.." && pwd)
+cd "$ROOT"
+MANIFEST=tools/vendor/manifest.tsv
+. tools/vendor/common.sh
+
+sources=${*:-$(manifest_sources)}
+
+for src in $sources; do
+    tag=$(manifest_field "$src" tag)
+    repo=$(manifest_field "$src" repo)
+    commit=$(manifest_field "$src" commit)
+    url=$(manifest_field "$src" archive)
+    want=$(manifest_field "$src" archive_sha256)
+
+    printf '==> %s %s\n' "$src" "$tag"
+
+    tmp=$(mktemp -d)
+    trap 'rm -rf "$tmp"' EXIT
+    archive="$tmp/archive"
+
+    printf '    fetching %s\n' "$url"
+    curl -sSL --fail --max-time 300 -o "$archive" "$url"
+
+    got=$(sha256_of "$archive")
+    if [ "$got" != "$want" ]; then
+        printf '    sha256 MISMATCH\n      expected %s\n      got      %s\n' \
+            "$want" "$got" >&2
+        exit 1
+    fi
+    printf '    sha256 ok %s\n' "$got"
+
+    mkdir -p "$tmp/x"
+    unzip -q -o "$archive" -d "$tmp/x"
+
+    dest="src/vendor/$src"
+    rm -rf "$dest"
+    mkdir -p "$dest"
+    for f in $(archive_members "$src"); do
+        if [ ! -f "$tmp/x/$f" ]; then
+            printf '    MISSING in archive: %s\n' "$f" >&2
+            exit 1
+        fi
+        cp "$tmp/x/$f" "$dest/$f"
+    done
+    # The licence comes from the tagged commit, not a branch, so it cannot
+    # drift from the release.
+    raw=$(printf '%s' "$repo" | sed 's#https://github.com/#https://raw.githubusercontent.com/#')
+    for f in $(licence_files "$src"); do
+        curl -sSL --fail --max-time 60 -o "$dest/$f" "$raw/$commit/$f"
+    done
+done
+
+tools/vendor/apply "$@"
+
+out=tools/vendor/checksums.sha256
+: > "$out"
+for src in $(manifest_sources); do
+    for f in $(vendored_files "$src"); do
+        printf '%s  %s\n' "$(sha256_of "$f")" "$f" >> "$out"
+    done
+done
+printf 'wrote %s (%s files)\n' "$out" "$(wc -l < "$out" | tr -d ' ')"

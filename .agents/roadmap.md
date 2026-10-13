@@ -19,7 +19,7 @@ written. Sections marked § are in design.md.
 | Stage | Title | Issue | Pull request | Done |
 | --- | --- | --- | --- | --- |
 | 0 | [Package identity](#stage-0--package-identity) | [#2](https://github.com/pedrobtz/zuutf/issues/2) | [#12](https://github.com/pedrobtz/zuutf/pull/12) | 2026-10-13 |
-| 1 | [Vendor simdutf and the Windows go/no-go](#stage-1--vendor-simdutf-and-the-windows-gono-go) | [#3](https://github.com/pedrobtz/zuutf/issues/3) | | |
+| 1 | [Vendor simdutf and the Windows go/no-go](#stage-1--vendor-simdutf-and-the-windows-gono-go) | [#3](https://github.com/pedrobtz/zuutf/issues/3) | [#14](https://github.com/pedrobtz/zuutf/pull/14) | 2026-10-13 |
 | 2 | [Validation, counts and kernel reporting](#stage-2--validation-counts-and-kernel-reporting) | [#4](https://github.com/pedrobtz/zuutf/issues/4) | | |
 | 3 | [Conversion](#stage-3--conversion) | [#5](https://github.com/pedrobtz/zuutf/issues/5) | | |
 | 4 | [Base64](#stage-4--base64) | [#6](https://github.com/pedrobtz/zuutf/issues/6) | | |
@@ -116,6 +116,15 @@ function proves the kernels work. Size: M.
 - `test-abi.R` and `test-vendor.R` pass on every leg.
 - design.md §12.1 has an **Outcome** paragraph and §12.2 has the measured
   numbers for Linux and Windows beside the macOS ones.
+
+**Deviations (2026-10-13).** `PKG_CPPFLAGS` is `-Ivendor/simdutf`, not
+`-Isrc/vendor/simdutf`: the compiler runs inside `src/`. It also carries
+`-DSIMDUTF_IMPLEMENTATION_FALLBACK=1` (design D16), so the `fallback` kernel
+exists on arm64 and the kernel matrix runs it on macOS beside `arm64`.
+`src/Makevars` lists `OBJECTS`, and `src/zuutf-win.def` limits the Windows
+DLL's exports to `R_init_zuutf`. On Windows `test-vendor.R` allows the four
+imports Rtools' statically linked C++ runtime brings (`abort`, `exit`,
+`_exit`, `__acrt_iob_func`) and still fails on any other (design §8).
 
 **Design.** §4, §8, §10 (kernel matrix), §12.
 
