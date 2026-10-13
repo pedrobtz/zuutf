@@ -10,5 +10,8 @@ SEXP zut_force_kernel_r(SEXP name);
 SEXP zut_kernel_ok(void);
 SEXP zut_validate(SEXP x, SEXP encoding, SEXP what);
 SEXP zut_length_as(SEXP x, SEXP from, SEXP to);
+SEXP zut_convert(SEXP x, SEXP from, SEXP to, SEXP policy, SEXP mode,
+                 SEXP simdutf_replacement);
+SEXP zut_detect(SEXP x);
 
 #endif
