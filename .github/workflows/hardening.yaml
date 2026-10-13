@@ -122,6 +122,19 @@ jobs:
           Get-ChildItem $dir | Format-Table Name, Length
           "ZUUTF_POWERSHELL=$dir" >> $env:GITHUB_ENV
 
+      # each oracle entry point once, small, with progress on stderr, which a
+      # crash does not swallow
+      - name: Oracle smoke test
+        run: |
+          Rscript -e '
+            message("load"); library(zuutforacle)
+            message("zufast_utf8"); print(zufast_utf8(list(charToRaw("abc"), as.raw(0xff))))
+            message("zufast_base64_strict"); print(zufast_base64_strict(list(charToRaw("aGk="))))
+            message("random_sweep(10)"); print(random_sweep(10)[1:3])
+            message("random_sweep(1e5)"); print(random_sweep(1e5)[1:3])
+            message("testthat"); library(testthat)
+            message("done")'
+
       - name: The oracle under every kernel this runner supports
         env:
           ZUUTF_FIXTURES: ${{ github.workspace }}/tests/testthat/fixtures
