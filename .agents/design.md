@@ -560,15 +560,17 @@ the outcome is recorded here with the numbers.
 
 **Outcome (2026-10-13, Stage 1): go, with every kernel.** The
 amalgamation compiles under Rtools 4.5's GCC 14.3.0 with CRAN's flags and
-no `-D` switch, and on the `windows-latest` runner (Intel Xeon Platinum
-8573C, which has AVX-512 VBMI2) the kernel-matrix job forced `icelake`,
-`haswell`, `westmere` and `fallback` in turn, confirmed each with
-`zuutf_info()$kernel`, and passed the whole suite on each, including the
-probe against `validUTF8()` at every length from 1 to 130 and 4090 to
-4100 bytes. `Makevars.win` therefore carries no
-`SIMDUTF_IMPLEMENTATION_<KERNEL>=0`. The corpus and oracle tests of
-Stages 2–6 run on the same matrix, so a MinGW-only miscompilation that the
-probe misses would still surface there.
+no `-D` switch. On `windows-latest` the kernel-matrix job forced
+`icelake`, `haswell`, `westmere` and `fallback` in turn, confirmed each
+with `zuutf_info()$kernel`, and passed the whole suite on each, including
+the probe against `validUTF8()` at every length from 1 to 130 and 4090 to
+4100 bytes ([run 38387588919](https://github.com/pedrobtz/zuutf/actions/runs/38387588919),
+attempt 2, on an AMD EPYC 9V45). Runner hardware varies: an AMD EPYC 7763
+has no AVX-512, and the job then runs the other three, which is why it
+asks the processor rather than listing kernels per runner. `Makevars.win`
+therefore carries no `SIMDUTF_IMPLEMENTATION_<KERNEL>=0`. The corpus and
+oracle tests of Stages 2–6 run on the same matrix, so a MinGW-only
+miscompilation the probe misses would still surface there.
 
 ### 12.2 Everywhere
 
