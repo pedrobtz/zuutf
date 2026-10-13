@@ -92,10 +92,10 @@ typedef struct {
   zuutf_result (*validate_utf8)(const char *s, size_t n);
   zuutf_result (*validate_utf16le)(const uint16_t *s, size_t n);
   zuutf_result (*validate_utf32)(const uint32_t *s, size_t n);
-  int (*validate_ascii)(const char *s, size_t n); /* 1 when every byte < 0x80 */
-
   /* counts and lengths, for valid input */
   size_t (*count_utf8)(const char *s, size_t n);              /* code points */
+  int (*validate_ascii)(const char *s, size_t n); /* 1 when every byte < 0x80 */
+
   size_t (*utf8_length_from_utf16le)(const uint16_t *s, size_t n); /* bytes */
   size_t (*utf16_length_from_utf8)(const char *s, size_t n);  /* UTF-16 units */
 
