@@ -23,7 +23,7 @@ written. Sections marked § are in design.md.
 | 2 | [Validation, counts and kernel reporting](#stage-2--validation-counts-and-kernel-reporting) | [#4](https://github.com/pedrobtz/zuutf/issues/4) | [#15](https://github.com/pedrobtz/zuutf/pull/15), [#16](https://github.com/pedrobtz/zuutf/pull/16) | 2026-10-13 |
 | 3 | [Conversion](#stage-3--conversion) | [#5](https://github.com/pedrobtz/zuutf/issues/5) | [#17](https://github.com/pedrobtz/zuutf/pull/17) | 2026-10-13 |
 | 4 | [Base64](#stage-4--base64) | [#6](https://github.com/pedrobtz/zuutf/issues/6) | [#18](https://github.com/pedrobtz/zuutf/pull/18) | 2026-10-13 |
-| 5 | [The C table and the consumer fixture](#stage-5--the-c-table-and-the-consumer-fixture) | [#7](https://github.com/pedrobtz/zuutf/issues/7) | | |
+| 5 | [The C table and the consumer fixture](#stage-5--the-c-table-and-the-consumer-fixture) | [#7](https://github.com/pedrobtz/zuutf/issues/7) | | 2026-10-13 |
 | 6 | [Oracles, hostile input, fuzzing and benchmarks](#stage-6--oracles-hostile-input-fuzzing-and-benchmarks) | [#8](https://github.com/pedrobtz/zuutf/issues/8) | | |
 | 7 | [v0.1.0 readiness](#stage-7--v010-readiness) | [#9](https://github.com/pedrobtz/zuutf/issues/9) | | |
 
@@ -285,6 +285,15 @@ multiple of 4 and returns lines unjoined, so the comparison joins them with
 - `inst/include/zuutf.h` compiles standalone under `-Werror` in C99 and
   C++17 with no simdutf or R header included.
 - `test-abi.R` still passes: registration adds no exported symbol.
+
+**Deviations (2026-10-13).** The table adds `base64_decoded_max_length`
+and gives `base64_encode` a capacity (design §7). The error codes are
+checked against simdutf's with `static_assert` in `src/zut_impl.cpp`, the
+one C++ file, and the frozen table in `tools/zuutftest` with C11
+`_Static_assert`, since the fixture is CI-only. `consumer.yaml` copies the
+fixture out of the source tree before installing it, so only the installed
+header satisfies its `#include`; zuutf's source tree itself was never on
+the library path.
 
 **Design.** §7, §12.2.
 

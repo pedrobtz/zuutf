@@ -21,3 +21,6 @@
 * `base64_encode()` and `base64_decode()` cover the standard and URL
   alphabets (either at once on decode with `url = NA`), padding on or off,
   line wrapping, and forgiving (WHATWG) or strict (RFC 4648) decoding.
+* A registered C table, `zuutf_api_v1`, in the installed header
+  `zuutf.h`, gives other packages validation, conversion and Base64 from
+  their own C code (`vignette("linking")`).
