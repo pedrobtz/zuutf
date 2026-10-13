@@ -5,9 +5,11 @@
 test_that("the shared object references no stdio, abort or exit", {
   skip_if(is_instrumented_build(), "instrumented build")
   names <- referenced_symbols()
-  # memcpy is always referenced, so an empty or misparsed table fails here
-  # instead of passing the check below vacuously
-  expect_true("memcpy" %in% names)
+  # init.c always calls R_registerRoutines, from R.dll on Windows and as an
+  # undefined symbol elsewhere, so an empty or misparsed table fails here
+  # instead of passing the check below vacuously. (memcpy is no sentinel:
+  # glibc builds reference it as __memcpy_chk or inline it.)
+  expect_true("R_registerRoutines" %in% names)
   banned <- c("printf", "puts", "putchar", "abort", "exit", "_exit",
               "stderr", "stdout", "__stderrp", "__stdoutp", "__acrt_iob_func")
   expect_identical(intersect(names, banned), character())
