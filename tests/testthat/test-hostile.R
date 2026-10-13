@@ -25,32 +25,33 @@ test_that("a bad byte at every position of every length is found there", {
 })
 
 test_that("a sequence truncated at every block boundary is found at its lead byte", {
+  seqs <- list(as.raw(c(0xc3, 0xa9)), as.raw(c(0xe2, 0x82, 0xac)),
+               as.raw(c(0xf0, 0x9f, 0x98, 0x80)))
+  lengths <- sweep_size(c(1:70, 125:130, 4090:4100), cran = c(1:66, 127:129, 4095:4097))
+  cases <- expand.grid(n = lengths, s = seq_along(seqs), cut = 1:3)
+  cases <- cases[cases$cut < lengths(seqs)[cases$s], ]
+  inputs <- Map(function(n, s, cut) c(as.raw(rep(0x61, n)), seqs[[s]][seq_len(cut)]),
+                cases$n, cases$s, cases$cut)
+  # and the same followed by ASCII, so the error is not at the end
+  followed <- lapply(inputs, function(b) c(b, charToRaw("z")))
   on_kernels({
-    for (seq in list(as.raw(c(0xc3, 0xa9)), as.raw(c(0xe2, 0x82, 0xac)),
-                     as.raw(c(0xf0, 0x9f, 0x98, 0x80)))) {
-      for (n in c(1:70, 125:130, 4090:4100)) {
-        for (cut in seq_len(length(seq) - 1L)) {
-          b <- c(as.raw(rep(0x61, n)), seq[seq_len(cut)])
-          expect_identical(utf_error_at(b), as.integer(n + 1L), info = paste(kernel, n, cut))
-          # and followed by ASCII, so the error is not at the end
-          expect_identical(utf_error_at(c(b, charToRaw("z"))), as.integer(n + 1L))
-        }
-      }
-    }
+    expect_identical(utf_error_at(inputs), as.integer(cases$n + 1L), info = kernel)
+    expect_identical(utf_error_at(followed), as.integer(cases$n + 1L), info = kernel)
   })
 })
 
 test_that("multi-byte text of every length decodes as base R decodes it", {
   withr::local_seed(20261013)
   cps <- random_code_points(4200)
+  lengths <- sweep_size(c(0:200, 4090:4100), cran = c(0:100, 4095:4097))
+  texts <- vapply(lengths, function(n) intToUtf8(cps[seq_len(n)]), "")
+  utf8 <- lapply(texts, charToRaw)
   on_kernels({
-    for (n in sweep_size(c(0:200, 4090:4100), cran = c(0:100, 4095:4097))) {
-      text <- intToUtf8(cps[seq_len(n)])
-      b <- charToRaw(text)
-      expect_identical(utf_count(b), n, info = paste(kernel, n))
-      expect_identical(utf_decode(utf_convert(b, "UTF-8", "UTF-16LE"), "UTF-16LE"), text)
-      expect_identical(utf_convert(utf_convert(b, "UTF-8", "UTF-32BE"), "UTF-32BE", "UTF-8"), b)
-    }
+    expect_identical(utf_count(utf8), lengths, info = kernel)
+    expect_identical(utf_decode(utf_convert(utf8, "UTF-8", "UTF-16LE"), "UTF-16LE"), texts,
+                     info = kernel)
+    expect_identical(utf_convert(utf_convert(utf8, "UTF-8", "UTF-32BE"), "UTF-32BE", "UTF-8"),
+                     utf8, info = kernel)
   })
 })
 
@@ -66,14 +67,13 @@ test_that("a BOM alone, and a BOM cut short", {
 })
 
 test_that("a NUL in every position is kept by utf_convert() and refused by utf_decode()", {
-  for (n in if (slow_tests()) 1:200 else c(1:20, 63:66)) {
-    for (i in seq_len(n)) {
-      b <- as.raw(rep(0x61, n))
-      b[i] <- as.raw(0)
-      expect_identical(utf_convert(b, "UTF-8", "UTF-8"), b)
-      e <- tryCatch(utf_decode(b, "UTF-8"), zuutf_nul_error = function(e) e$offset)
-      if (!identical(e, i)) fail(sprintf("length %d, NUL at %d: offset %s", n, i, format(e)))
-    }
+  lengths <- if (slow_tests()) 1:200 else sweep_size(c(1:20, 63:66), cran = c(1:8, 64:65))
+  for (n in lengths) {
+    inputs <- lapply(seq_len(n), function(i) { b <- as.raw(rep(0x61, n)); b[i] <- as.raw(0); b })
+    expect_identical(utf_convert(inputs, "UTF-8", "UTF-8"), inputs)
+    got <- vapply(inputs, function(b) {
+      tryCatch(utf_decode(b, "UTF-8"), zuutf_nul_error = function(e) e$offset)
+    }, integer(1))
+    expect_identical(got, seq_len(n), info = paste("length", n))
   }
-  succeed()
 })

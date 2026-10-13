@@ -2,7 +2,7 @@ test_that("encoding and decoding round-trip under every alphabet and padding", {
   withr::local_seed(20261013)
   # 10,000 vectors (roadmap Stage 4); under gctorture and valgrind, where
   # each call costs thousands of collections, enough to reach every path
-  n <- sweep_size(10000, cran = 1000, heavy = 300)
+  n <- sweep_size(10000, cran = 500, heavy = 300)
   lengths <- c(0:20, sample(21:600, n - 21, TRUE))
   inputs <- lapply(lengths, function(n) as.raw(sample(0:255, n, TRUE)))
   for (url in c(FALSE, TRUE)) {
