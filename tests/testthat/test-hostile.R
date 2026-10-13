@@ -7,8 +7,7 @@
 # kernel in-process too.
 
 test_that("a bad byte at every position of every length is found there", {
-  lengths <- c(0:200, 4090:4100)
-  if (!slow_tests()) lengths <- c(0:130, 4094:4098)
+  lengths <- if (slow_tests()) c(0:200, 4090:4100) else sweep(c(0:130, 4094:4098), cran = c(0:70, 4095:4097))
   on_kernels({
     for (n in lengths) {
       base <- as.raw(rep(0x61, n))
@@ -45,7 +44,7 @@ test_that("multi-byte text of every length decodes as base R decodes it", {
   withr::local_seed(20261013)
   cps <- random_code_points(4200)
   on_kernels({
-    for (n in c(0:200, 4090:4100)) {
+    for (n in sweep(c(0:200, 4090:4100), cran = c(0:100, 4095:4097))) {
       text <- intToUtf8(cps[seq_len(n)])
       b <- charToRaw(text)
       expect_identical(utf_count(b), n, info = paste(kernel, n))
