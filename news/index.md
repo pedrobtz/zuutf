@@ -1,5 +1,6 @@
 # Changelog
 
-## zuutf (development version)
+## zuutf 0.0.0.9000
 
-- Initial CRAN submission.
+- The package’s identity: `DESCRIPTION`, licences and the package
+  documentation. No function is exported yet.
