@@ -16,11 +16,11 @@ test_that("utf_valid() agrees with validUTF8() on the UTF-8 stress test", {
 test_that("utf_valid() agrees with validUTF8() on 10,000 random byte strings", {
   withr::local_seed(20261013)
   # bytes 1 to 255: a string cannot hold NUL, so validUTF8() cannot judge it
-  random <- lapply(sample(0:200, sweep(10000, cran = 2000), TRUE), function(n) {
+  random <- lapply(sample(0:200, sweep_size(10000, cran = 2000), TRUE), function(n) {
     as.raw(sample(1:255, n, TRUE))
   })
   # and valid text with one byte changed, so both outcomes are common
-  mutated <- lapply(seq_len(sweep(2000, cran = 500)), function(i) {
+  mutated <- lapply(seq_len(sweep_size(2000, cran = 500)), function(i) {
     b <- charToRaw(intToUtf8(random_code_points(sample(1:50, 1))))
     b[sample(length(b), 1)] <- as.raw(sample(1:255, 1))
     b
