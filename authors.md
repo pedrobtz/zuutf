@@ -7,7 +7,7 @@
 - **Daniel Lemire**. Copyright holder.  
   simdutf, bundled in src/vendor/simdutf
 
-- **The simdutf contributors**. Copyright holder.  
+- **The simdutf authors**. Copyright holder.  
   simdutf, bundled in src/vendor/simdutf
 
 ## Citation

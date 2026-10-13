@@ -29,5 +29,5 @@ Other contributors:
 - Daniel Lemire (simdutf, bundled in src/vendor/simdutf) \[copyright
   holder\]
 
-- The simdutf contributors (simdutf, bundled in src/vendor/simdutf)
+- The simdutf authors (simdutf, bundled in src/vendor/simdutf)
   \[copyright holder\]
