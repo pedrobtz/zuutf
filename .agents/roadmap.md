@@ -22,7 +22,7 @@ written. Sections marked § are in design.md.
 | 1 | [Vendor simdutf and the Windows go/no-go](#stage-1--vendor-simdutf-and-the-windows-gono-go) | [#3](https://github.com/pedrobtz/zuutf/issues/3) | [#14](https://github.com/pedrobtz/zuutf/pull/14) | 2026-10-13 |
 | 2 | [Validation, counts and kernel reporting](#stage-2--validation-counts-and-kernel-reporting) | [#4](https://github.com/pedrobtz/zuutf/issues/4) | [#15](https://github.com/pedrobtz/zuutf/pull/15), [#16](https://github.com/pedrobtz/zuutf/pull/16) | 2026-10-13 |
 | 3 | [Conversion](#stage-3--conversion) | [#5](https://github.com/pedrobtz/zuutf/issues/5) | [#17](https://github.com/pedrobtz/zuutf/pull/17) | 2026-10-13 |
-| 4 | [Base64](#stage-4--base64) | [#6](https://github.com/pedrobtz/zuutf/issues/6) | | 2026-10-13 |
+| 4 | [Base64](#stage-4--base64) | [#6](https://github.com/pedrobtz/zuutf/issues/6) | [#18](https://github.com/pedrobtz/zuutf/pull/18) | 2026-10-13 |
 | 5 | [The C table and the consumer fixture](#stage-5--the-c-table-and-the-consumer-fixture) | [#7](https://github.com/pedrobtz/zuutf/issues/7) | | |
 | 6 | [Oracles, hostile input, fuzzing and benchmarks](#stage-6--oracles-hostile-input-fuzzing-and-benchmarks) | [#8](https://github.com/pedrobtz/zuutf/issues/8) | | |
 | 7 | [v0.1.0 readiness](#stage-7--v010-readiness) | [#9](https://github.com/pedrobtz/zuutf/issues/9) | | |
