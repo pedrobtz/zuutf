@@ -363,6 +363,11 @@ test_that("U+0000 raises zuutf_nul_error under every policy", {
     utf_decode(bytes(0x00, 0xff), "UTF-8"),
     class = "zuutf_nul_error"
   )
+  # under "na" an ill-formed element is NA, a NUL before the error or not
+  expect_identical(
+    utf_decode(bytes(0x00, 0xff), "UTF-8", invalid = "na"),
+    NA_character_
+  )
 })
 
 test_that("utf_detect() puts a BOM alone, then the order of design \u00a76", {
