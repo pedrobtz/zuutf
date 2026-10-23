@@ -11,6 +11,12 @@ api_validate <- function(x, which) .Call(ztt_validate, x, which)
 
 api_count_utf8 <- function(x) .Call(ztt_count_utf8, x)
 
+# which: "utf8_length_from_utf16le", "utf16_length_from_utf8",
+# "base64_encoded_length", "base64_decoded_max_length".
+api_length <- function(x, which, flags = 0L) {
+  .Call(ztt_length, x, which, as.integer(flags))
+}
+
 # which: "utf16le_to_utf8", "utf8_to_utf16le", "latin1_to_utf8". cap NULL
 # for the length the table says to allocate. Returns list(error, count, out).
 api_convert <- function(x, which, cap = NULL) .Call(ztt_convert, x, which, cap)
