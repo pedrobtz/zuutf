@@ -116,3 +116,20 @@ is_instrumented_build <- function() {
 libstdcxx_instantiation <- function(names) {
   grepl("^_Z(T[ISV]|GV)?N?K?(St|9__gnu_cxx)", names)
 }
+
+# The symbols R CMD check flags, as this R's own table spells them for this
+# platform, without Mach-O's leading underscore.
+r_check_symbols <- function() {
+  table <- tryCatch(
+    get("so_symbol_names_table", envir = asNamespace("tools")),
+    error = function(e) NULL
+  )
+  if (is.null(table)) {
+    return(character())
+  }
+  names <- table[table[, "language"] %in% c("C", "C++"), "osname"]
+  if (Sys.info()[["sysname"]] == "Darwin") {
+    names <- sub("^_", "", names)
+  }
+  names
+}
