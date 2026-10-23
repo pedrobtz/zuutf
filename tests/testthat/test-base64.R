@@ -92,6 +92,24 @@ test_that("strict decoding rejects whitespace, missing padding and extra bits", 
   expect_error(base64_decode("aGVsb"), class = "zuutf_base64_error")
 })
 
+test_that("forgiving decoding reports the offset of the error", {
+  offset_of <- function(s, url = FALSE) {
+    tryCatch(
+      base64_decode(s, url = url),
+      zuutf_base64_error = function(e) e$offset
+    )
+  }
+  # one character left over: the last one carrying data, past whitespace
+  # and padding
+  expect_identical(offset_of("aGVsb"), 5L)
+  expect_identical(offset_of("aGVsb \n"), 5L)
+  expect_identical(offset_of("aGVsb=="), 5L)
+  # a character of the other alphabet
+  expect_identical(offset_of("-_8="), 1L)
+  expect_identical(offset_of("+/8=", url = TRUE), 1L)
+  expect_identical(offset_of("aG=VsbG8="), 3L) # padding inside
+})
+
 test_that("every byte value in every position of a short input", {
   values <- sweep_size(
     0:255,
