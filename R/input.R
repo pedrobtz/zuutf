@@ -45,7 +45,8 @@ check_bytes_input <- function(x, call = NULL) {
   if (is.raw(x)) {
     return(invisible())
   }
-  if (is.list(x) && !is.object(x)) {
+  # a plain list: is.list() is TRUE for pairlists too, which C cannot read
+  if (typeof(x) == "list" && !is.object(x)) {
     ok <- vapply(x, function(e) is.null(e) || is.raw(e), logical(1))
     if (all(ok)) {
       return(invisible())

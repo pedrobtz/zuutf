@@ -206,6 +206,15 @@ test_that("every encoding name is matched without regard to case or hyphens", {
 test_that("arguments of the wrong type are refused", {
   expect_error(utf_valid(1:3), class = "zuutf_invalid_argument")
   expect_error(utf_valid(list(raw(), "a")), class = "zuutf_invalid_argument")
+  # is.list() is TRUE for these, but C reads plain lists only
+  for (x in list(pairlist(as.raw(1)), expression(1))) {
+    expect_error(utf_valid(x), class = "zuutf_invalid_argument")
+    expect_error(
+      utf_convert(x, "UTF-8", "UTF-16LE"),
+      class = "zuutf_invalid_argument"
+    )
+    expect_error(utf_detect(x), class = "zuutf_invalid_argument")
+  }
   expect_error(utf_valid(factor("a")), class = "zuutf_invalid_argument")
   expect_error(utf_valid("a", useBytes = NA), class = "zuutf_invalid_argument")
   expect_error(utf_is_ascii(1), class = "zuutf_invalid_argument")
