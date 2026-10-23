@@ -137,6 +137,15 @@ test_that("line_length matches base64enc's lines joined with line feeds", {
   }
 })
 
+test_that("a line_length beyond the text gives one line", {
+  x <- as.raw(0:59)
+  one <- base64_encode(x)
+  expect_identical(base64_encode(x, line_length = nchar(one)), one)
+  expect_identical(base64_encode(x, line_length = 1e30), one)
+  expect_identical(base64_encode(x, line_length = 2^64), one)
+  expect_identical(base64_encode(as.raw(1:6), line_length = 4), "AQID\nBAUG")
+})
+
 test_that("the alphabets are kept apart unless url = NA", {
   std <- "+/8="
   web <- "-_8="
@@ -169,14 +178,12 @@ test_that("arguments are checked", {
     base64_encode(raw(), pad = "yes"),
     class = "zuutf_invalid_argument"
   )
-  expect_error(
-    base64_encode(raw(), line_length = 0),
-    class = "zuutf_invalid_argument"
-  )
-  expect_error(
-    base64_encode(raw(), line_length = 2.5),
-    class = "zuutf_invalid_argument"
-  )
+  for (w in list(0, 1, 3, 2.5, Inf, -Inf, NaN, NA_real_, "8", c(8, 8))) {
+    expect_error(
+      base64_encode(raw(), line_length = w),
+      class = "zuutf_invalid_argument"
+    )
+  }
   expect_error(base64_decode(1), class = "zuutf_invalid_argument")
   expect_error(base64_decode("", url = "x"), class = "zuutf_invalid_argument")
   expect_error(

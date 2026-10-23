@@ -17,10 +17,11 @@
 #'   with `+` and `/`, `TRUE` for the URL- and filename-safe one with `-`
 #'   and `_`. `base64_decode()` also takes `NA`, which accepts either.
 #' @param pad Whether `base64_encode()` writes `=` padding.
-#' @param line_length `NULL` (the default) for one line, or a positive whole
-#'   number: a line feed (`"\n"`) is written after every `line_length`
-#'   characters, as MIME and PEM do with 76 and 64. For the CRLF of MIME, use
-#'   [gsub()] on the result.
+#' @param line_length `NULL` (the default) for one line, or a whole number of
+#'   at least 4, one Base64 quantum: a line feed (`"\n"`) is written after
+#'   every `line_length` characters, as MIME and PEM do with 76 and 64. A
+#'   value at least as long as the text gives one line. For the CRLF of MIME,
+#'   use [gsub()] on the result.
 #' @param forgiving `TRUE` (the default) for WHATWG forgiving decoding,
 #'   `FALSE` for strict RFC 4648; see Details.
 #'
@@ -52,16 +53,17 @@ base64_encode <- function(x, url = FALSE, pad = TRUE, line_length = NULL) {
     if (
       !is.numeric(line_length) ||
         length(line_length) != 1L ||
-        is.na(line_length) ||
-        line_length < 1 ||
+        !is.finite(line_length) ||
+        line_length < 4 ||
         line_length != trunc(line_length)
     ) {
       abort_invalid_argument(
-        "`line_length` must be NULL or a positive whole number",
+        "`line_length` must be NULL or a whole number of at least 4",
         call = call
       )
     }
-    lines <- as.numeric(line_length)
+    # Base64 text is at most INT_MAX characters, so a longer line is one line
+    lines <- min(as.numeric(line_length), .Machine$integer.max)
   }
   x <- base64_input(x, utf8 = TRUE, call = call)
   check_kernel(call)

@@ -27,7 +27,7 @@ the first error is.
 
 * `base64_encode()` and `base64_decode()` cover the standard and URL
   alphabets (either at once on decode with `url = NA`), padding, line
-  wrapping, and forgiving (WHATWG) or strict (RFC 4648) decoding.
+  wrapping at 4 characters or more, and forgiving (WHATWG) or strict (RFC 4648) decoding.
 
 ## For other packages
 
