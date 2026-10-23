@@ -12,13 +12,11 @@
 #' cannot run, gives `"unsupported"`, and every function then fails.
 #'
 #' @return A list with elements:
-#'   \describe{
-#'     \item{`simdutf`}{The simdutf version, as a string.}
-#'     \item{`kernel`}{The name of the kernel in use.}
-#'     \item{`kernels`}{A data frame with one row per kernel compiled in and
-#'       columns `name`, `description` and `supported` (whether this
-#'       processor can run it).}
-#'   }
+#'   * `simdutf`: the simdutf version, as a string.
+#'   * `kernel`: the name of the kernel in use.
+#'   * `kernels`: a data frame with one row per kernel compiled in and
+#'     columns `name`, `description` and `supported` (whether this
+#'     processor can run it).
 #' @export
 #' @examples
 #' info <- zuutf_info()
@@ -26,14 +24,14 @@
 #' info$kernel
 #' info$kernels
 zuutf_info <- function() {
-  raw <- .Call(zut_info)
+  res <- .Call(zut_info)
   list(
-    simdutf = raw$simdutf,
-    kernel = raw$kernel,
+    simdutf = res$simdutf,
+    kernel = res$kernel,
     kernels = data.frame(
-      name = raw$name,
-      description = raw$description,
-      supported = raw$supported,
+      name = res$name,
+      description = res$description,
+      supported = res$supported,
       stringsAsFactors = FALSE
     )
   )

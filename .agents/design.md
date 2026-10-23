@@ -241,7 +241,9 @@ utf_detect(x)                         # character vector of candidate encodings,
 
 # lengths
 utf_count(x, encoding = "UTF-8")      # code points per element; NA where invalid
-utf_length_as(x, from = "UTF-8", to)  # bytes a conversion will produce, per element
+utf_length_as(x, from = "UTF-8", to)  # bytes a conversion will produce, per element;
+                                      # to after from, as in utf_convert(), though
+                                      # only to is required (review #51)
 
 # Base64
 base64_encode(x, url = FALSE, pad = TRUE, line_length = NULL)   # -> one string

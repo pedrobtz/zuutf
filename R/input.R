@@ -18,7 +18,10 @@ prepare_input <- function(x, encoding, useBytes = FALSE, call = NULL) {
     }
     if (any(Encoding(x) == "bytes")) {
       abort_invalid_argument(
-        "`x` has strings marked \"bytes\"; use `useBytes = TRUE` to read their bytes",
+        paste0(
+          "`x` has strings marked \"bytes\"; ",
+          "use `useBytes = TRUE` to read their bytes"
+        ),
         call = call
       )
     }
@@ -26,8 +29,8 @@ prepare_input <- function(x, encoding, useBytes = FALSE, call = NULL) {
       abort_invalid_argument(
         sprintf(
           paste0(
-            "a character vector is UTF-8 text, so `encoding` cannot be \"%s\"; ",
-            "pass raw bytes, or use `useBytes = TRUE`"
+            "a character vector is UTF-8 text, so `encoding` cannot be ",
+            "\"%s\"; pass raw bytes, or use `useBytes = TRUE`"
           ),
           encoding
         ),
@@ -53,7 +56,10 @@ check_bytes_input <- function(x, call = NULL) {
     }
     abort_invalid_argument(
       sprintf(
-        "every element of a list `x` must be a raw vector or NULL; element %d is not",
+        paste0(
+          "every element of a list `x` must be a raw vector or NULL; ",
+          "element %d is not"
+        ),
         which(!ok)[1L]
       ),
       call = call

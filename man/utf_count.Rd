@@ -43,10 +43,11 @@ produce, without converting it.
 \details{
 A leading byte-order mark that matches the input encoding is skipped and
 not counted, and a conversion writes none, so neither counts it. An
-element that is ill-formed in its encoding gives \code{NA}; \link[=utf_valid]{utf_error_at()}
-says where. With a \code{"Latin-1"} target every code point is one byte, those
-above U+00FF included, since a conversion writes one byte for each of
-them too (an error, \verb{?} or \code{NA}, as its \code{invalid} argument says).
+element that is ill-formed in its encoding gives \code{NA};
+\link[=utf_valid]{utf_error_at()} says where. With a \code{"Latin-1"} target every
+code point is one byte, those above U+00FF included, since a conversion
+writes one byte for each of them too (an error, \verb{?} or \code{NA}, as its
+\code{invalid} argument says).
 }
 \examples{
 utf_count(c("abc", "caf\u00e9", "\U0001f600", NA))

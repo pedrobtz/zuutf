@@ -8,12 +8,12 @@ zuutf_info()
 }
 \value{
 A list with elements:
-\describe{
-\item{\code{simdutf}}{The simdutf version, as a string.}
-\item{\code{kernel}}{The name of the kernel in use.}
-\item{\code{kernels}}{A data frame with one row per kernel compiled in and
+\itemize{
+\item \code{simdutf}: the simdutf version, as a string.
+\item \code{kernel}: the name of the kernel in use.
+\item \code{kernels}: a data frame with one row per kernel compiled in and
 columns \code{name}, \code{description} and \code{supported} (whether this
-processor can run it).}
+processor can run it).
 }
 }
 \description{

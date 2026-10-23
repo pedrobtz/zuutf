@@ -7,10 +7,11 @@
 #'
 #' A leading byte-order mark that matches the input encoding is skipped and
 #' not counted, and a conversion writes none, so neither counts it. An
-#' element that is ill-formed in its encoding gives `NA`; [utf_error_at()][utf_valid]
-#' says where. With a `"Latin-1"` target every code point is one byte, those
-#' above U+00FF included, since a conversion writes one byte for each of
-#' them too (an error, `?` or `NA`, as its `invalid` argument says).
+#' element that is ill-formed in its encoding gives `NA`;
+#' [utf_error_at()][utf_valid] says where. With a `"Latin-1"` target every
+#' code point is one byte, those above U+00FF included, since a conversion
+#' writes one byte for each of them too (an error, `?` or `NA`, as its
+#' `invalid` argument says).
 #'
 #' @inheritParams utf_valid
 #' @param encoding,from The encoding of the input: `"UTF-8"`, `"UTF-16LE"`,
@@ -37,10 +38,12 @@
 utf_count <- function(x, encoding = "UTF-8", useBytes = FALSE) {
   call <- sys.call()
   encoding <- match_encoding(encoding, enc_validate, "encoding", call)
-  x0 <- x
-  x <- prepare_input(x, encoding, useBytes, call)
+  bytes <- prepare_input(x, encoding, useBytes, call)
   check_kernel(call)
-  with_names(as_count(.Call(zut_validate, x, encoding_code(encoding), 2L)), x0)
+  with_names(
+    as_count(.Call(zut_validate, bytes, encoding_code(encoding), 2L)),
+    x
+  )
 }
 
 #' @rdname utf_count
@@ -52,11 +55,15 @@ utf_length_as <- function(x, from = "UTF-8", to) {
     abort_invalid_argument("`to` is required", call = call)
   }
   to <- match_encoding(to, enc_to, "to", call)
-  x0 <- x
-  x <- prepare_input(x, from, FALSE, call)
+  bytes <- prepare_input(x, from, FALSE, call)
   check_kernel(call)
   with_names(
-    as_count(.Call(zut_length_as, x, encoding_code(from), encoding_code(to))),
-    x0
+    as_count(.Call(
+      zut_length_as,
+      bytes,
+      encoding_code(from),
+      encoding_code(to)
+    )),
+    x
   )
 }

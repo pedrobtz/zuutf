@@ -54,10 +54,9 @@
 utf_valid <- function(x, encoding = "UTF-8", useBytes = FALSE) {
   call <- sys.call()
   encoding <- match_encoding(encoding, enc_validate, "encoding", call)
-  x0 <- x
-  x <- prepare_input(x, encoding, useBytes, call)
+  bytes <- prepare_input(x, encoding, useBytes, call)
   check_kernel(call)
-  with_names(.Call(zut_validate, x, encoding_code(encoding), 0L), x0)
+  with_names(.Call(zut_validate, bytes, encoding_code(encoding), 0L), x)
 }
 
 #' @rdname utf_valid
@@ -65,10 +64,12 @@ utf_valid <- function(x, encoding = "UTF-8", useBytes = FALSE) {
 utf_error_at <- function(x, encoding = "UTF-8", useBytes = FALSE) {
   call <- sys.call()
   encoding <- match_encoding(encoding, enc_validate, "encoding", call)
-  x0 <- x
-  x <- prepare_input(x, encoding, useBytes, call)
+  bytes <- prepare_input(x, encoding, useBytes, call)
   check_kernel(call)
-  with_names(as_count(.Call(zut_validate, x, encoding_code(encoding), 1L)), x0)
+  with_names(
+    as_count(.Call(zut_validate, bytes, encoding_code(encoding), 1L)),
+    x
+  )
 }
 
 #' @rdname utf_valid

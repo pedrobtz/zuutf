@@ -67,9 +67,17 @@ base64_encode <- function(x, url = FALSE, pad = TRUE, line_length = NULL) {
   }
   x <- base64_input(x, utf8 = TRUE, call = call)
   check_kernel(call)
-  # simdutf_base64_options: default 0, URL (unpadded) 1, default without
-  # padding 2, URL with padding 3
-  options <- if (url) (if (pad) 3L else 1L) else (if (pad) 0L else 2L)
+  # simdutf_base64_options: standard alphabet with padding 0, URL without
+  # padding 1, standard without padding 2, URL with padding 3
+  options <- if (url && pad) {
+    3L
+  } else if (url) {
+    1L
+  } else if (pad) {
+    0L
+  } else {
+    2L
+  }
   run_base64(.Call(zut_base64_encode, x, options, lines), call)
 }
 
@@ -112,7 +120,10 @@ base64_input <- function(x, utf8, call = NULL) {
   }
   if (!is.character(x) || length(x) != 1L || is.na(x)) {
     abort_invalid_argument(
-      "`x` must be a raw vector or a single non-missing string; use lapply() for several",
+      paste0(
+        "`x` must be a raw vector or a single non-missing string; ",
+        "use lapply() for several"
+      ),
       call = call
     )
   }
