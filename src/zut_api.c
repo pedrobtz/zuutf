@@ -144,6 +144,10 @@ static const char *api_kernel(void) {
   return zut_active_kernel();
 }
 
+static int api_kernel_ok(void) {
+  return zut_active_kernel_ok();
+}
+
 static const zuutf_api zuutf_api_table = {
   sizeof(zuutf_api),
   api_validate_utf8,
@@ -161,6 +165,7 @@ static const zuutf_api zuutf_api_table = {
   api_base64_decoded_max_length,
   api_base64_decode,
   api_kernel,
+  api_kernel_ok,
 };
 
 static const zuutf_api *zuutf_api_v1(void) {

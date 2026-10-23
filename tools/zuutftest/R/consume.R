@@ -4,6 +4,8 @@ api_struct_size <- function() .Call(ztt_struct_size)
 
 api_kernel <- function() .Call(ztt_kernel)
 
+api_kernel_ok <- function() .Call(ztt_kernel_ok)
+
 # which: "utf8", "utf16le", "utf32", "ascii". Returns c(error, count).
 api_validate <- function(x, which) .Call(ztt_validate, x, which)
 

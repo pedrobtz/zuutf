@@ -388,6 +388,7 @@ typedef struct {
   zuutf_result (*base64_decode)(const char *s, size_t n, unsigned char *out,
                                 size_t cap, unsigned flags);
   const char *(*kernel)(void);          /* the active simdutf implementation's name */
+  int (*kernel_ok)(void);               /* 1 when that kernel runs here (review #36) */
   /* appended over time, never reordered or removed */
 } zuutf_api;
 ```
@@ -424,6 +425,9 @@ getter registered as `zuutf_api_v1`, as zuxml's is. Rules, all `zuxml`'s
 - A consumer declares `Imports: zuutf` **and** `LinkingTo: zuutf`, and
   carries `importFrom(zuutf, zuutf_info)` in its `NAMESPACE`, because
   `R_GetCCallable()` resolves nothing until zuutf's namespace is loaded.
+- `kernel_ok()` is the table's `check_kernel()` (§10): a consumer checks
+  it once before any other member, since a forced kernel the processor
+  lacks dies of SIGILL inside the first member called.
 - All members are pure functions of their arguments. The first call from
   any thread runs CPU detection, which simdutf makes thread-safe; none
   calls into R, so a consumer may call them off the main thread.

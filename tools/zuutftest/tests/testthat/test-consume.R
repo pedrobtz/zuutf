@@ -14,6 +14,7 @@ test_that("the table resolves and is at least as large as 0.1.0's", {
   expect_gt(size[[1]], 0)
   expect_identical(size[[1]], size[[2]])
   expect_identical(api_kernel(), zuutf::zuutf_info()$kernel)
+  expect_true(api_kernel_ok())
 })
 
 test_that("validators match utf_error_at()", {

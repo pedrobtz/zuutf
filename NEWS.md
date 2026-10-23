@@ -33,7 +33,9 @@ the first error is.
 
 * A registered C table, `zuutf_api_v1`, declared in the installed header
   `zuutf.h`, gives validation, conversion and Base64 to other packages' C
-  code without vendoring simdutf (`vignette("linking")`).
+  code without vendoring simdutf (`vignette("linking")`). Its `kernel_ok()`
+  member tells a consumer whether the active simdutf kernel runs on the
+  processor.
 
 ## Errors and information
 

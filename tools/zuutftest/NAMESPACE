@@ -9,6 +9,7 @@ useDynLib(zuutftest, .registration = TRUE)
 
 export(api_struct_size)
 export(api_kernel)
+export(api_kernel_ok)
 export(api_validate)
 export(api_count_utf8)
 export(api_convert)

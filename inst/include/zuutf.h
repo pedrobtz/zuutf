@@ -118,6 +118,13 @@ typedef struct {
 
   /* the name of the active simdutf kernel, e.g. "haswell" */
   const char *(*kernel)(void);
+
+  /* 1 when the active kernel runs on this processor. 0 when
+   * SIMDUTF_FORCE_IMPLEMENTATION names one it cannot run, which dies of an
+   * illegal instruction on first use, or one simdutf does not know, which
+   * fails every call as if the input were bad. Check it once before any
+   * other member, and treat 0 as an error; zuutf's R functions do. */
+  int (*kernel_ok)(void);
 } zuutf_api;
 
 #define ZUUTF_API_HAS(api, member)                                            \
