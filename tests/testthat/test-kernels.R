@@ -1,4 +1,4 @@
-test_that("the probe agrees with validUTF8() on every supported kernel", {
+test_that("utf_valid() agrees with validUTF8() on every supported kernel", {
   withr::local_seed(20261013)
   inputs <- list(
     raw(0),
@@ -22,7 +22,7 @@ test_that("the probe agrees with validUTF8() on every supported kernel", {
     logical(1)
   )
   for_each_kernel({
-    got <- vapply(inputs, zuutf:::.zut_probe, logical(1))
+    got <- utf_valid(inputs)
     expect_identical(got, expected, info = kernel)
   })
 })

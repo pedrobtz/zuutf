@@ -9,7 +9,6 @@
 
 static const R_CallMethodDef call_methods[] = {
   {"zut_info", (DL_FUNC) &zut_info, 0},
-  {"zut_probe", (DL_FUNC) &zut_probe, 1},
   {"zut_force_kernel", (DL_FUNC) &zut_force_kernel_r, 1},
   {"zut_kernel_ok", (DL_FUNC) &zut_kernel_ok, 0},
   {"zut_validate", (DL_FUNC) &zut_validate, 3},

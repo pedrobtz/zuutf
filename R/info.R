@@ -39,13 +39,6 @@ zuutf_info <- function() {
   )
 }
 
-# Validate one raw vector as UTF-8 through simdutf's C API. Stage 1's proof
-# that the kernels work; utf_valid() replaces it in Stage 2.
-.zut_probe <- function(x) {
-  stopifnot(is.raw(x))
-  .Call(zut_probe, x)
-}
-
 # Make the named kernel active in this process, for tests (design §10).
 # Returns FALSE, leaving the kernel unchanged, when the name is not compiled
 # in or the processor cannot run it.
