@@ -21,8 +21,10 @@
  * <zuutf.h> alone for the types. vignette("linking") walks through it.
  *
  * This header includes <stddef.h> and <stdint.h> only: no simdutf type and
- * no R header. UTF-16 and UTF-32 are uint16_t and uint32_t in native byte
- * order, little-endian on every platform R supports today.
+ * no R header. The utf16le members read and write UTF-16LE: uint16_t units
+ * whose bytes are in little-endian order whatever the host's order, which
+ * is native order on a little-endian host only; on a big-endian host, swap
+ * the bytes of native units first. UTF-32 is uint32_t in native byte order.
  */
 #ifndef ZUUTF_H
 #define ZUUTF_H

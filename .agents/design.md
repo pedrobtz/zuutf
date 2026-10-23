@@ -411,7 +411,9 @@ getter registered as `zuutf_api_v1`, as zuxml's is. Rules, all `zuxml`'s
   as `zuutf_result`.
 - The header includes `<stddef.h>` and `<stdint.h>` only: no simdutf
   type, no `<uchar.h>` (UTF-16 and UTF-32 are `uint16_t` and `uint32_t`),
-  no R header. `ZUUTF_DEFINE_API_GET`, defined in exactly one of the
+  no R header. The `utf16le` members read and write little-endian bytes
+  whatever the host's order, as simdutf's `*le` functions do; UTF-32 is
+  in native order (review #37). `ZUUTF_DEFINE_API_GET`, defined in exactly one of the
   consumer's translation units after `<R_ext/Rdynload.h>`, emits a
   `zuutf_api_get()` that reads `R_GetCCallable()`'s `DL_FUNC` through a
   union, as zuxml's does, so clang's `-Wcast-function-type` stays quiet.
