@@ -155,6 +155,14 @@ test_that("the three policies act on ill-formed input in every source encoding",
       charToRaw("a?b"),
       info = from
     )
+    # every other target writes U+FFFD in its own encoding and byte order
+    for (to in setdiff(conversion_encodings, "Latin-1")) {
+      expect_identical(
+        utf_convert(b, from, to, invalid = "replace"),
+        encode_all("a\ufffdb", to)[[1L]],
+        info = paste(from, to)
+      )
+    }
 
     expect_identical(
       utf_decode(list(b, NULL), from, invalid = "na"),
