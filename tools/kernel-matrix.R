@@ -13,6 +13,10 @@
 
 install_seconds <- Sys.getenv("ZUUTF_INSTALL_SECONDS", "?")
 
+# The full sweeps and the skip_on_cran() tests, whatever the caller's
+# environment: setup-r sets NOT_CRAN, but this script should not rely on it.
+Sys.setenv(NOT_CRAN = "true")
+
 Sys.unsetenv("SIMDUTF_FORCE_IMPLEMENTATION")
 info <- zuutf::zuutf_info()
 kernels <- info$kernels
