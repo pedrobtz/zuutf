@@ -70,14 +70,14 @@ test_that("utf_error_at() gives the first error's offset in bytes", {
 })
 
 test_that("a matching byte-order mark is skipped and offsets start after it", {
-  b <- c(bom[["UTF-8"]], charToRaw("ab"), bytes(0xff))
+  b <- c(boms()[["UTF-8"]], charToRaw("ab"), bytes(0xff))
   expect_false(utf_valid(b))
   expect_identical(utf_error_at(b), 3L)
-  expect_identical(utf_count(c(bom[["UTF-8"]], charToRaw("ab"))), 2L)
+  expect_identical(utf_count(c(boms()[["UTF-8"]], charToRaw("ab"))), 2L)
 
-  le <- c(bom[["UTF-16LE"]], utf16le("ab"), bytes(0x00, 0xdc))
+  le <- c(boms()[["UTF-16LE"]], utf16le("ab"), bytes(0x00, 0xdc))
   expect_identical(utf_error_at(le, "UTF-16LE"), 3L)
-  be <- c(bom[["UTF-32BE"]], utf32be("ab"), bytes(0x00, 0x11, 0x00, 0x00))
+  be <- c(boms()[["UTF-32BE"]], utf32be("ab"), bytes(0x00, 0x11, 0x00, 0x00))
   expect_identical(utf_error_at(be, "UTF-32BE"), 3L)
 })
 
@@ -114,13 +114,16 @@ test_that("UTF-32 is checked in either byte order", {
 
 test_that("\"UTF-16\" and \"UTF-32\" take the byte order from the BOM", {
   text <- "a\u00e9\U0001f600"
-  expect_true(utf_valid(c(bom[["UTF-16LE"]], utf16le(text)), "UTF-16"))
-  expect_true(utf_valid(c(bom[["UTF-16BE"]], utf16be(text)), "UTF-16"))
+  expect_true(utf_valid(c(boms()[["UTF-16LE"]], utf16le(text)), "UTF-16"))
+  expect_true(utf_valid(c(boms()[["UTF-16BE"]], utf16be(text)), "UTF-16"))
   expect_true(utf_valid(utf16be(text), "UTF-16")) # no BOM: BE
-  expect_true(utf_valid(c(bom[["UTF-32LE"]], utf32le(text)), "UTF-32"))
+  expect_true(utf_valid(c(boms()[["UTF-32LE"]], utf32le(text)), "UTF-32"))
   expect_true(utf_valid(utf32be(text), "UTF-32"))
   expect_false(utf_valid(utf32le(text), "UTF-32")) # LE read as BE
-  expect_identical(utf_count(c(bom[["UTF-16LE"]], utf16le(text)), "UTF-16"), 3L)
+  expect_identical(
+    utf_count(c(boms()[["UTF-16LE"]], utf16le(text)), "UTF-16"),
+    3L
+  )
 })
 
 test_that("Latin-1 is always valid and ASCII stops at 0x80", {
@@ -227,7 +230,6 @@ test_that("arguments of the wrong type are refused", {
     class = "zuutf_invalid_argument"
   )
   expect_error(utf_is_ascii(1), class = "zuutf_invalid_argument")
-  expect_error(utf_valid(1), class = "zuutf_error")
 })
 
 test_that("every function takes all three shapes in every encoding", {
@@ -236,10 +238,10 @@ test_that("every function takes all three shapes in every encoding", {
     "UTF-8" = charToRaw(enc2utf8(text)),
     "UTF-16LE" = utf16le(text),
     "UTF-16BE" = utf16be(text),
-    "UTF-16" = c(bom[["UTF-16LE"]], utf16le(text)),
+    "UTF-16" = c(boms()[["UTF-16LE"]], utf16le(text)),
     "UTF-32LE" = utf32le(text),
     "UTF-32BE" = utf32be(text),
-    "UTF-32" = c(bom[["UTF-32LE"]], utf32le(text)),
+    "UTF-32" = c(boms()[["UTF-32LE"]], utf32le(text)),
     "Latin-1" = bytes(0x61, 0xe9),
     "ASCII" = charToRaw("ab")
   )

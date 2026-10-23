@@ -134,11 +134,15 @@ test_that("multi-byte text of every length decodes as base R decodes it", {
 })
 
 test_that("a BOM alone, and a BOM cut short", {
-  for (enc in names(bom)) {
-    expect_identical(utf_decode(bom[[enc]], enc), "", info = enc)
-    expect_identical(utf_convert(bom[[enc]], enc, "UTF-8"), raw(), info = enc)
-    expect_identical(utf_count(bom[[enc]], enc), 0L, info = enc)
-    expect_identical(utf_detect(bom[[enc]]), enc, info = enc)
+  for (enc in names(boms())) {
+    expect_identical(utf_decode(boms()[[enc]], enc), "", info = enc)
+    expect_identical(
+      utf_convert(boms()[[enc]], enc, "UTF-8"),
+      raw(),
+      info = enc
+    )
+    expect_identical(utf_count(boms()[[enc]], enc), 0L, info = enc)
+    expect_identical(utf_detect(boms()[[enc]]), enc, info = enc)
   }
   expect_identical(
     utf_decode(bytes(0xef, 0xbb), "UTF-8", invalid = "replace"),

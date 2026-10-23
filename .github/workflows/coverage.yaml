@@ -19,3 +19,7 @@ jobs:
     with:
       badge-branch: gh-pages
       badge-path: badges/coverage.svg
+      # line and branch coverage of src/ through gcov, beside covr's number
+      # (review #50); simdutf itself is upstream's to cover
+      native: true
+      native-exclude: src/vendor

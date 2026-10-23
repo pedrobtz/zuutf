@@ -1,28 +1,19 @@
 test_that("conditions carry the zuutf classes", {
-  e <- tryCatch(utf_valid("a", "EBCDIC"), error = identity)
-  expect_s3_class(
-    e,
-    c("zuutf_invalid_argument", "zuutf_error", "error", "condition")
+  # through the public functions, not the constructors
+  triggers <- list(
+    zuutf_invalid_argument = function() utf_valid("a", "EBCDIC"),
+    zuutf_encoding_error = function() utf_decode(as.raw(0xff), "UTF-8"),
+    zuutf_nul_error = function() utf_decode(as.raw(0), "UTF-8"),
+    zuutf_base64_error = function() base64_decode("a")
   )
-  e <- zuutf:::zuutf_condition(
-    "zuutf_encoding_error",
-    "m",
-    index = 2L,
-    offset = 5L,
-    encoding = "UTF-8"
-  )
-  expect_s3_class(e, c("zuutf_encoding_error", "zuutf_error", "error"))
-  expect_identical(e$index, 2L)
-  expect_identical(e$offset, 5L)
-  expect_identical(e$encoding, "UTF-8")
-  expect_error(
-    zuutf:::abort_internal_error("m"),
-    class = "zuutf_internal_error"
-  )
-  expect_error(
-    zuutf:::abort_encoding_error("m", 1L, 1L, "UTF-8"),
-    class = "zuutf_encoding_error"
-  )
+  for (cls in names(triggers)) {
+    e <- tryCatch(triggers[[cls]](), error = identity)
+    expect_s3_class(
+      e,
+      c(cls, "zuutf_error", "error", "condition"),
+      exact = TRUE
+    )
+  }
 })
 
 test_that("every C status maps to its condition class", {

@@ -19,13 +19,16 @@ utf16be <- function(text) encode_as(text, "UTF-16BE")
 utf32le <- function(text) encode_as(text, "UTF-32LE")
 utf32be <- function(text) encode_as(text, "UTF-32BE")
 
-bom <- list(
-  "UTF-8" = bytes(0xef, 0xbb, 0xbf),
-  "UTF-16LE" = bytes(0xff, 0xfe),
-  "UTF-16BE" = bytes(0xfe, 0xff),
-  "UTF-32LE" = bytes(0xff, 0xfe, 0x00, 0x00),
-  "UTF-32BE" = bytes(0x00, 0x00, 0xfe, 0xff)
-)
+# Each encoding's byte-order mark.
+boms <- function() {
+  list(
+    "UTF-8" = bytes(0xef, 0xbb, 0xbf),
+    "UTF-16LE" = bytes(0xff, 0xfe),
+    "UTF-16BE" = bytes(0xfe, 0xff),
+    "UTF-32LE" = bytes(0xff, 0xfe, 0x00, 0x00),
+    "UTF-32BE" = bytes(0x00, 0x00, 0xfe, 0xff)
+  )
+}
 
 # The UTF-8 stress test, one raw vector per line.
 kuhn_lines <- function() {
@@ -57,24 +60,17 @@ read_fixture <- function(name) {
 }
 
 # iconv()'s name for each of zuutf's.
-iconv_name <- c(
-  "UTF-8" = "UTF-8",
-  "UTF-16LE" = "UTF-16LE",
-  "UTF-16BE" = "UTF-16BE",
-  "UTF-32LE" = "UTF-32LE",
-  "UTF-32BE" = "UTF-32BE",
-  "Latin-1" = "latin1"
-)
+iconv_name <- function(enc) if (enc == "Latin-1") "latin1" else enc
 
 # iconv() of a list of raw vectors, NULL where it fails.
 iconv_raw <- function(x, from, to) {
-  iconv(x, iconv_name[[from]], iconv_name[[to]], toRaw = TRUE)
+  iconv(x, iconv_name(from), iconv_name(to), toRaw = TRUE)
 }
 
 # The test texts as raw vectors in `enc`, from UTF-8 strings.
 encode_all <- function(texts, enc) {
   lapply(texts, function(t) {
-    iconv(enc2utf8(t), "UTF-8", iconv_name[[enc]], toRaw = TRUE)[[1L]]
+    iconv(enc2utf8(t), "UTF-8", iconv_name(enc), toRaw = TRUE)[[1L]]
   })
 }
 
@@ -92,14 +88,16 @@ conversion_texts <- function(n = 200) {
   c("", "a", lines, sample, random)
 }
 
-conversion_encodings <- c(
-  "UTF-8",
-  "UTF-16LE",
-  "UTF-16BE",
-  "UTF-32LE",
-  "UTF-32BE",
-  "Latin-1"
-)
+conversion_encodings <- function() {
+  c(
+    "UTF-8",
+    "UTF-16LE",
+    "UTF-16BE",
+    "UTF-32LE",
+    "UTF-32BE",
+    "Latin-1"
+  )
+}
 
 # Base64 fixtures: hex TSV, read as text.
 read_tsv_fixture <- function(name) {

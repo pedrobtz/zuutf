@@ -15,8 +15,8 @@ test_that("conversions match iconv() byte for byte wherever iconv() succeeds", {
     "\u00a1Hola!",
     intToUtf8(1:255, multiple = FALSE)
   )
-  for (from in conversion_encodings) {
-    for (to in conversion_encodings) {
+  for (from in conversion_encodings()) {
+    for (to in conversion_encodings()) {
       t <- if ("Latin-1" %in% c(from, to)) narrow else texts
       input <- encode_all(t, from)
       expected <- iconv_raw(input, from, to)
@@ -69,13 +69,17 @@ test_that("the fixtures in every encoding decode to the sample text", {
   for (f in c("utf16le", "utf16be", "utf32le", "utf32be")) {
     enc <- toupper(sub("^utf(16|32)(le|be)$", "UTF-\\1\\2", f))
     plain <- read_fixture(paste0("sample.", f, ".txt"))
-    bom <- read_fixture(paste0("sample.", f, "-bom.txt"))
+    with_bom <- read_fixture(paste0("sample.", f, "-bom.txt"))
     expect_identical(utf_decode(plain, enc), text, info = f)
-    expect_identical(utf_decode(bom, enc), text, info = f) # BOM dropped
-    expect_identical(utf_decode(bom), text, info = f) # BOM decides
-    expect_identical(utf_decode(bom, sub("(LE|BE)$", "", enc)), text, info = f)
+    expect_identical(utf_decode(with_bom, enc), text, info = f) # BOM dropped
+    expect_identical(utf_decode(with_bom), text, info = f) # BOM decides
     expect_identical(
-      utf_convert(bom, enc, "UTF-8"),
+      utf_decode(with_bom, sub("(LE|BE)$", "", enc)),
+      text,
+      info = f
+    )
+    expect_identical(
+      utf_convert(with_bom, enc, "UTF-8"),
       read_fixture("sample.utf8.txt")
     )
     expect_identical(utf_encode(text, enc), plain, info = f) # no BOM written
@@ -102,8 +106,8 @@ test_that("every pair round-trips", {
   withr::local_seed(20261013)
   texts <- conversion_texts(100)
   narrow <- c("", "caf\u00e9", intToUtf8(1:255, multiple = FALSE))
-  for (a in conversion_encodings) {
-    for (b in conversion_encodings) {
+  for (a in conversion_encodings()) {
+    for (b in conversion_encodings()) {
       t <- if ("Latin-1" %in% c(a, b)) narrow else texts
       x <- encode_all(t, a)
       expect_identical(
@@ -156,7 +160,7 @@ test_that("the three policies act on ill-formed input in every source encoding",
       info = from
     )
     # every other target writes U+FFFD in its own encoding and byte order
-    for (to in setdiff(conversion_encodings, "Latin-1")) {
+    for (to in setdiff(conversion_encodings(), "Latin-1")) {
       expect_identical(
         utf_convert(b, from, to, invalid = "replace"),
         encode_all("a\ufffdb", to)[[1L]],
@@ -381,11 +385,23 @@ test_that("U+0000 raises zuutf_nul_error under every policy", {
 })
 
 test_that("utf_detect() puts a BOM alone, then the order of design \u00a76", {
-  expect_identical(utf_detect(c(bom[["UTF-8"]], charToRaw("a"))), "UTF-8")
-  expect_identical(utf_detect(c(bom[["UTF-16LE"]], utf16le("ab"))), "UTF-16LE")
-  expect_identical(utf_detect(c(bom[["UTF-16BE"]], utf16be("ab"))), "UTF-16BE")
-  expect_identical(utf_detect(c(bom[["UTF-32LE"]], utf32le("ab"))), "UTF-32LE")
-  expect_identical(utf_detect(c(bom[["UTF-32BE"]], utf32be("ab"))), "UTF-32BE")
+  expect_identical(utf_detect(c(boms()[["UTF-8"]], charToRaw("a"))), "UTF-8")
+  expect_identical(
+    utf_detect(c(boms()[["UTF-16LE"]], utf16le("ab"))),
+    "UTF-16LE"
+  )
+  expect_identical(
+    utf_detect(c(boms()[["UTF-16BE"]], utf16be("ab"))),
+    "UTF-16BE"
+  )
+  expect_identical(
+    utf_detect(c(boms()[["UTF-32LE"]], utf32le("ab"))),
+    "UTF-32LE"
+  )
+  expect_identical(
+    utf_detect(c(boms()[["UTF-32BE"]], utf32be("ab"))),
+    "UTF-32BE"
+  )
   expect_identical(utf_detect(charToRaw("abc")), "UTF-8")
   expect_identical(
     utf_detect(charToRaw("abcd")),

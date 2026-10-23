@@ -106,7 +106,7 @@ test_that("utf_length_as() reads Latin-1 and the BOM-chosen orders", {
   expect_identical(utf_length_as(latin1, "Latin-1", "UTF-16LE"), 6L)
   expect_identical(utf_length_as(latin1, "Latin-1", "UTF-32BE"), 12L)
   expect_identical(utf_length_as(latin1, "Latin-1", "Latin-1"), 3L)
-  le <- c(bom[["UTF-16LE"]], utf16le("\U0001f600"))
+  le <- c(boms()[["UTF-16LE"]], utf16le("\U0001f600"))
   expect_identical(utf_length_as(le, "UTF-16", "UTF-8"), 4L)
   expect_identical(utf_length_as("\u00e9", to = "UTF-16BE"), 2L)
 })
