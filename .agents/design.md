@@ -563,6 +563,23 @@ message.
   its target, a conversion under `"error"` round-trips, what decodes
   re-encodes canonically) and has a canary build that must crash on its
   canary input before the target is trusted (`tools/run-fuzz`).
+- **Branches no R test reaches.** Each is listed with why, so that
+  coverage gaps are decisions and not oversights (review #35):
+  - `ZUT_TOO_LONG` in `zut_convert.c` and `ZUT_B64_TOO_LONG` in
+    `zut_base64.c`, and the double branch of `as_count()`: they need an
+    output or input past 2^31 - 1 bytes, too large for any test suite.
+  - `ZUT_INTERNAL` (written length other than measured) in
+    `zut_convert.c`, `ZUT_B64_INTERNAL` (`wrote != len`, and simdutf
+    error codes zuutf does not expect) in `zut_base64.c`: they need
+    simdutf to disagree with itself.
+  - Big-endian hosts: the `zut_little_endian()` false branches in
+    `zut_view.c` and `zut_input.c`; no CI leg is big-endian.
+  - An actual user interrupt: `R_CheckUserInterrupt()` is reached by
+    inputs of 1024 elements or more, and every allocation is R's and
+    protected, so a longjmp there leaks nothing, but no test sends one.
+
+  The R side of each status is tested directly, through `raise_status()`
+  and `run_base64()` (`test-conditions.R`).
 - **Symbols.** `test-abi.R` greps the installed shared object for
   exports: `R_init_zuutf` and, on Linux with GCC, libstdc++ template
   instantiations only, as zufft accepts them (R3, §12.2).

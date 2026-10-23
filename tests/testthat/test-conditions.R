@@ -25,6 +25,38 @@ test_that("conditions carry the zuutf classes", {
   )
 })
 
+test_that("every C status maps to its condition class", {
+  # kinds ZUT_TOO_LONG, ZUT_INTERNAL and ZUT_B64_* other than INVALID need
+  # a 2 GB input or a simdutf fault, so the mapping is tested directly
+  convert_status <- function(kind) {
+    zuutf:::raise_status(c(kind, 2, 3, 1), "UTF-16LE", NULL)
+  }
+  expect_error(convert_status(1), class = "zuutf_encoding_error")
+  expect_error(convert_status(2), class = "zuutf_encoding_error")
+  expect_error(convert_status(3), class = "zuutf_nul_error")
+  expect_error(convert_status(4), class = "zuutf_size_error")
+  for (kind in c(5, 6, -1)) {
+    expect_error(convert_status(kind), class = "zuutf_internal_error")
+  }
+  e <- tryCatch(convert_status(1), error = identity)
+  expect_identical(e$index, 2L)
+  expect_identical(e$offset, 3L)
+  expect_identical(e$encoding, "UTF-8")
+  e <- tryCatch(convert_status(2), error = identity)
+  expect_identical(e$encoding, "UTF-16LE")
+
+  base64_status <- function(kind) {
+    zuutf:::run_base64(list(as.raw(1), c(kind, 4)), NULL)
+  }
+  expect_identical(base64_status(0), as.raw(1))
+  expect_error(base64_status(1), class = "zuutf_base64_error")
+  expect_identical(tryCatch(base64_status(1), error = identity)$offset, 4L)
+  expect_error(base64_status(2), class = "zuutf_size_error")
+  for (kind in c(3, 4, -1)) {
+    expect_error(base64_status(kind), class = "zuutf_internal_error")
+  }
+})
+
 test_that("a forced kernel the processor cannot run is an internal error", {
   # Run in a child process: the kernel is chosen once per process.
   skip_on_cran()

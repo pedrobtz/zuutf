@@ -128,11 +128,15 @@ base64_input <- function(x, utf8, call = NULL) {
   x
 }
 
+# Status kinds are ZUT_B64_* in src/zut_base64.c. A numeric switch() has no
+# default, so an unknown kind falls through to the internal error.
 run_base64 <- function(res, call) {
   status <- res[[2L]]
+  if (status[[1L]] == 0) {
+    return(res[[1L]])
+  }
   switch(
-    status[[1L]] + 1,
-    res[[1L]],
+    status[[1L]],
     abort_base64_error(
       sprintf("invalid Base64 at offset %s", as_count(status[[2L]])),
       offset = as_count(status[[2L]]),
@@ -141,7 +145,7 @@ run_base64 <- function(res, call) {
     abort_size_error(
       "the Base64 text would be longer than a string can hold",
       call = call
-    ),
-    abort_internal_error("unexpected result from simdutf's Base64", call = call)
+    )
   )
+  abort_internal_error("unexpected result from simdutf's Base64", call = call)
 }

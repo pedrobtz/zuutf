@@ -207,6 +207,8 @@ run_convert <- function(
   res[[1L]]
 }
 
+# Status kinds are zut_convert.c's. A numeric switch() has no default, so
+# ZUT_INTERNAL and any unknown kind fall through to the internal error.
 raise_status <- function(status, to, call) {
   kind <- status[[1L]]
   index <- as_count(status[[2L]])
@@ -246,7 +248,7 @@ raise_status <- function(status, to, call) {
     abort_size_error(
       sprintf("element %d converts to more bytes than R can hold", index),
       call = call
-    ),
-    abort_internal_error("unexpected status from the converter", call = call)
+    )
   )
+  abort_internal_error("unexpected status from the converter", call = call)
 }
