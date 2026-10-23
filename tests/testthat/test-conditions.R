@@ -65,12 +65,33 @@ test_that("a forced kernel the processor cannot run is an internal error", {
   # where it runs: under valgrind this process sees valgrind's emulated CPU
   # while the child runs on the real one.
   script <- withr::local_tempfile(fileext = ".R")
+  # Every export that reaches simdutf is called once and prints one token,
+  # so dropping check_kernel() from any of them shows here, not as SIGILL.
   writeLines(
     c(
       "k <- Sys.getenv('SIMDUTF_FORCE_IMPLEMENTATION')",
       "info <- zuutf::zuutf_info()",
-      "if (k %in% info$kernels$name[info$kernels$supported]) cat('supported') else",
-      "  cat(tryCatch(zuutf::utf_valid('a'), zuutf_internal_error = function(e) 'internal'))"
+      "if (k %in% info$kernels$name[info$kernels$supported]) {",
+      "  cat('supported')",
+      "} else {",
+      "  b <- charToRaw('a')",
+      "  calls <- list(",
+      "    function() zuutf::utf_valid('a'),",
+      "    function() zuutf::utf_error_at('a'),",
+      "    function() zuutf::utf_is_ascii('a'),",
+      "    function() zuutf::utf_count('a'),",
+      "    function() zuutf::utf_length_as('a', to = 'UTF-16LE'),",
+      "    function() zuutf::utf_convert(b, 'UTF-8', 'UTF-16LE'),",
+      "    function() zuutf::utf_decode(b),",
+      "    function() zuutf::utf_encode('a'),",
+      "    function() zuutf::utf_detect(b),",
+      "    function() zuutf::base64_encode(b),",
+      "    function() zuutf::base64_decode('YQ==')",
+      "  )",
+      "  tokens <- vapply(calls, function(f) tryCatch({ f(); 'ran' },",
+      "    zuutf_internal_error = function(e) 'internal'), '')",
+      "  cat(unique(tokens), sep = ',')",
+      "}"
     ),
     script
   )
