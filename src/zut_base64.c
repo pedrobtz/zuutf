@@ -19,6 +19,10 @@ static void bytes_of(SEXP x, const char **p, size_t *n) {
   if (TYPEOF(x) == RAWSXP) {
     *p = (const char *) RAW(x);
     *n = (size_t) XLENGTH(x);
+  } else if (XLENGTH(x) == 0) {
+    /* R passes one string; a direct .Call must not index past the end */
+    *p = "";
+    *n = 0;
   } else {
     SEXP s = STRING_ELT(x, 0);
     *p = CHAR(s);

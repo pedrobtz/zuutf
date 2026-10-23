@@ -8,7 +8,9 @@
 #' return) is skipped, padding is optional, and a final quantum of a single
 #' character is an error. `forgiving = FALSE` reads RFC 4648 section 3.3
 #' strictly: padding is required, the unused bits of the last character
-#' must be zero, and whitespace is an error too.
+#' must be zero, and whitespace is an error too. Padding is required with
+#' the URL alphabet as well, so text written with `pad = FALSE` decodes
+#' only in forgiving mode.
 #'
 #' @param x For `base64_encode()`, a raw vector, or a single string, which
 #'   is encoded as its UTF-8 bytes. For `base64_decode()`, a single string
@@ -100,15 +102,6 @@ base64_decode <- function(x, url = FALSE, forgiving = TRUE) {
     0L
   }
   run_base64(.Call(zut_base64_decode, x, options, !forgiving), call)
-}
-
-check_flag <- function(x, arg, call = NULL) {
-  if (!isTRUE(x) && !isFALSE(x)) {
-    abort_invalid_argument(
-      sprintf("`%s` must be TRUE or FALSE", arg),
-      call = call
-    )
-  }
 }
 
 # One raw vector or one string (design §5, D14). A string to encode is

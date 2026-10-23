@@ -9,10 +9,8 @@
 # useBytes = TRUE reads the bytes of every string as they are, in any
 # encoding.
 prepare_input <- function(x, encoding, useBytes = FALSE, call = NULL) {
+  check_flag(useBytes, "useBytes", call = call)
   if (is.character(x)) {
-    if (!isTRUE(useBytes) && !isFALSE(useBytes)) {
-      abort_invalid_argument("`useBytes` must be TRUE or FALSE", call = call)
-    }
     if (useBytes) {
       return(x)
     }
@@ -41,6 +39,16 @@ prepare_input <- function(x, encoding, useBytes = FALSE, call = NULL) {
   }
   check_bytes_input(x, call = call)
   x
+}
+
+# TRUE or FALSE, nothing else.
+check_flag <- function(x, arg, call = NULL) {
+  if (!isTRUE(x) && !isFALSE(x)) {
+    abort_invalid_argument(
+      sprintf("`%s` must be TRUE or FALSE", arg),
+      call = call
+    )
+  }
 }
 
 # Raw vector, or a list whose elements are raw vectors or NULL.

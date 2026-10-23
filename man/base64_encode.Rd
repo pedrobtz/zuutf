@@ -44,7 +44,9 @@ decode" is: ASCII whitespace (space, tab, line feed, form feed, carriage
 return) is skipped, padding is optional, and a final quantum of a single
 character is an error. \code{forgiving = FALSE} reads RFC 4648 section 3.3
 strictly: padding is required, the unused bits of the last character
-must be zero, and whitespace is an error too.
+must be zero, and whitespace is an error too. Padding is required with
+the URL alphabet as well, so text written with \code{pad = FALSE} decodes
+only in forgiving mode.
 }
 \examples{
 base64_encode(charToRaw("hello"))

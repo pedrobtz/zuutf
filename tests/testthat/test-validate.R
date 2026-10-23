@@ -217,6 +217,15 @@ test_that("arguments of the wrong type are refused", {
   }
   expect_error(utf_valid(factor("a")), class = "zuutf_invalid_argument")
   expect_error(utf_valid("a", useBytes = NA), class = "zuutf_invalid_argument")
+  # useBytes is checked whatever x is
+  expect_error(
+    utf_valid(as.raw(1), useBytes = "x"),
+    class = "zuutf_invalid_argument"
+  )
+  expect_error(
+    utf_count(list(as.raw(1)), useBytes = NA),
+    class = "zuutf_invalid_argument"
+  )
   expect_error(utf_is_ascii(1), class = "zuutf_invalid_argument")
   expect_error(utf_valid(1), class = "zuutf_error")
 })
