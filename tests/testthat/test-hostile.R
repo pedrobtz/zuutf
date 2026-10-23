@@ -36,6 +36,48 @@ test_that("a bad byte at every position of every length is found there", {
   })
 })
 
+test_that("a bad UTF-16 or UTF-32 unit at every position is found there", {
+  # "a" and an ill-formed unit (a lone low surrogate; a value above
+  # U+10FFFF) in each byte order, so the BE swap path is swept too
+  units <- list(
+    "UTF-16LE" = list(ok = bytes(0x61, 0), bad = bytes(0, 0xdc)),
+    "UTF-16BE" = list(ok = bytes(0, 0x61), bad = bytes(0xdc, 0)),
+    "UTF-32LE" = list(ok = bytes(0x61, 0, 0, 0), bad = bytes(0, 0, 0x11, 0)),
+    "UTF-32BE" = list(ok = bytes(0, 0, 0, 0x61), bad = bytes(0, 0x11, 0, 0))
+  )
+  lengths <- if (slow_tests()) {
+    0:200
+  } else {
+    sweep_size(0:140, cran = c(0:34, 62:66))
+  }
+  on_kernels({
+    for (enc in names(units)) {
+      u <- units[[enc]]
+      for (n in lengths) {
+        base <- rep(u$ok, n)
+        expect_true(utf_valid(base, enc), info = paste(kernel, enc, n))
+        bad <- lapply(seq_len(n), function(i) {
+          k <- length(u$ok)
+          b <- base
+          b[(i - 1L) * k + seq_len(k)] <- u$bad
+          b
+        })
+        got <- utf_error_at(bad, enc)
+        if (!identical(got, seq_len(n))) {
+          fail(sprintf(
+            "%s: %s length %d, offsets %s",
+            kernel,
+            enc,
+            n,
+            paste(head(got[got != seq_len(n)]), collapse = " ")
+          ))
+        }
+      }
+    }
+    succeed()
+  })
+})
+
 test_that("a sequence truncated at every block boundary is found at its lead byte", {
   seqs <- list(
     as.raw(c(0xc3, 0xa9)),
