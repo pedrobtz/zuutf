@@ -595,7 +595,8 @@ message.
   is behind `ZUUTF_SLOW_TESTS` (R7). In the CRAN suite the hostile sweeps
   run on the kernel in use, since the kernel-matrix job runs the whole
   suite once per kernel; `ZUUTF_SLOW_TESTS` runs them on every kernel in
-  process too. `ZUUTF_SKIP_HEAVY` shrinks the random sweeps for gctorture,
+  process too, and the kernel-matrix job runs the suite once with it set
+  on each leg (review #34). `ZUUTF_SKIP_HEAVY` shrinks the random sweeps for gctorture,
   and `ZUUTF_TIMING_TESTS` turns on an elapsed-time check, meaningful only
   against an installed package, since `devtools::load_all()` compiles
   with `-O0`.

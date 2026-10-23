@@ -60,6 +60,18 @@ jobs:
         if: runner.os == 'Linux'
         run: Rscript tools/cran-suite-time.R
 
+      # The sweeps roadmap Stage 6 names (every length 0-200 and around
+      # 4096, a NUL in every position) and design §10's in-process loop over
+      # every kernel run only under ZUUTF_SLOW_TESTS (review #34)
+      - name: Slow sweeps on every kernel in process
+        shell: bash
+        env:
+          ZUUTF_SLOW_TESTS: "true"
+        run: >
+          Rscript -e "testthat::test_dir('tests/testthat', package = 'zuutf',
+          load_package = 'installed', stop_on_failure = TRUE,
+          reporter = testthat::SummaryReporter\$new())"
+
       - name: Test suite per kernel
         shell: bash
         run: Rscript -e 'library(zuutf); source("tools/kernel-matrix.R")'
