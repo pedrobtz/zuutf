@@ -263,13 +263,23 @@ test_that("the replacement loop agrees with simdutf's on UTF-16", {
     bytes(0x00, 0xdc, 0x00, 0xd8),
     bytes(0x3d, 0xd8, 0x3d, 0xd8, 0x00, 0xde)
   )
+  # both paths against known answers, so they cannot agree on a wrong one
+  fffd <- "\ufffd"
+  known <- c(fffd, fffd, strrep(fffd, 2), paste0(fffd, "\U0001f600"))
+  for (simdutf in c(TRUE, FALSE)) {
+    got <- zuutf:::run_convert(
+      lone,
+      "UTF-16LE",
+      "UTF-8",
+      "replace",
+      1L,
+      simdutf_replacement = simdutf
+    )
+    expect_identical(got, known, info = simdutf)
+  }
   inputs <- c(inputs, lone)
   for (from in c("UTF-16LE", "UTF-16BE")) {
-    x <- if (from == "UTF-16LE") {
-      inputs
-    } else {
-      utf_convert(inputs, "UTF-16LE", "UTF-16BE", invalid = "replace")
-    }
+    x <- inputs
     if (from == "UTF-16BE") {
       x <- lapply(inputs, function(b) {
         if (length(b)) {
