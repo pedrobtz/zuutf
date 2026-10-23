@@ -74,6 +74,8 @@ test_that("strict decoding rejects whitespace, missing padding and extra bits", 
   expect_identical(offset_of("aGVs bG8="), 5L) # whitespace
   expect_identical(offset_of("aGVsbG8=\n"), 9L)
   expect_identical(offset_of("\taGVsbG8="), 1L)
+  expect_identical(offset_of("aGVs\fbG8="), 5L) # form feed
+  expect_identical(offset_of("aGVsbG8=\r"), 9L) # carriage return
   expect_identical(offset_of("aGVsbG8"), 7L) # no padding
   expect_identical(offset_of("aGVsbA"), 6L)
   expect_identical(offset_of("aGVsbG9="), 7L) # non-zero trailing bits
@@ -83,6 +85,8 @@ test_that("strict decoding rejects whitespace, missing padding and extra bits", 
   expect_identical(offset_of("aGVsbG8=="), 8L) # too much padding: from its start
   # forgiving decoding takes the first four of these
   expect_identical(rawToChar(base64_decode("aGVs bG8=")), "hello")
+  expect_identical(rawToChar(base64_decode("aGVs\fbG8=")), "hello")
+  expect_identical(rawToChar(base64_decode("aGVsbG8=\r\n")), "hello")
   expect_identical(rawToChar(base64_decode("aGVsbG8")), "hello")
   expect_identical(rawToChar(base64_decode("aGVsbG9=")), "hello")
   expect_error(base64_decode("aGVsb"), class = "zuutf_base64_error")
