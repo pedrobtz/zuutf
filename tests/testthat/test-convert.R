@@ -215,6 +215,33 @@ test_that("code points a Latin-1 target cannot hold follow the policy", {
   )
 })
 
+test_that("the Latin-1 target's edge is between U+00FF and U+0100", {
+  # the first-wide detectors of every source encoding, at their boundary
+  offset <- c(
+    "UTF-8" = 3L,
+    "UTF-16LE" = 2L,
+    "UTF-16BE" = 2L,
+    "UTF-32LE" = 2L,
+    "UTF-32BE" = 2L
+  )
+  for (from in names(offset)) {
+    edge <- encode_all("\u00ff\u0100", from)[[1L]]
+    expect_identical(
+      utf_convert(edge, from, "Latin-1", invalid = "replace"),
+      bytes(0xff, 0x3f),
+      info = from
+    )
+    e <- tryCatch(utf_convert(edge, from, "Latin-1"), error = identity)
+    expect_s3_class(e, "zuutf_encoding_error")
+    expect_identical(e$offset, offset[[from]], info = from)
+    expect_identical(
+      utf_convert(encode_all("\u00ff", from)[[1L]], from, "Latin-1"),
+      bytes(0xff),
+      info = from
+    )
+  }
+})
+
 test_that("the replacement loop agrees with simdutf's on UTF-16", {
   withr::local_seed(20261013)
   texts <- conversion_texts(100)
