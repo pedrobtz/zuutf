@@ -40,9 +40,11 @@
 #'
 #' @return `utf_convert()` and `utf_encode()`: a raw vector for a raw vector
 #'   or a single string, otherwise a list of raw vectors (`NULL` for a
-#'   missing or, under `"na"`, invalid element). `utf_decode()`: a character
-#'   vector marked UTF-8, one string per element. A list or a character
-#'   vector keeps its names.
+#'   missing or, under `"na"`, invalid element). A single string that is
+#'   `NA`, or invalid under `"na"`, gives `NULL`, and its name is dropped,
+#'   since a raw vector has no element names. `utf_decode()`: a character
+#'   vector marked UTF-8, one string per element. A list, or a character
+#'   vector of any other length, keeps its names.
 #' @seealso [utf_detect()], [utf_valid()], [utf_length_as()]; [iconv()].
 #' @export
 #' @examples

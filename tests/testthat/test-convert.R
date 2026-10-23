@@ -386,6 +386,8 @@ test_that("shapes, names and arguments", {
     list(x = bytes(0x61, 0), y = NULL)
   )
   expect_null(utf_encode(NA_character_))
+  expect_null(utf_encode("\u4e2d", "Latin-1", invalid = "na"))
+  expect_identical(utf_encode(c(a = "x")), bytes(0x78, 0))
   expect_identical(utf_decode(list(a = charToRaw("x"))), c(a = "x"))
   expect_identical(Encoding(utf_decode(charToRaw("caf\u00e9"))), "UTF-8")
   expect_identical(utf_decode(raw()), "")

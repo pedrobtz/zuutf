@@ -257,7 +257,9 @@ element return a vector of that length; `utf_convert()` and
 `utf_encode()` return a raw vector for one-element input and a list of
 raw otherwise, like `iconv(toRaw = TRUE)`: one-element input is a raw
 vector, or a single string for `utf_encode()`, and a list stays a list
-whatever its length (Stage 3, 2026-10-13).
+whatever its length (Stage 3, 2026-10-13). A single string's name is
+dropped with the list, and an `NA` single string, or one invalid under
+`"na"`, gives `NULL`, the missing element unwrapped (review #48).
 
 **Encoding names.** `"UTF-8"`, `"UTF-16LE"`, `"UTF-16BE"`, `"UTF-32LE"`,
 `"UTF-32BE"`, `"Latin-1"`, `"ASCII"` (validation only), matched without

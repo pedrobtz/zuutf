@@ -31,9 +31,11 @@ none). Matched without regard to case or hyphens.}
 \value{
 \code{utf_convert()} and \code{utf_encode()}: a raw vector for a raw vector
 or a single string, otherwise a list of raw vectors (\code{NULL} for a
-missing or, under \code{"na"}, invalid element). \code{utf_decode()}: a character
-vector marked UTF-8, one string per element. A list or a character
-vector keeps its names.
+missing or, under \code{"na"}, invalid element). A single string that is
+\code{NA}, or invalid under \code{"na"}, gives \code{NULL}, and its name is dropped,
+since a raw vector has no element names. \code{utf_decode()}: a character
+vector marked UTF-8, one string per element. A list, or a character
+vector of any other length, keeps its names.
 }
 \description{
 \code{utf_convert()} converts bytes from one encoding to another.
