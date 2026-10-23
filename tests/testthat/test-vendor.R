@@ -1,6 +1,24 @@
 # CRAN's compiled-code check applies to vendored code (design §8): the
-# installed object must not reach printf, abort, exit or stderr, so that a
-# future simdutf release cannot bring them in unnoticed.
+# installed object must not reach printf, abort, exit, stderr or any other
+# entry point that check names, so that a future simdutf release cannot
+# bring them in unnoticed.
+
+# The symbols R CMD check flags, as this R's own table spells them for this
+# platform, without Mach-O's leading underscore.
+r_check_symbols <- function() {
+  table <- tryCatch(
+    get("so_symbol_names_table", envir = asNamespace("tools")),
+    error = function(e) NULL
+  )
+  if (is.null(table)) {
+    return(character())
+  }
+  names <- table[table[, "language"] %in% c("C", "C++"), "osname"]
+  if (Sys.info()[["sysname"]] == "Darwin") {
+    names <- sub("^_", "", names)
+  }
+  names
+}
 
 test_that("the shared object references no stdio, abort or exit", {
   skip_if(is_instrumented_build(), "instrumented build")
@@ -21,7 +39,25 @@ test_that("the shared object references no stdio, abort or exit", {
     "stdout",
     "__stderrp",
     "__stdoutp",
-    "__acrt_iob_func"
+    "__acrt_iob_func",
+    # glibc's and macOS's spellings, which no table lists everywhere
+    "__assert_fail",
+    "__assert_rtn",
+    "_Exit",
+    "sprintf",
+    "__sprintf_chk",
+    "vprintf",
+    "vsprintf",
+    "__vsprintf_chk",
+    "__printf_chk",
+    "__fprintf_chk",
+    "rand",
+    "srand",
+    "random",
+    "srandom",
+    "rand_r",
+    "srand48",
+    r_check_symbols()
   )
   found <- intersect(names, banned)
   if (Sys.info()[["sysname"]] == "Windows") {
