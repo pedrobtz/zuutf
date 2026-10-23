@@ -4,7 +4,8 @@
 #             (tools/run-fuzz): a target is trusted once it has failed
 #   fuzz      libFuzzer over zuutf's .Call glue and simdutf, R embedded,
 #             through r-actions' fuzz.yml: five minutes a target on pull
-#             requests and pushes, an hour nightly; the corpus is cached
+#             requests and pushes, an hour nightly and on a manual run;
+#             the corpus is cached
 #   oracle    zufast's scalar validator and strict Base64 decoder against
 #             zuutf (tools/zuutforacle, D12) on the corpus, the unicode_lipsum
 #             samples and a million random strings, under every kernel the
@@ -60,7 +61,10 @@ jobs:
       sanitizers: fuzzer,address,alignment,bool,builtin,bounds,enum,float-cast-overflow,integer-divide-by-zero,nonnull-attribute,null,object-size,pointer-overflow,return,returns-nonnull-attribute,shift,signed-integer-overflow,unreachable,vla-bound
       seed-corpus: tools/fuzz/seeds/${{ matrix.target }}
       libfuzzer-args: -max_len=4096
-      max-total-time: ${{ github.event_name == 'schedule' && 3600 || 300 }}
+      # the job's timeout must hold the budget plus the build and the corpus
+      # save, or GitHub cancels it mid-run (#23)
+      max-total-time: ${{ (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') && 3600 || 300 }}
+      timeout-minutes: ${{ (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') && 75 || 30 }}
 
   oracle:
     runs-on: ${{ matrix.os }}
