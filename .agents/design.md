@@ -208,7 +208,13 @@ R result: logical / integer offsets / raw / character (marked UTF-8)
   vector. Output buffers are sized by simdutf's length functions and
   allocated once as the R result; a `_safe` variant with an explicit
   capacity is used wherever the C API offers one, so a wrong length
-  estimate is an error, never an overrun.
+  estimate is an error, never an overrun. That is Latin-1 to UTF-8, and
+  UTF-16 to UTF-8 with replacement in native byte order; the other calls,
+  the opposite-order replacement among them, have no `_safe` form and rely
+  on the length pass. Every element's written length is compared with its
+  measured length, and a difference is a `zuutf_internal_error`. simdutf
+  documents `convert_latin1_to_utf8_safe` as up to four times slower on
+  short inputs; the bound is kept anyway (review #27).
 - No R API call happens between a simdutf call and the use of its result;
   `R_CheckUserInterrupt()` runs between elements, never inside a call.
   simdutf calls are `noexcept` and never `longjmp`, so no R error passes

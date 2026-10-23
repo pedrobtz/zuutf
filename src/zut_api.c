@@ -92,7 +92,7 @@ static zuutf_result api_latin1_to_utf8(const char *s, size_t n, char *out,
   if (need > cap) {
     return too_small(need);
   }
-  return ok(simdutf_convert_latin1_to_utf8(s, n, out));
+  return ok(simdutf_convert_latin1_to_utf8_safe(s, n, out, cap));
 }
 
 /* ZUUTF_BASE64_* flags to a simdutf_base64_options value. */

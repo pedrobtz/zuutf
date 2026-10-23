@@ -140,10 +140,11 @@ size_t zut_view_length(const zut_view *v, size_t pos, size_t cnt, zut_enc to) {
   }
 }
 
-static size_t write_utf8(const zut_view *v, size_t pos, size_t cnt, char *out) {
+static size_t write_utf8(const zut_view *v, size_t pos, size_t cnt, char *out,
+                         size_t cap) {
   switch (v->enc) {
   case ZUT_LATIN1:
-    return simdutf_convert_latin1_to_utf8(v->base + pos, cnt, out);
+    return simdutf_convert_latin1_to_utf8_safe(v->base + pos, cnt, out, cap);
   case ZUT_UTF16LE:
     return simdutf_convert_valid_utf16le_to_utf8(U16(v) + pos, cnt, out);
   case ZUT_UTF16BE:
@@ -231,13 +232,13 @@ static size_t write_latin1(const zut_view *v, size_t pos, size_t cnt, char *out)
 }
 
 size_t zut_view_write(const zut_view *v, size_t pos, size_t cnt, zut_enc to,
-                      unsigned char *out) {
+                      unsigned char *out, size_t cap) {
   if (cnt == 0) {
     return 0;
   }
   switch (to) {
   case ZUT_UTF8:
-    return write_utf8(v, pos, cnt, (char *) out);
+    return write_utf8(v, pos, cnt, (char *) out, cap);
   case ZUT_UTF16LE:
   case ZUT_UTF16BE:
     return write_utf16(v, pos, cnt, to == ZUT_UTF16LE, out);

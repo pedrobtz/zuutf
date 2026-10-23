@@ -22,7 +22,8 @@ enum {
   ZUT_ILL_FORMED = 1,
   ZUT_UNREPRESENTABLE = 2,
   ZUT_NUL = 3,
-  ZUT_TOO_LONG = 4
+  ZUT_TOO_LONG = 4,
+  ZUT_INTERNAL = 5 /* wrote other than it measured */
 };
 
 typedef struct {
@@ -33,33 +34,38 @@ typedef struct {
 
 static int is_utf16(zut_enc e) { return e == ZUT_UTF16LE || e == ZUT_UTF16BE; }
 
-static size_t emit(const zut_view *v, size_t pos, size_t cnt, zut_enc to,
-                   unsigned char *out) {
-  return out ? zut_view_write(v, pos, cnt, to, out) : zut_view_length(v, pos, cnt, to);
+/* Write the run at out + *w, bounded by cap, or measure it when out is NULL;
+ * adds the bytes to *w. */
+static void emit(const zut_view *v, size_t pos, size_t cnt, zut_enc to,
+                 unsigned char *out, size_t cap, size_t *w) {
+  *w += out ? zut_view_write(v, pos, cnt, to, out + *w, cap - *w)
+            : zut_view_length(v, pos, cnt, to);
 }
 
 /* A valid run into a Latin-1 target: code points above U+00FF are
  * unrepresentable, '?' under "replace". */
 static int emit_latin1(const zut_view *v, const zut_conv *c, size_t pos,
-                       size_t cnt, unsigned char *out, size_t *w, size_t *err) {
+                       size_t cnt, unsigned char *out, size_t cap, size_t *w,
+                       size_t *err) {
   size_t end = pos + cnt, at, len;
   while (pos < end && zut_view_first_wide(v, pos, end - pos, &at, &len)) {
     if (c->policy != ZUT_POLICY_REPLACE) {
       *err = at;
       return ZUT_UNREPRESENTABLE;
     }
-    *w += emit(v, pos, at - pos, ZUT_LATIN1, out ? out + *w : NULL);
+    emit(v, pos, at - pos, ZUT_LATIN1, out, cap, w);
     *w += zut_replacement(ZUT_LATIN1, out ? out + *w : NULL);
     pos = at + len;
   }
-  *w += emit(v, pos, end - pos, ZUT_LATIN1, out ? out + *w : NULL);
+  emit(v, pos, end - pos, ZUT_LATIN1, out, cap, w);
   return ZUT_OK;
 }
 
-/* Convert the view into out, or measure it when out is NULL. Returns a
- * status; on failure *err is the unit offset of the problem. */
+/* Convert the view into out, which holds cap bytes, or measure it when out
+ * is NULL. Returns a status; on failure *err is the unit offset of the
+ * problem. */
 static int convert_view(const zut_view *v, const zut_conv *c, unsigned char *out,
-                        size_t *len, size_t *err) {
+                        size_t cap, size_t *len, size_t *err) {
   size_t w = 0, pos = 0;
 
   if (c->policy == ZUT_POLICY_REPLACE && c->to == ZUT_UTF8 &&
@@ -67,7 +73,11 @@ static int convert_view(const zut_view *v, const zut_conv *c, unsigned char *out
     /* D8: simdutf's own replacement where the C API has one */
     const char16_t *s = (const char16_t *) (const void *) v->base;
     int le = v->enc == ZUT_UTF16LE;
-    if (out) {
+    if (out && le == zut_little_endian()) {
+      /* the _safe call exists in native byte order only */
+      w = simdutf_convert_utf16_to_utf8_with_replacement_safe(s, v->units, (char *) out, cap)
+              .output_count;
+    } else if (out) {
       w = le ? simdutf_convert_utf16le_to_utf8_with_replacement(s, v->units, (char *) out)
              : simdutf_convert_utf16be_to_utf8_with_replacement(s, v->units, (char *) out);
     } else {
@@ -80,12 +90,12 @@ static int convert_view(const zut_view *v, const zut_conv *c, unsigned char *out
       int ok = zut_view_validate(v, pos, &e);
       size_t run = (ok ? v->units : e) - pos;
       if (c->to == ZUT_LATIN1) {
-        int st = emit_latin1(v, c, pos, run, out, &w, err);
+        int st = emit_latin1(v, c, pos, run, out, cap, &w, err);
         if (st != ZUT_OK) {
           return st;
         }
       } else {
-        w += emit(v, pos, run, c->to, out ? out + w : NULL);
+        emit(v, pos, run, c->to, out, cap, &w);
       }
       pos += run;
       if (ok) {
@@ -244,7 +254,7 @@ SEXP zut_convert(SEXP x, SEXP from, SEXP to, SEXP policy, SEXP mode,
     zut_view_make(&v, &scratch, e, p, n);
 
     size_t outlen = 0, err = 0;
-    int s = convert_view(&v, &c, NULL, &outlen, &err);
+    int s = convert_view(&v, &c, NULL, 0, &outlen, &err);
     if (chr) {
       size_t nul = find_nul(&v);
       if (nul != (size_t) -1) {
@@ -276,18 +286,26 @@ SEXP zut_convert(SEXP x, SEXP from, SEXP to, SEXP policy, SEXP mode,
       size_t wrote = 0;
       const char *o = "";
       if (outlen) {
-        convert_view(&v, &c, RAW(buf), &wrote, &err);
+        convert_view(&v, &c, RAW(buf), outlen, &wrote, &err);
         o = (const char *) RAW(buf);
+      }
+      if (wrote != outlen) {
+        set_status(st, ZUT_INTERNAL, i, 0, e);
+        break;
       }
       SET_STRING_ELT(value, i, Rf_mkCharLenCE(o, (int) wrote, CE_UTF8));
     } else {
       SEXP r = PROTECT(Rf_allocVector(RAWSXP, (R_xlen_t) outlen));
       size_t wrote = 0;
       if (outlen) {
-        convert_view(&v, &c, RAW(r), &wrote, &err);
+        convert_view(&v, &c, RAW(r), outlen, &wrote, &err);
       }
       SET_VECTOR_ELT(value, i, r);
       UNPROTECT(1);
+      if (wrote != outlen) {
+        set_status(st, ZUT_INTERNAL, i, 0, e);
+        break;
+      }
     }
   }
 
