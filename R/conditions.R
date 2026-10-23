@@ -37,22 +37,40 @@ abort_invalid_argument <- function(message, call = NULL) {
   stop(zuutf_condition("zuutf_invalid_argument", message, call = call))
 }
 
-abort_encoding_error <- function(message, index, offset, encoding, call = NULL) {
+abort_encoding_error <- function(
+  message,
+  index,
+  offset,
+  encoding,
+  call = NULL
+) {
   stop(zuutf_condition(
-    "zuutf_encoding_error", message,
-    index = index, offset = offset, encoding = encoding, call = call
+    "zuutf_encoding_error",
+    message,
+    index = index,
+    offset = offset,
+    encoding = encoding,
+    call = call
   ))
 }
 
 abort_nul_error <- function(message, index, offset, call = NULL) {
   stop(zuutf_condition(
-    "zuutf_nul_error", message,
-    index = index, offset = offset, call = call
+    "zuutf_nul_error",
+    message,
+    index = index,
+    offset = offset,
+    call = call
   ))
 }
 
 abort_base64_error <- function(message, offset, call = NULL) {
-  stop(zuutf_condition("zuutf_base64_error", message, offset = offset, call = call))
+  stop(zuutf_condition(
+    "zuutf_base64_error",
+    message,
+    offset = offset,
+    call = call
+  ))
 }
 
 abort_size_error <- function(message, call = NULL) {

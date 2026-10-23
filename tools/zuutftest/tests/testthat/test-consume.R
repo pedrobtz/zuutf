@@ -5,7 +5,9 @@ ERR_SUCCESS <- 0
 ERR_SURROGATE <- 6
 ERR_TOO_SMALL <- 10
 
-text_bytes <- function() charToRaw(enc2utf8(intToUtf8(c(0x61, 0xe9, 0x4e2d, 0x1f600))))
+text_bytes <- function() {
+  charToRaw(enc2utf8(intToUtf8(c(0x61, 0xe9, 0x4e2d, 0x1f600))))
+}
 
 test_that("the table resolves and is at least as large as 0.1.0's", {
   size <- api_struct_size()
@@ -24,10 +26,19 @@ test_that("validators match utf_error_at()", {
   le <- zuutf::utf_convert(good, "UTF-8", "UTF-16LE")
   expect_identical(api_validate(le, "utf16le"), c(ERR_SUCCESS, length(le) / 2))
   lone <- c(le, as.raw(c(0x00, 0xdc)))
-  expect_identical(api_validate(lone, "utf16le"), c(ERR_SURROGATE, length(le) / 2))
-  native32 <- zuutf::utf_convert(good, "UTF-8",
-                                 if (.Platform$endian == "little") "UTF-32LE" else "UTF-32BE")
-  expect_identical(api_validate(native32, "utf32"), c(ERR_SUCCESS, length(native32) / 4))
+  expect_identical(
+    api_validate(lone, "utf16le"),
+    c(ERR_SURROGATE, length(le) / 2)
+  )
+  native32 <- zuutf::utf_convert(
+    good,
+    "UTF-8",
+    if (.Platform$endian == "little") "UTF-32LE" else "UTF-32BE"
+  )
+  expect_identical(
+    api_validate(native32, "utf32"),
+    c(ERR_SUCCESS, length(native32) / 4)
+  )
   expect_true(api_validate(charToRaw("abc"), "ascii"))
   expect_false(api_validate(good, "ascii"))
   expect_identical(api_count_utf8(good), as.numeric(zuutf::utf_count(good)))
@@ -70,11 +81,17 @@ test_that("Base64 matches base64_encode() and base64_decode()", {
     d <- api_base64_decode(charToRaw(s), if (url) 1L else 0L)
     expect_identical(d[[3]], x)
   }
-  expect_identical(api_base64_decode(charToRaw("-_8="), 8L)[[3]], as.raw(c(0xfb, 0xff)))
+  expect_identical(
+    api_base64_decode(charToRaw("-_8="), 8L)[[3]],
+    as.raw(c(0xfb, 0xff))
+  )
   strict <- api_base64_decode(charToRaw("aGVs bG8="), 4L)
-  expect_identical(strict[[1]], 7L)              # whitespace is invalid when strict
+  expect_identical(strict[[1]], 7L) # whitespace is invalid when strict
   expect_identical(strict[[2]], 4)
-  expect_identical(api_base64_decode(charToRaw("aGVs bG8="), 0L)[[3]], charToRaw("hello"))
+  expect_identical(
+    api_base64_decode(charToRaw("aGVs bG8="), 0L)[[3]],
+    charToRaw("hello")
+  )
   short <- api_base64_encode(x, 0L, cap = 10)
   expect_identical(short[[1]], as.integer(ERR_TOO_SMALL))
   short <- api_base64_decode(charToRaw("aGVsbG8="), 0L, cap = 2)

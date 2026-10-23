@@ -42,7 +42,11 @@ random_code_points <- function(n) {
   cp <- integer(n)
   cp[classes == 1] <- sample(1:0x7f, sum(classes == 1), TRUE)
   cp[classes == 2] <- sample(0x80:0x7ff, sum(classes == 2), TRUE)
-  cp[classes == 3] <- sample(c(0x800:0xd7ff, 0xe000:0xffff), sum(classes == 3), TRUE)
+  cp[classes == 3] <- sample(
+    c(0x800:0xd7ff, 0xe000:0xffff),
+    sum(classes == 3),
+    TRUE
+  )
   cp[classes == 4] <- sample(0x10000:0x10ffff, sum(classes == 4), TRUE)
   cp
 }
@@ -54,8 +58,12 @@ read_fixture <- function(name) {
 
 # iconv()'s name for each of zuutf's.
 iconv_name <- c(
-  "UTF-8" = "UTF-8", "UTF-16LE" = "UTF-16LE", "UTF-16BE" = "UTF-16BE",
-  "UTF-32LE" = "UTF-32LE", "UTF-32BE" = "UTF-32BE", "Latin-1" = "latin1"
+  "UTF-8" = "UTF-8",
+  "UTF-16LE" = "UTF-16LE",
+  "UTF-16BE" = "UTF-16BE",
+  "UTF-32LE" = "UTF-32LE",
+  "UTF-32BE" = "UTF-32BE",
+  "Latin-1" = "latin1"
 )
 
 # iconv() of a list of raw vectors, NULL where it fails.
@@ -65,29 +73,50 @@ iconv_raw <- function(x, from, to) {
 
 # The test texts as raw vectors in `enc`, from UTF-8 strings.
 encode_all <- function(texts, enc) {
-  lapply(texts, function(t) iconv(enc2utf8(t), "UTF-8", iconv_name[[enc]], toRaw = TRUE)[[1L]])
+  lapply(texts, function(t) {
+    iconv(enc2utf8(t), "UTF-8", iconv_name[[enc]], toRaw = TRUE)[[1L]]
+  })
 }
 
 conversion_texts <- function(n = 200) {
   sample <- rawToChar(read_fixture("sample.utf8.txt"))
   Encoding(sample) <- "UTF-8"
   lines <- strsplit(sample, "\n", fixed = TRUE)[[1L]]
-  random <- vapply(seq_len(n), function(i) {
-    intToUtf8(random_code_points(sample(0:120, 1)))
-  }, "")
+  random <- vapply(
+    seq_len(n),
+    function(i) {
+      intToUtf8(random_code_points(sample(0:120, 1)))
+    },
+    ""
+  )
   c("", "a", lines, sample, random)
 }
 
-conversion_encodings <- c("UTF-8", "UTF-16LE", "UTF-16BE", "UTF-32LE", "UTF-32BE", "Latin-1")
+conversion_encodings <- c(
+  "UTF-8",
+  "UTF-16LE",
+  "UTF-16BE",
+  "UTF-32LE",
+  "UTF-32BE",
+  "Latin-1"
+)
 
 # Base64 fixtures: hex TSV, read as text.
 read_tsv_fixture <- function(name) {
-  utils::read.delim(test_path("fixtures", name), colClasses = "character",
-                    na.strings = "NA", quote = "")
+  utils::read.delim(
+    test_path("fixtures", name),
+    colClasses = "character",
+    na.strings = "NA",
+    quote = ""
+  )
 }
 
 hex_raw <- function(h) {
-  if (is.na(h)) return(NULL)
-  if (!nzchar(h)) return(raw())
+  if (is.na(h)) {
+    return(NULL)
+  }
+  if (!nzchar(h)) {
+    return(raw())
+  }
   as.raw(strtoi(substring(h, seq(1, nchar(h), 2), seq(2, nchar(h), 2)), 16L))
 }

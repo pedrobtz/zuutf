@@ -8,7 +8,10 @@
 test_that("utf_valid() is faster than validUTF8() on a large input", {
   skip_unless_timing()
   withr::local_seed(20261013)
-  text <- strrep(paste0("caf\u00e9 ", intToUtf8(sample(0x4e00:0x4fff, 100, TRUE)), " "), 2^15)
+  text <- strrep(
+    paste0("caf\u00e9 ", intToUtf8(sample(0x4e00:0x4fff, 100, TRUE)), " "),
+    2^15
+  )
   raw <- charToRaw(text)
   base <- min(replicate(3, system.time(validUTF8(text))[["elapsed"]]))
   ours <- min(replicate(3, system.time(utf_valid(raw))[["elapsed"]]))

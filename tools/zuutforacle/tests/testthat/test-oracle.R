@@ -18,7 +18,11 @@ split_lines <- function(raw) {
 # zuutf skips a leading byte-order mark (design §6) and zufast reads it as
 # U+FEFF, so zufast is given the bytes after it
 strip_utf8_bom <- function(b) {
-  if (length(b) >= 3 && identical(b[1:3], as.raw(c(0xef, 0xbb, 0xbf)))) b[-(1:3)] else b
+  if (length(b) >= 3 && identical(b[1:3], as.raw(c(0xef, 0xbb, 0xbf)))) {
+    b[-(1:3)]
+  } else {
+    b
+  }
 }
 
 # unicode_lipsum's UTF-16 and UTF-32 files carry one more U+FEFF than its
@@ -35,8 +39,13 @@ expect_agree <- function(x, label) {
 
 test_that("zufast and zuutf agree on every corpus file, whole and by line", {
   dir <- fixtures()
-  files <- c("UTF-8-test.txt", "UTF-8-test.whatwg.txt", "sample.utf8.txt",
-             "sample.utf16le.txt", "sample.utf32be.txt")
+  files <- c(
+    "UTF-8-test.txt",
+    "UTF-8-test.whatwg.txt",
+    "sample.utf8.txt",
+    "sample.utf16le.txt",
+    "sample.utf32be.txt"
+  )
   for (f in files) {
     raw <- read_bytes(file.path(dir, f))
     expect_agree(list(raw), f)
@@ -46,25 +55,34 @@ test_that("zufast and zuutf agree on every corpus file, whole and by line", {
 
 test_that("zufast and zuutf agree on every truncation of the stress test", {
   lines <- split_lines(read_bytes(file.path(fixtures(), "UTF-8-test.txt")))
-  cuts <- unlist(lapply(lines, function(b) {
-    lapply(seq_len(length(b)), function(k) b[seq_len(k)])
-  }), recursive = FALSE)
+  cuts <- unlist(
+    lapply(lines, function(b) {
+      lapply(seq_len(length(b)), function(k) b[seq_len(k)])
+    }),
+    recursive = FALSE
+  )
   expect_gt(length(cuts), 10000L)
   expect_agree(cuts, "truncations")
 })
 
 test_that("zufast and zuutf agree through R on random strings", {
   set.seed(20261013)
-  x <- lapply(sample(0:200, 1e5, TRUE), function(n) as.raw(sample(0:255, n, TRUE)))
+  x <- lapply(sample(0:200, 1e5, TRUE), function(n) {
+    as.raw(sample(0:255, n, TRUE))
+  })
   expect_agree(x, "random")
 })
 
 test_that("zufast and zuutf's C table agree on a million random strings", {
   res <- random_sweep(1e6)
   expect_identical(res$strings, 1e6)
-  expect_gt(res$valid, 1e5)         # both outcomes are common
+  expect_gt(res$valid, 1e5) # both outcomes are common
   expect_lt(res$valid, 9e5)
-  expect_identical(res$disagreements, 0, info = paste(res$first, collapse = " "))
+  expect_identical(
+    res$disagreements,
+    0,
+    info = paste(res$first, collapse = " ")
+  )
 })
 
 test_that("strict Base64 accepts exactly what zufast accepts", {
@@ -76,18 +94,30 @@ test_that("strict Base64 accepts exactly what zufast accepts", {
     url <- i %% 2 == 0
     s <- charToRaw(zuutf::base64_encode(b, url = url))
     k <- i %% 5
-    if (k == 1 && length(s)) s[sample(length(s), 1)] <- charToRaw(sample(alphabet, 1))
-    if (k == 2 && length(s)) s <- s[-sample(length(s), 1)]
-    if (k == 3) s <- c(s, charToRaw(sample(c("=", "A", " "), 1)))
-    if (k == 4) s <- s[s != charToRaw("=")]
+    if (k == 1 && length(s)) {
+      s[sample(length(s), 1)] <- charToRaw(sample(alphabet, 1))
+    }
+    if (k == 2 && length(s)) {
+      s <- s[-sample(length(s), 1)]
+    }
+    if (k == 3) {
+      s <- c(s, charToRaw(sample(c("=", "A", " "), 1)))
+    }
+    if (k == 4) {
+      s <- s[s != charToRaw("=")]
+    }
     inputs[[i]] <- list(s = s, url = url)
   }
   for (url in c(FALSE, TRUE)) {
     sel <- Filter(function(e) e$url == url, inputs)
     x <- lapply(sel, `[[`, "s")
     z <- zufast_base64_strict(x, url = url)
-    u <- lapply(x, function(s) tryCatch(zuutf::base64_decode(s, url = url, forgiving = FALSE),
-                                        zuutf_base64_error = function(e) NULL))
+    u <- lapply(x, function(s) {
+      tryCatch(
+        zuutf::base64_decode(s, url = url, forgiving = FALSE),
+        zuutf_base64_error = function(e) NULL
+      )
+    })
     expect_identical(u, z, info = paste("url =", url))
     expect_gt(sum(!vapply(z, is.null, logical(1))), 1000L)
     expect_gt(sum(vapply(z, is.null, logical(1))), 1000L)
@@ -106,22 +136,39 @@ test_that("the unicode_lipsum samples agree with zufast and with their own UTF-1
     text <- drop_feff(zuutf::utf_decode(raw8, "UTF-8"))
     raw16 <- read_bytes(sub("utf8", "utf16", f, fixed = TRUE))
     raw32 <- read_bytes(sub("utf8", "utf32", f, fixed = TRUE))
-    expect_identical(drop_feff(zuutf::utf_decode(raw16, "UTF-16LE")), text, info = basename(f))
-    expect_identical(drop_feff(zuutf::utf_decode(raw32, "UTF-32LE")), text, info = basename(f))
-    expect_identical(zuutf::utf_encode(text, "UTF-16LE"),
-                     zuutf::utf_encode(drop_feff(zuutf::utf_decode(raw16)), "UTF-16LE"),
-                     info = basename(f))
+    expect_identical(
+      drop_feff(zuutf::utf_decode(raw16, "UTF-16LE")),
+      text,
+      info = basename(f)
+    )
+    expect_identical(
+      drop_feff(zuutf::utf_decode(raw32, "UTF-32LE")),
+      text,
+      info = basename(f)
+    )
+    expect_identical(
+      zuutf::utf_encode(text, "UTF-16LE"),
+      zuutf::utf_encode(drop_feff(zuutf::utf_decode(raw16)), "UTF-16LE"),
+      info = basename(f)
+    )
   }
 })
 
 test_that("files Windows PowerShell wrote decode to the text it was given", {
   dir <- Sys.getenv("ZUUTF_POWERSHELL")
-  skip_if(!nzchar(dir) || !dir.exists(dir), "not on Windows, or no PowerShell files")
+  skip_if(
+    !nzchar(dir) || !dir.exists(dir),
+    "not on Windows, or no PowerShell files"
+  )
   text <- zuutf::utf_decode(read_bytes(Sys.getenv("ZUUTF_SAMPLE")), "UTF-8")
-  expected <- c(Unicode = "UTF-16LE", BigEndianUnicode = "UTF-16BE", UTF8 = "UTF-8")
+  expected <- c(
+    Unicode = "UTF-16LE",
+    BigEndianUnicode = "UTF-16BE",
+    UTF8 = "UTF-8"
+  )
   for (enc in names(expected)) {
     raw <- read_bytes(file.path(dir, paste0(enc, ".txt")))
-    expect_identical(zuutf::utf_detect(raw), expected[[enc]], info = enc)   # its BOM
+    expect_identical(zuutf::utf_detect(raw), expected[[enc]], info = enc) # its BOM
     expect_identical(zuutf::utf_decode(raw), text, info = enc)
     expect_identical(zuutf::utf_decode(raw, expected[[enc]]), text, info = enc)
   }

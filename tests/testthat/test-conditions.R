@@ -1,13 +1,24 @@
 test_that("conditions carry the zuutf classes", {
   e <- tryCatch(utf_valid("a", "EBCDIC"), error = identity)
-  expect_s3_class(e, c("zuutf_invalid_argument", "zuutf_error", "error", "condition"))
-  e <- zuutf:::zuutf_condition("zuutf_encoding_error", "m",
-                               index = 2L, offset = 5L, encoding = "UTF-8")
+  expect_s3_class(
+    e,
+    c("zuutf_invalid_argument", "zuutf_error", "error", "condition")
+  )
+  e <- zuutf:::zuutf_condition(
+    "zuutf_encoding_error",
+    "m",
+    index = 2L,
+    offset = 5L,
+    encoding = "UTF-8"
+  )
   expect_s3_class(e, c("zuutf_encoding_error", "zuutf_error", "error"))
   expect_identical(e$index, 2L)
   expect_identical(e$offset, 5L)
   expect_identical(e$encoding, "UTF-8")
-  expect_error(zuutf:::abort_internal_error("m"), class = "zuutf_internal_error")
+  expect_error(
+    zuutf:::abort_internal_error("m"),
+    class = "zuutf_internal_error"
+  )
   expect_error(
     zuutf:::abort_encoding_error("m", 1L, 1L, "UTF-8"),
     class = "zuutf_encoding_error"
@@ -22,12 +33,15 @@ test_that("a forced kernel the processor cannot run is an internal error", {
   # where it runs: under valgrind this process sees valgrind's emulated CPU
   # while the child runs on the real one.
   script <- withr::local_tempfile(fileext = ".R")
-  writeLines(c(
-    "k <- Sys.getenv('SIMDUTF_FORCE_IMPLEMENTATION')",
-    "info <- zuutf::zuutf_info()",
-    "if (k %in% info$kernels$name[info$kernels$supported]) cat('supported') else",
-    "  cat(tryCatch(zuutf::utf_valid('a'), zuutf_internal_error = function(e) 'internal'))"
-  ), script)
+  writeLines(
+    c(
+      "k <- Sys.getenv('SIMDUTF_FORCE_IMPLEMENTATION')",
+      "info <- zuutf::zuutf_info()",
+      "if (k %in% info$kernels$name[info$kernels$supported]) cat('supported') else",
+      "  cat(tryCatch(zuutf::utf_valid('a'), zuutf_internal_error = function(e) 'internal'))"
+    ),
+    script
+  )
   rscript <- file.path(R.home("bin"), "Rscript")
   run_forced <- function(kernel) {
     # a script file, not -e: Windows' cmd does not keep single quotes, and
@@ -35,7 +49,12 @@ test_that("a forced kernel the processor cannot run is an internal error", {
     # R_TESTS is R CMD check's startup file for the test process only
     withr::with_envvar(
       c(SIMDUTF_FORCE_IMPLEMENTATION = kernel, R_TESTS = ""),
-      suppressWarnings(system2(rscript, shQuote(script), stdout = TRUE, stderr = TRUE))
+      suppressWarnings(system2(
+        rscript,
+        shQuote(script),
+        stdout = TRUE,
+        stderr = TRUE
+      ))
     )
   }
 

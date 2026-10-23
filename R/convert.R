@@ -85,12 +85,19 @@ utf_convert <- function(x, from, to, invalid = c("error", "replace", "na")) {
 
 #' @rdname utf_convert
 #' @export
-utf_decode <- function(x, from = "auto", invalid = c("error", "replace", "na")) {
+utf_decode <- function(
+  x,
+  from = "auto",
+  invalid = c("error", "replace", "na")
+) {
   call <- sys.call()
   from <- match_encoding(from, c(enc_from, "auto"), "from", call)
   invalid <- match_invalid(invalid, call)
   if (is.character(x)) {
-    abort_invalid_argument("`x` must be raw bytes, not a character vector", call = call)
+    abort_invalid_argument(
+      "`x` must be raw bytes, not a character vector",
+      call = call
+    )
   }
   check_bytes_input(x, call = call)
   check_kernel(call)
@@ -99,7 +106,11 @@ utf_decode <- function(x, from = "auto", invalid = c("error", "replace", "na")) 
 
 #' @rdname utf_convert
 #' @export
-utf_encode <- function(x, to = "UTF-16LE", invalid = c("error", "replace", "na")) {
+utf_encode <- function(
+  x,
+  to = "UTF-16LE",
+  invalid = c("error", "replace", "na")
+) {
   call <- sys.call()
   to <- match_encoding(to, enc_to, "to", call)
   invalid <- match_invalid(invalid, call)
@@ -158,7 +169,9 @@ match_invalid <- function(invalid, call = NULL) {
   if (identical(invalid, choices)) {
     return("error")
   }
-  if (!is.character(invalid) || length(invalid) != 1L || !invalid %in% choices) {
+  if (
+    !is.character(invalid) || length(invalid) != 1L || !invalid %in% choices
+  ) {
     abort_invalid_argument(
       "`invalid` must be one of \"error\", \"replace\" or \"na\"",
       call = call
@@ -168,12 +181,24 @@ match_invalid <- function(invalid, call = NULL) {
 }
 
 # Run the C converter and raise the condition it reports, if any.
-run_convert <- function(x, from, to, invalid, mode, call = NULL,
-                        simdutf_replacement = TRUE) {
+run_convert <- function(
+  x,
+  from,
+  to,
+  invalid,
+  mode,
+  call = NULL,
+  simdutf_replacement = TRUE
+) {
   policy <- match(invalid, c("error", "replace", "na")) - 1L
   res <- .Call(
-    zut_convert, x, encoding_code(from), encoding_code(to), policy,
-    mode, simdutf_replacement
+    zut_convert,
+    x,
+    encoding_code(from),
+    encoding_code(to),
+    policy,
+    mode,
+    simdutf_replacement
   )
   status <- res[[2L]]
   if (status[[1L]] != 0) {
@@ -191,21 +216,32 @@ raise_status <- function(status, to, call) {
     kind,
     abort_encoding_error(
       sprintf("element %d is ill-formed %s at offset %s", index, enc, offset),
-      index = index, offset = offset, encoding = enc, call = call
+      index = index,
+      offset = offset,
+      encoding = enc,
+      call = call
     ),
     abort_encoding_error(
       sprintf(
         "element %d has a code point at offset %s that %s cannot represent",
-        index, offset, to
+        index,
+        offset,
+        to
       ),
-      index = index, offset = offset, encoding = to, call = call
+      index = index,
+      offset = offset,
+      encoding = to,
+      call = call
     ),
     abort_nul_error(
       sprintf(
         "element %d holds U+0000 at offset %s, which an R string cannot",
-        index, offset
+        index,
+        offset
       ),
-      index = index, offset = offset, call = call
+      index = index,
+      offset = offset,
+      call = call
     ),
     abort_size_error(
       sprintf("element %d converts to more bytes than R can hold", index),

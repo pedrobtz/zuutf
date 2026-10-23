@@ -10,8 +10,19 @@ test_that("the shared object references no stdio, abort or exit", {
   # instead of passing the check below vacuously. (memcpy is no sentinel:
   # glibc builds reference it as __memcpy_chk or inline it.)
   expect_true("R_registerRoutines" %in% names)
-  banned <- c("printf", "puts", "putchar", "abort", "exit", "_exit",
-              "stderr", "stdout", "__stderrp", "__stdoutp", "__acrt_iob_func")
+  banned <- c(
+    "printf",
+    "puts",
+    "putchar",
+    "abort",
+    "exit",
+    "_exit",
+    "stderr",
+    "stdout",
+    "__stderrp",
+    "__stdoutp",
+    "__acrt_iob_func"
+  )
   found <- intersect(names, banned)
   if (Sys.info()[["sysname"]] == "Windows") {
     # Rtools links the C++ runtime into the DLL statically, and its

@@ -49,8 +49,13 @@ base64_encode <- function(x, url = FALSE, pad = TRUE, line_length = NULL) {
   check_flag(pad, "pad", call = call)
   lines <- 0
   if (!is.null(line_length)) {
-    if (!is.numeric(line_length) || length(line_length) != 1L ||
-        is.na(line_length) || line_length < 1 || line_length != trunc(line_length)) {
+    if (
+      !is.numeric(line_length) ||
+        length(line_length) != 1L ||
+        is.na(line_length) ||
+        line_length < 1 ||
+        line_length != trunc(line_length)
+    ) {
       abort_invalid_argument(
         "`line_length` must be NULL or a positive whole number",
         call = call
@@ -77,13 +82,22 @@ base64_decode <- function(x, url = FALSE, forgiving = TRUE) {
   x <- base64_input(x, utf8 = FALSE, call = call)
   check_kernel(call)
   # simdutf_base64_options: default 0, URL 1, either alphabet 8
-  options <- if (is.na(url)) 8L else if (url) 1L else 0L
+  options <- if (is.na(url)) {
+    8L
+  } else if (url) {
+    1L
+  } else {
+    0L
+  }
   run_base64(.Call(zut_base64_decode, x, options, !forgiving), call)
 }
 
 check_flag <- function(x, arg, call = NULL) {
   if (!isTRUE(x) && !isFALSE(x)) {
-    abort_invalid_argument(sprintf("`%s` must be TRUE or FALSE", arg), call = call)
+    abort_invalid_argument(
+      sprintf("`%s` must be TRUE or FALSE", arg),
+      call = call
+    )
   }
 }
 
@@ -119,9 +133,13 @@ run_base64 <- function(res, call) {
     res[[1L]],
     abort_base64_error(
       sprintf("invalid Base64 at offset %s", as_count(status[[2L]])),
-      offset = as_count(status[[2L]]), call = call
+      offset = as_count(status[[2L]]),
+      call = call
     ),
-    abort_size_error("the Base64 text would be longer than a string can hold", call = call),
+    abort_size_error(
+      "the Base64 text would be longer than a string can hold",
+      call = call
+    ),
     abort_internal_error("unexpected result from simdutf's Base64", call = call)
   )
 }

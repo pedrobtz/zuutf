@@ -17,7 +17,10 @@ run_tool <- function(tool, args) {
   out <- suppressWarnings(
     system2(exe, args, stdout = TRUE, stderr = FALSE)
   )
-  skip_if(!is.character(out) || length(out) == 0L, paste(tool, "gave no output"))
+  skip_if(
+    !is.character(out) || length(out) == 0L,
+    paste(tool, "gave no output")
+  )
   out
 }
 
