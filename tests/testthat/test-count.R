@@ -31,6 +31,9 @@ test_that("utf_count() is NA where the element is invalid or missing", {
   expect_identical(utf_count(c(a = "x", b = NA)), c(a = 1L, b = NA))
   expect_identical(utf_count(bytes(0x61, 0xe9), "Latin-1"), 2L)
   expect_identical(utf_count(bytes(0x61, 0xe9), "ASCII"), NA_integer_)
+  # a character vector is UTF-8 text, which "ASCII" can count too
+  expect_identical(utf_count(c(a = "abc", b = NA), "ascii"), c(a = 3L, b = NA))
+  expect_identical(utf_count("caf\u00e9", "ASCII"), NA_integer_)
 })
 
 test_that("utf_length_as() gives the bytes a conversion produces", {

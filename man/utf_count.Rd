@@ -18,7 +18,8 @@ give \code{NA}.}
 \code{"UTF-16BE"}, \code{"UTF-16"}, \code{"UTF-32LE"}, \code{"UTF-32BE"}, \code{"UTF-32"} or
 \code{"Latin-1"}, matched without regard to case or hyphens; \code{utf_count()}
 also takes \code{"ASCII"}. A character vector is UTF-8 text, so for one only
-\code{"UTF-8"} applies, unless \code{useBytes = TRUE} in \code{utf_count()}.}
+\code{"UTF-8"} applies, and \code{"ASCII"} in \code{utf_count()}, unless
+\code{useBytes = TRUE} in \code{utf_count()}.}
 
 \item{useBytes}{For a character vector: \code{FALSE} (the default) takes each
 string in its marked encoding and checks its UTF-8 form, refusing

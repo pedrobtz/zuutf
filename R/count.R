@@ -17,7 +17,8 @@
 #'   `"UTF-16BE"`, `"UTF-16"`, `"UTF-32LE"`, `"UTF-32BE"`, `"UTF-32"` or
 #'   `"Latin-1"`, matched without regard to case or hyphens; `utf_count()`
 #'   also takes `"ASCII"`. A character vector is UTF-8 text, so for one only
-#'   `"UTF-8"` applies, unless `useBytes = TRUE` in `utf_count()`.
+#'   `"UTF-8"` applies, and `"ASCII"` in `utf_count()`, unless
+#'   `useBytes = TRUE` in `utf_count()`.
 #' @param to The target encoding: `"UTF-8"`, `"UTF-16LE"`, `"UTF-16BE"`,
 #'   `"UTF-32LE"`, `"UTF-32BE"` or `"Latin-1"`.
 #'
