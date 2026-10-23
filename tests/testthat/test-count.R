@@ -36,6 +36,25 @@ test_that("utf_count() is NA where the element is invalid or missing", {
   expect_identical(utf_count("caf\u00e9", "ASCII"), NA_integer_)
 })
 
+test_that("utf_length_as() puts U+FFFF in one UTF-16 unit and U+10000 in two", {
+  # random code points almost never land on the boundary
+  edge <- list(
+    "UTF-32LE" = bytes(0xff, 0xff, 0, 0, 0, 0, 0x01, 0),
+    "UTF-32BE" = bytes(0, 0, 0xff, 0xff, 0, 0x01, 0, 0)
+  )
+  for (from in names(edge)) {
+    x <- edge[[from]]
+    expect_identical(utf_length_as(x, from, "UTF-16LE"), 6L, info = from)
+    expect_identical(utf_length_as(x, from, "UTF-16BE"), 6L, info = from)
+    expect_identical(utf_length_as(x, from, "UTF-8"), 7L, info = from)
+    expect_identical(
+      length(utf_convert(x, from, "UTF-16LE")),
+      6L,
+      info = from
+    )
+  }
+})
+
 test_that("utf_length_as() gives the bytes a conversion produces", {
   withr::local_seed(20261013)
   texts <- c(
