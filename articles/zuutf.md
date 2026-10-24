@@ -168,5 +168,5 @@ says which:
 ``` r
 
 zuutf_info()$kernel
-#> [1] "haswell"
+#> [1] "icelake"
 ```
