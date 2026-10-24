@@ -33,6 +33,23 @@ Other contributors:
 \itemize{
   \item Daniel Lemire (simdutf, bundled in src/vendor/simdutf) [contributor, copyright holder]
   \item The simdutf authors (simdutf, bundled in src/vendor/simdutf) [copyright holder]
+  \item Facebook, Inc (CPU detection in src/vendor/simdutf/simdutf.h, from PyTorch) [copyright holder]
+  \item Idiap Research Institute (CPU detection in src/vendor/simdutf/simdutf.h, from PyTorch) [copyright holder]
+  \item Deepmind Technologies (CPU detection in src/vendor/simdutf/simdutf.h, from PyTorch) [copyright holder]
+  \item NEC Laboratories America (CPU detection in src/vendor/simdutf/simdutf.h, from PyTorch) [copyright holder]
+  \item NYU (CPU detection in src/vendor/simdutf/simdutf.h, from PyTorch) [copyright holder]
+  \item Adam Paszke (PyTorch CPU detection, in src/vendor/simdutf/simdutf.h) [contributor]
+  \item Soumith Chintala (PyTorch CPU detection, in src/vendor/simdutf/simdutf.h) [contributor]
+  \item Ronan Collobert (PyTorch CPU detection, in src/vendor/simdutf/simdutf.h) [contributor]
+  \item Koray Kavukcuoglu (PyTorch CPU detection, in src/vendor/simdutf/simdutf.h) [contributor]
+  \item Clement Farabet (PyTorch CPU detection, in src/vendor/simdutf/simdutf.h) [contributor]
+  \item Leon Bottou (PyTorch CPU detection, in src/vendor/simdutf/simdutf.h) [contributor]
+  \item Iain Melvin (PyTorch CPU detection, in src/vendor/simdutf/simdutf.h) [contributor]
+  \item Jason Weston (PyTorch CPU detection, in src/vendor/simdutf/simdutf.h) [contributor]
+  \item Samy Bengio (PyTorch CPU detection, in src/vendor/simdutf/simdutf.h) [contributor]
+  \item Johnny Mariethoz (PyTorch CPU detection, in src/vendor/simdutf/simdutf.h) [contributor]
+  \item Markus Kuhn (UTF-8 stress test, tests/testthat/fixtures/UTF-8-test.txt) [copyright holder]
+  \item web-platform-tests contributors (Base64 vectors, tests/testthat/fixtures/whatwg-base64.tsv) [copyright holder]
 }
 
 }
