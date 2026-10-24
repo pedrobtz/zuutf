@@ -4,7 +4,10 @@ It bundles the simdutf library (https://github.com/simdutf/simdutf) in
 src/vendor/simdutf/, taken unmodified from the single-header release
 artefact of a pinned upstream release. simdutf is dual-licensed under the
 Apache License 2.0 and the MIT licence, at the user's choice; zuutf takes
-it under the MIT licence.
+it under the MIT licence. simdutf itself contains CPU-detection code derived
+from PyTorch, under the 3-Clause BSD licence, and a scalar UTF-8 validator
+based on Google Fuchsia's, under the Apache License 2.0; inst/COPYRIGHTS
+gives their notices.
 
 
 zuutf

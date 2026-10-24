@@ -7,10 +7,45 @@ Authors@R: c(
     person("Daniel", "Lemire", role = c("ctb", "cph"),
            comment = "simdutf, bundled in src/vendor/simdutf"),
     person("The simdutf authors", role = "cph",
-           comment = "simdutf, bundled in src/vendor/simdutf"))
-Description: Validates text and converts it between UTF-8, UTF-16 and
-    UTF-32 in either byte order and Latin-1, counts characters, detects
-    encodings, and encodes and decodes Base64, with a bundled copy of the
+           comment = "simdutf, bundled in src/vendor/simdutf"),
+    person("Facebook, Inc", role = "cph",
+           comment = "CPU detection in src/vendor/simdutf/simdutf.h, from PyTorch"),
+    person("Idiap Research Institute", role = "cph",
+           comment = "CPU detection in src/vendor/simdutf/simdutf.h, from PyTorch"),
+    person("Deepmind Technologies", role = "cph",
+           comment = "CPU detection in src/vendor/simdutf/simdutf.h, from PyTorch"),
+    person("NEC Laboratories America", role = "cph",
+           comment = "CPU detection in src/vendor/simdutf/simdutf.h, from PyTorch"),
+    person("NYU", role = "cph",
+           comment = "CPU detection in src/vendor/simdutf/simdutf.h, from PyTorch"),
+    person("Adam", "Paszke", role = "ctb",
+           comment = "PyTorch CPU detection, in src/vendor/simdutf/simdutf.h"),
+    person("Soumith", "Chintala", role = "ctb",
+           comment = "PyTorch CPU detection, in src/vendor/simdutf/simdutf.h"),
+    person("Ronan", "Collobert", role = "ctb",
+           comment = "PyTorch CPU detection, in src/vendor/simdutf/simdutf.h"),
+    person("Koray", "Kavukcuoglu", role = "ctb",
+           comment = "PyTorch CPU detection, in src/vendor/simdutf/simdutf.h"),
+    person("Clement", "Farabet", role = "ctb",
+           comment = "PyTorch CPU detection, in src/vendor/simdutf/simdutf.h"),
+    person("Leon", "Bottou", role = "ctb",
+           comment = "PyTorch CPU detection, in src/vendor/simdutf/simdutf.h"),
+    person("Iain", "Melvin", role = "ctb",
+           comment = "PyTorch CPU detection, in src/vendor/simdutf/simdutf.h"),
+    person("Jason", "Weston", role = "ctb",
+           comment = "PyTorch CPU detection, in src/vendor/simdutf/simdutf.h"),
+    person("Samy", "Bengio", role = "ctb",
+           comment = "PyTorch CPU detection, in src/vendor/simdutf/simdutf.h"),
+    person("Johnny", "Mariethoz", role = "ctb",
+           comment = "PyTorch CPU detection, in src/vendor/simdutf/simdutf.h"),
+    person("Markus", "Kuhn", role = "cph",
+           comment = "UTF-8 stress test, tests/testthat/fixtures/UTF-8-test.txt"),
+    person("web-platform-tests contributors", role = "cph",
+           comment = "Base64 vectors, tests/testthat/fixtures/whatwg-base64.tsv"))
+Description: Validates text and converts it between the Unicode
+    Transformation Formats UTF-8, UTF-16 and UTF-32, in either byte order,
+    and Latin-1, counts characters, detects encodings, and encodes and
+    decodes Base64, with a bundled copy of the
     'simdutf' library (<https://github.com/simdutf/simdutf>). 'simdutf'
     chooses single instruction, multiple data (SIMD) code for the running
     processor at first use, so validation and conversion run at gigabytes
