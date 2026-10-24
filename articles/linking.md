@@ -111,3 +111,14 @@ reports:
 zuutf::zuutf_info()$kernel
 #> [1] "icelake"
 ```
+
+`SIMDUTF_FORCE_IMPLEMENTATION` makes simdutf use the kernel it names
+without asking the processor, so a kernel the CPU lacks dies of an
+illegal instruction on first use. Check `kernel_ok()` once, before any
+other member, and raise an error when it is 0:
+
+``` c
+if (!api->kernel_ok()) {
+  Rf_error("zuutf has no usable simdutf kernel");
+}
+```

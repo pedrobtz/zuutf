@@ -27,7 +27,8 @@ utf_length_as(x, from = "UTF-8", to)
   `"UTF-16"`, `"UTF-32LE"`, `"UTF-32BE"`, `"UTF-32"` or `"Latin-1"`,
   matched without regard to case or hyphens; `utf_count()` also takes
   `"ASCII"`. A character vector is UTF-8 text, so for one only `"UTF-8"`
-  applies, unless `useBytes = TRUE` in `utf_count()`.
+  applies, and `"ASCII"` in `utf_count()`, unless `useBytes = TRUE` in
+  `utf_count()`.
 
 - useBytes:
 

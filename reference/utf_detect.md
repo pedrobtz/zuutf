@@ -5,7 +5,10 @@ alone; otherwise the candidates are every encoding the bytes are valid
 in, by the validators of simdutf, in the order UTF-8, UTF-16LE,
 UTF-16BE, UTF-32LE, UTF-32BE. Latin-1 is never listed, since every byte
 string is valid Latin-1, and pure ASCII text is valid UTF-16 too when
-its length is even, which is why UTF-8 comes first.
+its length is even, which is why UTF-8 comes first. `FF FE 00 00` is the
+UTF-32LE byte-order mark, so it is detected as an empty UTF-32LE string,
+although it is also a UTF-16LE mark followed by U+0000; the longer mark
+wins.
 
 ## Usage
 

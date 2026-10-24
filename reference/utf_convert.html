@@ -88,9 +88,11 @@ none). Matched without regard to case or hyphens.</p></dd>
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p><code>utf_convert()</code> and <code>utf_encode()</code>: a raw vector for a raw vector
 or a single string, otherwise a list of raw vectors (<code>NULL</code> for a
-missing or, under <code>"na"</code>, invalid element). <code>utf_decode()</code>: a character
-vector marked UTF-8, one string per element. A list or a character
-vector keeps its names.</p>
+missing or, under <code>"na"</code>, invalid element). A single string that is
+<code>NA</code>, or invalid under <code>"na"</code>, gives <code>NULL</code>, and its name is dropped,
+since a raw vector has no element names. <code>utf_decode()</code>: a character
+vector marked UTF-8, one string per element. A list, or a character
+vector of any other length, keeps its names.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>

@@ -43,8 +43,8 @@ where the first error is.
   and
   [`base64_decode()`](https://pedrobtz.github.io/zuutf/reference/base64_encode.md)
   cover the standard and URL alphabets (either at once on decode with
-  `url = NA`), padding, line wrapping, and forgiving (WHATWG) or strict
-  (RFC 4648) decoding.
+  `url = NA`), padding, line wrapping at 4 characters or more, and
+  forgiving (WHATWG) or strict (RFC 4648) decoding.
 
 ### For other packages
 
@@ -52,6 +52,8 @@ where the first error is.
   `zuutf.h`, gives validation, conversion and Base64 to other packages’
   C code without vendoring simdutf
   ([`vignette("linking")`](https://pedrobtz.github.io/zuutf/articles/linking.md)).
+  Its `kernel_ok()` member tells a consumer whether the active simdutf
+  kernel runs on the processor.
 
 ### Errors and information
 

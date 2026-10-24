@@ -57,11 +57,11 @@
 <div class="section level3">
 <h3 id="base64-0-1-0">Base64<a class="anchor" aria-label="anchor" href="#base64-0-1-0"></a></h3>
 <ul><li>
-<code><a href="../reference/base64_encode.html">base64_encode()</a></code> and <code><a href="../reference/base64_encode.html">base64_decode()</a></code> cover the standard and URL alphabets (either at once on decode with <code>url = NA</code>), padding, line wrapping, and forgiving (WHATWG) or strict (RFC 4648) decoding.</li>
+<code><a href="../reference/base64_encode.html">base64_encode()</a></code> and <code><a href="../reference/base64_encode.html">base64_decode()</a></code> cover the standard and URL alphabets (either at once on decode with <code>url = NA</code>), padding, line wrapping at 4 characters or more, and forgiving (WHATWG) or strict (RFC 4648) decoding.</li>
 </ul></div>
 <div class="section level3">
 <h3 id="for-other-packages-0-1-0">For other packages<a class="anchor" aria-label="anchor" href="#for-other-packages-0-1-0"></a></h3>
-<ul><li>A registered C table, <code>zuutf_api_v1</code>, declared in the installed header <code>zuutf.h</code>, gives validation, conversion and Base64 to other packages’ C code without vendoring simdutf (<code><a href="../articles/linking.html">vignette("linking")</a></code>).</li>
+<ul><li>A registered C table, <code>zuutf_api_v1</code>, declared in the installed header <code>zuutf.h</code>, gives validation, conversion and Base64 to other packages’ C code without vendoring simdutf (<code><a href="../articles/linking.html">vignette("linking")</a></code>). Its <code>kernel_ok()</code> member tells a consumer whether the active simdutf kernel runs on the processor.</li>
 </ul></div>
 <div class="section level3">
 <h3 id="errors-and-information-0-1-0">Errors and information<a class="anchor" aria-label="anchor" href="#errors-and-information-0-1-0"></a></h3>

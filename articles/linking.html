@@ -166,6 +166,14 @@ use is the one <code><a href="../reference/zuutf_info.html">zuutf_info()</a></co
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">zuutf</span><span class="fu">::</span><span class="fu"><a href="../reference/zuutf_info.html">zuutf_info</a></span><span class="op">(</span><span class="op">)</span><span class="op">$</span><span class="va">kernel</span></span>
 <span><span class="co">#&gt; [1] "icelake"</span></span></code></pre></div>
+<p><code>SIMDUTF_FORCE_IMPLEMENTATION</code> makes simdutf use the
+kernel it names without asking the processor, so a kernel the CPU lacks
+dies of an illegal instruction on first use. Check
+<code>kernel_ok()</code> once, before any other member, and raise an
+error when it is 0:</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a><span class="cf">if</span> <span class="op">(!</span>api<span class="op">-&gt;</span>kernel_ok<span class="op">())</span> <span class="op">{</span></span>
+<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a>  Rf_error<span class="op">(</span><span class="st">"zuutf has no usable simdutf kernel"</span><span class="op">);</span></span>
+<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

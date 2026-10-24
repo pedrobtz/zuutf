@@ -13,18 +13,13 @@ zuutf_info()
 
 A list with elements:
 
-- `simdutf`:
+- `simdutf`: the simdutf version, as a string.
 
-  The simdutf version, as a string.
+- `kernel`: the name of the kernel in use.
 
-- `kernel`:
-
-  The name of the kernel in use.
-
-- `kernels`:
-
-  A data frame with one row per kernel compiled in and columns `name`,
-  `description` and `supported` (whether this processor can run it).
+- `kernels`: a data frame with one row per kernel compiled in and
+  columns `name`, `description` and `supported` (whether this processor
+  can run it).
 
 ## Details
 
