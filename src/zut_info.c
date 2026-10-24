@@ -39,14 +39,6 @@ SEXP zut_kernel_ok(void) {
   return Rf_ScalarLogical(zut_active_kernel_ok());
 }
 
-SEXP zut_probe(SEXP x) {
-  if (TYPEOF(x) != RAWSXP) {
-    Rf_error("`x` must be a raw vector");
-  }
-  bool ok = simdutf_validate_utf8((const char *) RAW(x), (size_t) XLENGTH(x));
-  return Rf_ScalarLogical(ok ? 1 : 0);
-}
-
 SEXP zut_force_kernel_r(SEXP name) {
   if (TYPEOF(name) != STRSXP || XLENGTH(name) != 1 ||
       STRING_ELT(name, 0) == NA_STRING) {

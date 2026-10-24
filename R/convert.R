@@ -40,9 +40,11 @@
 #'
 #' @return `utf_convert()` and `utf_encode()`: a raw vector for a raw vector
 #'   or a single string, otherwise a list of raw vectors (`NULL` for a
-#'   missing or, under `"na"`, invalid element). `utf_decode()`: a character
-#'   vector marked UTF-8, one string per element. A list or a character
-#'   vector keeps its names.
+#'   missing or, under `"na"`, invalid element). A single string that is
+#'   `NA`, or invalid under `"na"`, gives `NULL`, and its name is dropped,
+#'   since a raw vector has no element names. `utf_decode()`: a character
+#'   vector marked UTF-8, one string per element. A list, or a character
+#'   vector of any other length, keeps its names.
 #' @seealso [utf_detect()], [utf_valid()], [utf_length_as()]; [iconv()].
 #' @export
 #' @examples
@@ -85,12 +87,19 @@ utf_convert <- function(x, from, to, invalid = c("error", "replace", "na")) {
 
 #' @rdname utf_convert
 #' @export
-utf_decode <- function(x, from = "auto", invalid = c("error", "replace", "na")) {
+utf_decode <- function(
+  x,
+  from = "auto",
+  invalid = c("error", "replace", "na")
+) {
   call <- sys.call()
   from <- match_encoding(from, c(enc_from, "auto"), "from", call)
   invalid <- match_invalid(invalid, call)
   if (is.character(x)) {
-    abort_invalid_argument("`x` must be raw bytes, not a character vector", call = call)
+    abort_invalid_argument(
+      "`x` must be raw bytes, not a character vector",
+      call = call
+    )
   }
   check_bytes_input(x, call = call)
   check_kernel(call)
@@ -99,7 +108,11 @@ utf_decode <- function(x, from = "auto", invalid = c("error", "replace", "na")) 
 
 #' @rdname utf_convert
 #' @export
-utf_encode <- function(x, to = "UTF-16LE", invalid = c("error", "replace", "na")) {
+utf_encode <- function(
+  x,
+  to = "UTF-16LE",
+  invalid = c("error", "replace", "na")
+) {
   call <- sys.call()
   to <- match_encoding(to, enc_to, "to", call)
   invalid <- match_invalid(invalid, call)
@@ -119,7 +132,9 @@ utf_encode <- function(x, to = "UTF-16LE", invalid = c("error", "replace", "na")
 #' in, by the validators of simdutf, in the order UTF-8, UTF-16LE, UTF-16BE,
 #' UTF-32LE, UTF-32BE. Latin-1 is never listed, since every byte string is
 #' valid Latin-1, and pure ASCII text is valid UTF-16 too when its length is
-#' even, which is why UTF-8 comes first.
+#' even, which is why UTF-8 comes first. `FF FE 00 00` is the UTF-32LE
+#' byte-order mark, so it is detected as an empty UTF-32LE string, although
+#' it is also a UTF-16LE mark followed by U+0000; the longer mark wins.
 #'
 #' @param x A raw vector (one element) or a list of raw vectors.
 #' @return For a raw vector, a character vector of candidate encodings, best
@@ -158,7 +173,9 @@ match_invalid <- function(invalid, call = NULL) {
   if (identical(invalid, choices)) {
     return("error")
   }
-  if (!is.character(invalid) || length(invalid) != 1L || !invalid %in% choices) {
+  if (
+    !is.character(invalid) || length(invalid) != 1L || !invalid %in% choices
+  ) {
     abort_invalid_argument(
       "`invalid` must be one of \"error\", \"replace\" or \"na\"",
       call = call
@@ -168,12 +185,24 @@ match_invalid <- function(invalid, call = NULL) {
 }
 
 # Run the C converter and raise the condition it reports, if any.
-run_convert <- function(x, from, to, invalid, mode, call = NULL,
-                        simdutf_replacement = TRUE) {
+run_convert <- function(
+  x,
+  from,
+  to,
+  invalid,
+  mode,
+  call = NULL,
+  simdutf_replacement = TRUE
+) {
   policy <- match(invalid, c("error", "replace", "na")) - 1L
   res <- .Call(
-    zut_convert, x, encoding_code(from), encoding_code(to), policy,
-    mode, simdutf_replacement
+    zut_convert,
+    x,
+    encoding_code(from),
+    encoding_code(to),
+    policy,
+    mode,
+    simdutf_replacement
   )
   status <- res[[2L]]
   if (status[[1L]] != 0) {
@@ -182,6 +211,8 @@ run_convert <- function(x, from, to, invalid, mode, call = NULL,
   res[[1L]]
 }
 
+# Status kinds are zut_convert.c's. A numeric switch() has no default, so
+# ZUT_INTERNAL and any unknown kind fall through to the internal error.
 raise_status <- function(status, to, call) {
   kind <- status[[1L]]
   index <- as_count(status[[2L]])
@@ -191,26 +222,37 @@ raise_status <- function(status, to, call) {
     kind,
     abort_encoding_error(
       sprintf("element %d is ill-formed %s at offset %s", index, enc, offset),
-      index = index, offset = offset, encoding = enc, call = call
+      index = index,
+      offset = offset,
+      encoding = enc,
+      call = call
     ),
     abort_encoding_error(
       sprintf(
         "element %d has a code point at offset %s that %s cannot represent",
-        index, offset, to
+        index,
+        offset,
+        to
       ),
-      index = index, offset = offset, encoding = to, call = call
+      index = index,
+      offset = offset,
+      encoding = to,
+      call = call
     ),
     abort_nul_error(
       sprintf(
         "element %d holds U+0000 at offset %s, which an R string cannot",
-        index, offset
+        index,
+        offset
       ),
-      index = index, offset = offset, call = call
+      index = index,
+      offset = offset,
+      call = call
     ),
     abort_size_error(
       sprintf("element %d converts to more bytes than R can hold", index),
       call = call
-    ),
-    abort_internal_error("unexpected status from the converter", call = call)
+    )
   )
+  abort_internal_error("unexpected status from the converter", call = call)
 }

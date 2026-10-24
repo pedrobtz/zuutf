@@ -208,7 +208,13 @@ R result: logical / integer offsets / raw / character (marked UTF-8)
   vector. Output buffers are sized by simdutf's length functions and
   allocated once as the R result; a `_safe` variant with an explicit
   capacity is used wherever the C API offers one, so a wrong length
-  estimate is an error, never an overrun.
+  estimate is an error, never an overrun. That is Latin-1 to UTF-8, and
+  UTF-16 to UTF-8 with replacement in native byte order; the other calls,
+  the opposite-order replacement among them, have no `_safe` form and rely
+  on the length pass. Every element's written length is compared with its
+  measured length, and a difference is a `zuutf_internal_error`. simdutf
+  documents `convert_latin1_to_utf8_safe` as up to four times slower on
+  short inputs; the bound is kept anyway (review #27).
 - No R API call happens between a simdutf call and the use of its result;
   `R_CheckUserInterrupt()` runs between elements, never inside a call.
   simdutf calls are `noexcept` and never `longjmp`, so no R error passes
@@ -235,7 +241,9 @@ utf_detect(x)                         # character vector of candidate encodings,
 
 # lengths
 utf_count(x, encoding = "UTF-8")      # code points per element; NA where invalid
-utf_length_as(x, from = "UTF-8", to)  # bytes a conversion will produce, per element
+utf_length_as(x, from = "UTF-8", to)  # bytes a conversion will produce, per element;
+                                      # to after from, as in utf_convert(), though
+                                      # only to is required (review #51)
 
 # Base64
 base64_encode(x, url = FALSE, pad = TRUE, line_length = NULL)   # -> one string
@@ -251,7 +259,9 @@ element return a vector of that length; `utf_convert()` and
 `utf_encode()` return a raw vector for one-element input and a list of
 raw otherwise, like `iconv(toRaw = TRUE)`: one-element input is a raw
 vector, or a single string for `utf_encode()`, and a list stays a list
-whatever its length (Stage 3, 2026-10-13).
+whatever its length (Stage 3, 2026-10-13). A single string's name is
+dropped with the list, and an `NA` single string, or one invalid under
+`"na"`, gives `NULL`, the missing element unwrapped (review #48).
 
 **Encoding names.** `"UTF-8"`, `"UTF-16LE"`, `"UTF-16BE"`, `"UTF-32LE"`,
 `"UTF-32BE"`, `"Latin-1"`, `"ASCII"` (validation only), matched without
@@ -380,6 +390,7 @@ typedef struct {
   zuutf_result (*base64_decode)(const char *s, size_t n, unsigned char *out,
                                 size_t cap, unsigned flags);
   const char *(*kernel)(void);          /* the active simdutf implementation's name */
+  int (*kernel_ok)(void);               /* 1 when that kernel runs here (review #36) */
   /* appended over time, never reordered or removed */
 } zuutf_api;
 ```
@@ -403,7 +414,9 @@ getter registered as `zuutf_api_v1`, as zuxml's is. Rules, all `zuxml`'s
   as `zuutf_result`.
 - The header includes `<stddef.h>` and `<stdint.h>` only: no simdutf
   type, no `<uchar.h>` (UTF-16 and UTF-32 are `uint16_t` and `uint32_t`),
-  no R header. `ZUUTF_DEFINE_API_GET`, defined in exactly one of the
+  no R header. The `utf16le` members read and write little-endian bytes
+  whatever the host's order, as simdutf's `*le` functions do; UTF-32 is
+  in native order (review #37). `ZUUTF_DEFINE_API_GET`, defined in exactly one of the
   consumer's translation units after `<R_ext/Rdynload.h>`, emits a
   `zuutf_api_get()` that reads `R_GetCCallable()`'s `DL_FUNC` through a
   union, as zuxml's does, so clang's `-Wcast-function-type` stays quiet.
@@ -414,6 +427,9 @@ getter registered as `zuutf_api_v1`, as zuxml's is. Rules, all `zuxml`'s
 - A consumer declares `Imports: zuutf` **and** `LinkingTo: zuutf`, and
   carries `importFrom(zuutf, zuutf_info)` in its `NAMESPACE`, because
   `R_GetCCallable()` resolves nothing until zuutf's namespace is loaded.
+- `kernel_ok()` is the table's `check_kernel()` (§10): a consumer checks
+  it once before any other member, since a forced kernel the processor
+  lacks dies of SIGILL inside the first member called.
 - All members are pure functions of their arguments. The first call from
   any thread runs CPU detection, which simdutf makes thread-safe; none
   calls into R, so a consumer may call them off the main thread.
@@ -557,6 +573,23 @@ message.
   its target, a conversion under `"error"` round-trips, what decodes
   re-encodes canonically) and has a canary build that must crash on its
   canary input before the target is trusted (`tools/run-fuzz`).
+- **Branches no R test reaches.** Each is listed with why, so that
+  coverage gaps are decisions and not oversights (review #35):
+  - `ZUT_TOO_LONG` in `zut_convert.c` and `ZUT_B64_TOO_LONG` in
+    `zut_base64.c`, and the double branch of `as_count()`: they need an
+    output or input past 2^31 - 1 bytes, too large for any test suite.
+  - `ZUT_INTERNAL` (written length other than measured) in
+    `zut_convert.c`, `ZUT_B64_INTERNAL` (`wrote != len`, and simdutf
+    error codes zuutf does not expect) in `zut_base64.c`: they need
+    simdutf to disagree with itself.
+  - Big-endian hosts: the `zut_little_endian()` false branches in
+    `zut_view.c` and `zut_input.c`; no CI leg is big-endian.
+  - An actual user interrupt: `R_CheckUserInterrupt()` is reached by
+    inputs of 1024 elements or more, and every allocation is R's and
+    protected, so a longjmp there leaks nothing, but no test sends one.
+
+  The R side of each status is tested directly, through `raise_status()`
+  and `run_base64()` (`test-conditions.R`).
 - **Symbols.** `test-abi.R` greps the installed shared object for
   exports: `R_init_zuutf` and, on Linux with GCC, libstdc++ template
   instantiations only, as zufft accepts them (R3, §12.2).
@@ -564,7 +597,8 @@ message.
   is behind `ZUUTF_SLOW_TESTS` (R7). In the CRAN suite the hostile sweeps
   run on the kernel in use, since the kernel-matrix job runs the whole
   suite once per kernel; `ZUUTF_SLOW_TESTS` runs them on every kernel in
-  process too. `ZUUTF_SKIP_HEAVY` shrinks the random sweeps for gctorture,
+  process too, and the kernel-matrix job runs the suite once with it set
+  on each leg (review #34). `ZUUTF_SKIP_HEAVY` shrinks the random sweeps for gctorture,
   and `ZUUTF_TIMING_TESTS` turns on an elapsed-time check, meaningful only
   against an installed package, since `devtools::load_all()` compiles
   with `-O0`.

@@ -1,6 +1,7 @@
 # CRAN's compiled-code check applies to vendored code (design §8): the
-# installed object must not reach printf, abort, exit or stderr, so that a
-# future simdutf release cannot bring them in unnoticed.
+# installed object must not reach printf, abort, exit, stderr or any other
+# entry point that check names, so that a future simdutf release cannot
+# bring them in unnoticed.
 
 test_that("the shared object references no stdio, abort or exit", {
   skip_if(is_instrumented_build(), "instrumented build")
@@ -10,8 +11,37 @@ test_that("the shared object references no stdio, abort or exit", {
   # instead of passing the check below vacuously. (memcpy is no sentinel:
   # glibc builds reference it as __memcpy_chk or inline it.)
   expect_true("R_registerRoutines" %in% names)
-  banned <- c("printf", "puts", "putchar", "abort", "exit", "_exit",
-              "stderr", "stdout", "__stderrp", "__stdoutp", "__acrt_iob_func")
+  banned <- c(
+    "printf",
+    "puts",
+    "putchar",
+    "abort",
+    "exit",
+    "_exit",
+    "stderr",
+    "stdout",
+    "__stderrp",
+    "__stdoutp",
+    "__acrt_iob_func",
+    # glibc's and macOS's spellings, which no table lists everywhere
+    "__assert_fail",
+    "__assert_rtn",
+    "_Exit",
+    "sprintf",
+    "__sprintf_chk",
+    "vprintf",
+    "vsprintf",
+    "__vsprintf_chk",
+    "__printf_chk",
+    "__fprintf_chk",
+    "rand",
+    "srand",
+    "random",
+    "srandom",
+    "rand_r",
+    "srand48",
+    r_check_symbols()
+  )
   found <- intersect(names, banned)
   if (Sys.info()[["sysname"]] == "Windows") {
     # Rtools links the C++ runtime into the DLL statically, and its

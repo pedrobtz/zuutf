@@ -21,8 +21,10 @@
  * <zuutf.h> alone for the types. vignette("linking") walks through it.
  *
  * This header includes <stddef.h> and <stdint.h> only: no simdutf type and
- * no R header. UTF-16 and UTF-32 are uint16_t and uint32_t in native byte
- * order, little-endian on every platform R supports today.
+ * no R header. The utf16le members read and write UTF-16LE: uint16_t units
+ * whose bytes are in little-endian order whatever the host's order, which
+ * is native order on a little-endian host only; on a big-endian host, swap
+ * the bytes of native units first. UTF-32 is uint32_t in native byte order.
  */
 #ifndef ZUUTF_H
 #define ZUUTF_H
@@ -116,6 +118,13 @@ typedef struct {
 
   /* the name of the active simdutf kernel, e.g. "haswell" */
   const char *(*kernel)(void);
+
+  /* 1 when the active kernel runs on this processor. 0 when
+   * SIMDUTF_FORCE_IMPLEMENTATION names one it cannot run, which dies of an
+   * illegal instruction on first use, or one simdutf does not know, which
+   * fails every call as if the input were bad. Check it once before any
+   * other member, and treat 0 as an error; zuutf's R functions do. */
+  int (*kernel_ok)(void);
 } zuutf_api;
 
 #define ZUUTF_API_HAS(api, member)                                            \

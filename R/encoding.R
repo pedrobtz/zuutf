@@ -1,8 +1,14 @@
 # Encoding names (design §5), matched without regard to case or hyphens.
 # The codes are zut_enc in src/zut_input.h.
 zut_encodings <- c(
-  "UTF-8" = 1L, "UTF-16LE" = 2L, "UTF-16BE" = 3L, "UTF-32LE" = 4L,
-  "UTF-32BE" = 5L, "Latin-1" = 6L, "ASCII" = 7L, "UTF-16" = 8L,
+  "UTF-8" = 1L,
+  "UTF-16LE" = 2L,
+  "UTF-16BE" = 3L,
+  "UTF-32LE" = 4L,
+  "UTF-32BE" = 5L,
+  "Latin-1" = 6L,
+  "ASCII" = 7L,
+  "UTF-16" = 8L,
   "UTF-32" = 9L
 )
 
@@ -27,7 +33,9 @@ match_encoding <- function(name, allowed, arg, call = NULL) {
     abort_invalid_argument(
       sprintf(
         "`%s` must be one of %s, not \"%s\"",
-        arg, paste0("\"", allowed, "\"", collapse = ", "), name
+        arg,
+        paste0("\"", allowed, "\"", collapse = ", "),
+        name
       ),
       call = call
     )
@@ -37,4 +45,6 @@ match_encoding <- function(name, allowed, arg, call = NULL) {
 
 # "auto" is conversion input only (utf_detect()'s first candidate), so it is
 # not among zut_encodings and no other argument accepts it.
-encoding_code <- function(name) if (name == "auto") 10L else zut_encodings[[name]]
+encoding_code <- function(name) {
+  if (name == "auto") 10L else zut_encodings[[name]]
+}

@@ -13,13 +13,22 @@ on_cran <- function() !identical(Sys.getenv("NOT_CRAN"), "true")
 # roadmap exit criterion names, which CI shows), `cran` in CRAN's suite, to
 # keep it under 15 seconds (design §10), and `heavy` under ZUUTF_SKIP_HEAVY.
 sweep_size <- function(full, cran, heavy = cran) {
-  if (heavy_skipped()) heavy else if (on_cran()) cran else full
+  if (heavy_skipped()) {
+    heavy
+  } else if (on_cran()) {
+    cran
+  } else {
+    full
+  }
 }
 
 slow_tests <- function() identical(Sys.getenv("ZUUTF_SLOW_TESTS"), "true")
 
 skip_unless_timing <- function() {
-  skip_if_not(identical(Sys.getenv("ZUUTF_TIMING_TESTS"), "true"), "ZUUTF_TIMING_TESTS is not true")
+  skip_if_not(
+    identical(Sys.getenv("ZUUTF_TIMING_TESTS"), "true"),
+    "ZUUTF_TIMING_TESTS is not true"
+  )
 }
 
 # Run code on every kernel under ZUUTF_SLOW_TESTS, else on the kernel in

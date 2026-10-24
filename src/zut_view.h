@@ -33,10 +33,13 @@ size_t zut_view_code_points(const zut_view *v, size_t pos, size_t cnt);
 /* Bytes the valid run converts to in `to`; one per code point for Latin-1. */
 size_t zut_view_length(const zut_view *v, size_t pos, size_t cnt, zut_enc to);
 
-/* Convert the valid run into out, returning the bytes written. For a
- * Latin-1 target every code point of the run must be at most U+00FF. */
+/* Convert the valid run into out, which holds cap bytes, returning the
+ * bytes written. For a Latin-1 target every code point of the run must be
+ * at most U+00FF. Where simdutf's C API has a _safe call it is bounded by
+ * cap and writes less on a wrong estimate, which the caller detects as
+ * fewer bytes than it measured (design §4). */
 size_t zut_view_write(const zut_view *v, size_t pos, size_t cnt, zut_enc to,
-                      unsigned char *out);
+                      unsigned char *out, size_t cap);
 
 /* The first code point above U+00FF in the valid run, if any: returns 1 and
  * sets *at (absolute unit offset) and *len (its length in units). */

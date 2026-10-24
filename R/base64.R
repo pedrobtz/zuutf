@@ -8,7 +8,9 @@
 #' return) is skipped, padding is optional, and a final quantum of a single
 #' character is an error. `forgiving = FALSE` reads RFC 4648 section 3.3
 #' strictly: padding is required, the unused bits of the last character
-#' must be zero, and whitespace is an error too.
+#' must be zero, and whitespace is an error too. Padding is required with
+#' the URL alphabet as well, so text written with `pad = FALSE` decodes
+#' only in forgiving mode.
 #'
 #' @param x For `base64_encode()`, a raw vector, or a single string, which
 #'   is encoded as its UTF-8 bytes. For `base64_decode()`, a single string
@@ -17,10 +19,11 @@
 #'   with `+` and `/`, `TRUE` for the URL- and filename-safe one with `-`
 #'   and `_`. `base64_decode()` also takes `NA`, which accepts either.
 #' @param pad Whether `base64_encode()` writes `=` padding.
-#' @param line_length `NULL` (the default) for one line, or a positive whole
-#'   number: a line feed (`"\n"`) is written after every `line_length`
-#'   characters, as MIME and PEM do with 76 and 64. For the CRLF of MIME, use
-#'   [gsub()] on the result.
+#' @param line_length `NULL` (the default) for one line, or a whole number of
+#'   at least 4, one Base64 quantum: a line feed (`"\n"`) is written after
+#'   every `line_length` characters, as MIME and PEM do with 76 and 64. A
+#'   value at least as long as the text gives one line. For the CRLF of MIME,
+#'   use [gsub()] on the result.
 #' @param forgiving `TRUE` (the default) for WHATWG forgiving decoding,
 #'   `FALSE` for strict RFC 4648; see Details.
 #'
@@ -49,20 +52,34 @@ base64_encode <- function(x, url = FALSE, pad = TRUE, line_length = NULL) {
   check_flag(pad, "pad", call = call)
   lines <- 0
   if (!is.null(line_length)) {
-    if (!is.numeric(line_length) || length(line_length) != 1L ||
-        is.na(line_length) || line_length < 1 || line_length != trunc(line_length)) {
+    if (
+      !is.numeric(line_length) ||
+        length(line_length) != 1L ||
+        !is.finite(line_length) ||
+        line_length < 4 ||
+        line_length != trunc(line_length)
+    ) {
       abort_invalid_argument(
-        "`line_length` must be NULL or a positive whole number",
+        "`line_length` must be NULL or a whole number of at least 4",
         call = call
       )
     }
-    lines <- as.numeric(line_length)
+    # Base64 text is at most INT_MAX characters, so a longer line is one line
+    lines <- min(as.numeric(line_length), .Machine$integer.max)
   }
   x <- base64_input(x, utf8 = TRUE, call = call)
   check_kernel(call)
-  # simdutf_base64_options: default 0, URL (unpadded) 1, default without
-  # padding 2, URL with padding 3
-  options <- if (url) (if (pad) 3L else 1L) else (if (pad) 0L else 2L)
+  # simdutf_base64_options: standard alphabet with padding 0, URL without
+  # padding 1, standard without padding 2, URL with padding 3
+  options <- if (url && pad) {
+    3L
+  } else if (url) {
+    1L
+  } else if (pad) {
+    0L
+  } else {
+    2L
+  }
   run_base64(.Call(zut_base64_encode, x, options, lines), call)
 }
 
@@ -77,14 +94,14 @@ base64_decode <- function(x, url = FALSE, forgiving = TRUE) {
   x <- base64_input(x, utf8 = FALSE, call = call)
   check_kernel(call)
   # simdutf_base64_options: default 0, URL 1, either alphabet 8
-  options <- if (is.na(url)) 8L else if (url) 1L else 0L
-  run_base64(.Call(zut_base64_decode, x, options, !forgiving), call)
-}
-
-check_flag <- function(x, arg, call = NULL) {
-  if (!isTRUE(x) && !isFALSE(x)) {
-    abort_invalid_argument(sprintf("`%s` must be TRUE or FALSE", arg), call = call)
+  options <- if (is.na(url)) {
+    8L
+  } else if (url) {
+    1L
+  } else {
+    0L
   }
+  run_base64(.Call(zut_base64_decode, x, options, !forgiving), call)
 }
 
 # One raw vector or one string (design §5, D14). A string to encode is
@@ -96,7 +113,10 @@ base64_input <- function(x, utf8, call = NULL) {
   }
   if (!is.character(x) || length(x) != 1L || is.na(x)) {
     abort_invalid_argument(
-      "`x` must be a raw vector or a single non-missing string; use lapply() for several",
+      paste0(
+        "`x` must be a raw vector or a single non-missing string; ",
+        "use lapply() for several"
+      ),
       call = call
     )
   }
@@ -112,16 +132,24 @@ base64_input <- function(x, utf8, call = NULL) {
   x
 }
 
+# Status kinds are ZUT_B64_* in src/zut_base64.c. A numeric switch() has no
+# default, so an unknown kind falls through to the internal error.
 run_base64 <- function(res, call) {
   status <- res[[2L]]
+  if (status[[1L]] == 0) {
+    return(res[[1L]])
+  }
   switch(
-    status[[1L]] + 1,
-    res[[1L]],
+    status[[1L]],
     abort_base64_error(
       sprintf("invalid Base64 at offset %s", as_count(status[[2L]])),
-      offset = as_count(status[[2L]]), call = call
+      offset = as_count(status[[2L]]),
+      call = call
     ),
-    abort_size_error("the Base64 text would be longer than a string can hold", call = call),
-    abort_internal_error("unexpected result from simdutf's Base64", call = call)
+    abort_size_error(
+      "the Base64 text would be longer than a string can hold",
+      call = call
+    )
   )
+  abort_internal_error("unexpected result from simdutf's Base64", call = call)
 }

@@ -33,6 +33,7 @@ typedef struct {
   zuutf_result (*base64_decode)(const char *, size_t, unsigned char *, size_t,
                                 unsigned);
   const char *(*kernel)(void);
+  int (*kernel_ok)(void);
 } zuutf_api_0_1_0;
 
 #define FROZEN(member)                                                       \
@@ -54,6 +55,7 @@ FROZEN(base64_encode);
 FROZEN(base64_decoded_max_length);
 FROZEN(base64_decode);
 FROZEN(kernel);
+FROZEN(kernel_ok);
 _Static_assert(sizeof(zuutf_api) >= sizeof(zuutf_api_0_1_0),
                "zuutf_api lost a member: members are never removed");
 
@@ -106,6 +108,12 @@ SEXP ztt_kernel(void) {
   return Rf_mkString(a->kernel());
 }
 
+SEXP ztt_kernel_ok(void) {
+  const zuutf_api *a = api();
+  if (!ZUUTF_API_HAS(a, kernel_ok)) Rf_error("no kernel_ok member");
+  return Rf_ScalarLogical(a->kernel_ok());
+}
+
 SEXP ztt_validate(SEXP x, SEXP which) {
   const zuutf_api *a = api();
   const char *w = CHAR(STRING_ELT(which, 0));
@@ -118,6 +126,24 @@ SEXP ztt_validate(SEXP x, SEXP which) {
     return result2(a->validate_utf32((const uint32_t *) (const void *) p, n / 4));
   if (strcmp(w, "ascii") == 0) return Rf_ScalarLogical(a->validate_ascii(p, n));
   Rf_error("unknown validator");
+  return R_NilValue;
+}
+
+/* The length members, which size every output. */
+SEXP ztt_length(SEXP x, SEXP which, SEXP flags) {
+  const zuutf_api *a = api();
+  const char *w = CHAR(STRING_ELT(which, 0));
+  const char *p = (const char *) RAW(x);
+  size_t n = (size_t) XLENGTH(x);
+  if (strcmp(w, "utf8_length_from_utf16le") == 0)
+    return Rf_ScalarReal((double) a->utf8_length_from_utf16le((const uint16_t *) (const void *) p, n / 2));
+  if (strcmp(w, "utf16_length_from_utf8") == 0)
+    return Rf_ScalarReal((double) a->utf16_length_from_utf8(p, n));
+  if (strcmp(w, "base64_encoded_length") == 0)
+    return Rf_ScalarReal((double) a->base64_encoded_length(n, (unsigned) Rf_asInteger(flags)));
+  if (strcmp(w, "base64_decoded_max_length") == 0)
+    return Rf_ScalarReal((double) a->base64_decoded_max_length(p, n));
+  Rf_error("unknown length member");
   return R_NilValue;
 }
 
@@ -182,8 +208,10 @@ SEXP ztt_base64_decode(SEXP x, SEXP flags, SEXP cap) {
 static const R_CallMethodDef calls[] = {
   {"ztt_struct_size", (DL_FUNC) &ztt_struct_size, 0},
   {"ztt_kernel", (DL_FUNC) &ztt_kernel, 0},
+  {"ztt_kernel_ok", (DL_FUNC) &ztt_kernel_ok, 0},
   {"ztt_validate", (DL_FUNC) &ztt_validate, 2},
   {"ztt_count_utf8", (DL_FUNC) &ztt_count_utf8, 1},
+  {"ztt_length", (DL_FUNC) &ztt_length, 3},
   {"ztt_convert", (DL_FUNC) &ztt_convert, 3},
   {"ztt_base64_encode", (DL_FUNC) &ztt_base64_encode, 3},
   {"ztt_base64_decode", (DL_FUNC) &ztt_base64_decode, 3},

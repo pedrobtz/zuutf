@@ -20,10 +20,11 @@ and \verb{_}. \code{base64_decode()} also takes \code{NA}, which accepts either.
 
 \item{pad}{Whether \code{base64_encode()} writes \code{=} padding.}
 
-\item{line_length}{\code{NULL} (the default) for one line, or a positive whole
-number: a line feed (\code{"\\n"}) is written after every \code{line_length}
-characters, as MIME and PEM do with 76 and 64. For the CRLF of MIME, use
-\code{\link[=gsub]{gsub()}} on the result.}
+\item{line_length}{\code{NULL} (the default) for one line, or a whole number of
+at least 4, one Base64 quantum: a line feed (\code{"\\n"}) is written after
+every \code{line_length} characters, as MIME and PEM do with 76 and 64. A
+value at least as long as the text gives one line. For the CRLF of MIME,
+use \code{\link[=gsub]{gsub()}} on the result.}
 
 \item{forgiving}{\code{TRUE} (the default) for WHATWG forgiving decoding,
 \code{FALSE} for strict RFC 4648; see Details.}
@@ -43,7 +44,9 @@ decode" is: ASCII whitespace (space, tab, line feed, form feed, carriage
 return) is skipped, padding is optional, and a final quantum of a single
 character is an error. \code{forgiving = FALSE} reads RFC 4648 section 3.3
 strictly: padding is required, the unused bits of the last character
-must be zero, and whitespace is an error too.
+must be zero, and whitespace is an error too. Padding is required with
+the URL alphabet as well, so text written with \code{pad = FALSE} decodes
+only in forgiving mode.
 }
 \examples{
 base64_encode(charToRaw("hello"))

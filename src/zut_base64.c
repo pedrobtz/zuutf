@@ -19,6 +19,10 @@ static void bytes_of(SEXP x, const char **p, size_t *n) {
   if (TYPEOF(x) == RAWSXP) {
     *p = (const char *) RAW(x);
     *n = (size_t) XLENGTH(x);
+  } else if (XLENGTH(x) == 0) {
+    /* R passes one string; a direct .Call must not index past the end */
+    *p = "";
+    *n = 0;
   } else {
     SEXP s = STRING_ELT(x, 0);
     *p = CHAR(s);
@@ -55,7 +59,10 @@ SEXP zut_base64_encode(SEXP x, SEXP options, SEXP line_length) {
   size_t n;
   bytes_of(x, &p, &n);
   simdutf_base64_options opt = (simdutf_base64_options) Rf_asInteger(options);
-  size_t lines = (size_t) Rf_asReal(line_length);
+  /* R passes 0 or a whole number in [4, INT_MAX]; anything else is one line,
+   * so a bad value cannot reach an out-of-range double to size_t cast */
+  double d = Rf_asReal(line_length);
+  size_t lines = d >= 4 && d <= INT_MAX ? (size_t) d : 0;
 
   size_t len = lines ? simdutf_base64_length_from_binary_with_lines(n, opt, lines)
                      : simdutf_base64_length_from_binary(n, opt);

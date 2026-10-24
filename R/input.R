@@ -9,16 +9,17 @@
 # useBytes = TRUE reads the bytes of every string as they are, in any
 # encoding.
 prepare_input <- function(x, encoding, useBytes = FALSE, call = NULL) {
+  check_flag(useBytes, "useBytes", call = call)
   if (is.character(x)) {
-    if (!isTRUE(useBytes) && !isFALSE(useBytes)) {
-      abort_invalid_argument("`useBytes` must be TRUE or FALSE", call = call)
-    }
     if (useBytes) {
       return(x)
     }
     if (any(Encoding(x) == "bytes")) {
       abort_invalid_argument(
-        "`x` has strings marked \"bytes\"; use `useBytes = TRUE` to read their bytes",
+        paste0(
+          "`x` has strings marked \"bytes\"; ",
+          "use `useBytes = TRUE` to read their bytes"
+        ),
         call = call
       )
     }
@@ -26,8 +27,8 @@ prepare_input <- function(x, encoding, useBytes = FALSE, call = NULL) {
       abort_invalid_argument(
         sprintf(
           paste0(
-            "a character vector is UTF-8 text, so `encoding` cannot be \"%s\"; ",
-            "pass raw bytes, or use `useBytes = TRUE`"
+            "a character vector is UTF-8 text, so `encoding` cannot be ",
+            "\"%s\"; pass raw bytes, or use `useBytes = TRUE`"
           ),
           encoding
         ),
@@ -40,19 +41,33 @@ prepare_input <- function(x, encoding, useBytes = FALSE, call = NULL) {
   x
 }
 
+# TRUE or FALSE, nothing else.
+check_flag <- function(x, arg, call = NULL) {
+  if (!isTRUE(x) && !isFALSE(x)) {
+    abort_invalid_argument(
+      sprintf("`%s` must be TRUE or FALSE", arg),
+      call = call
+    )
+  }
+}
+
 # Raw vector, or a list whose elements are raw vectors or NULL.
 check_bytes_input <- function(x, call = NULL) {
   if (is.raw(x)) {
     return(invisible())
   }
-  if (is.list(x) && !is.object(x)) {
+  # a plain list: is.list() is TRUE for pairlists too, which C cannot read
+  if (typeof(x) == "list" && !is.object(x)) {
     ok <- vapply(x, function(e) is.null(e) || is.raw(e), logical(1))
     if (all(ok)) {
       return(invisible())
     }
     abort_invalid_argument(
       sprintf(
-        "every element of a list `x` must be a raw vector or NULL; element %d is not",
+        paste0(
+          "every element of a list `x` must be a raw vector or NULL; ",
+          "element %d is not"
+        ),
         which(!ok)[1L]
       ),
       call = call
