@@ -8,7 +8,7 @@ it back.
 ``` r
 base64_encode(x, url = FALSE, pad = TRUE, line_length = NULL)
 
-base64_decode(x, url = FALSE, forgiving = TRUE)
+base64_decode(x, url = FALSE, forgiving = TRUE, pad = TRUE)
 ```
 
 ## Arguments
@@ -27,7 +27,10 @@ base64_decode(x, url = FALSE, forgiving = TRUE)
 
 - pad:
 
-  Whether `base64_encode()` writes `=` padding.
+  Whether `base64_encode()` writes `=` padding. For `base64_decode()`
+  with `forgiving = FALSE`, whether padding is required (`TRUE`, the
+  default) or refused (`FALSE`); forgiving decoding accepts either, so
+  `pad = FALSE` needs `forgiving = FALSE`.
 
 - line_length:
 
@@ -56,8 +59,11 @@ return) is skipped, padding is optional, and a final quantum of a single
 character is an error. `forgiving = FALSE` reads RFC 4648 section 3.3
 strictly: padding is required, the unused bits of the last character
 must be zero, and whitespace is an error too. Padding is required with
-the URL alphabet as well, so text written with `pad = FALSE` decodes
-only in forgiving mode.
+the URL alphabet as well, unless `pad = FALSE`: then padding is an error
+instead, and an unpadded text is read just as strictly. That is the
+Base64url of JOSE (RFC 7515 section 2) and of JWTs, where each value has
+exactly one accepted encoding, the one `base64_encode(pad = FALSE)`
+writes.
 
 ## See also
 
@@ -89,4 +95,7 @@ tryCatch(
   zuutf_base64_error = function(e) e$offset
 )
 #> [1] 7
+# Unpadded Base64url, read strictly, as JOSE and JWTs use it
+base64_decode("aGVsbG8", url = TRUE, forgiving = FALSE, pad = FALSE)
+#> [1] 68 65 6c 6c 6f
 ```
