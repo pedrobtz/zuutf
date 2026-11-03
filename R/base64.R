@@ -9,8 +9,11 @@
 #' character is an error. `forgiving = FALSE` reads RFC 4648 section 3.3
 #' strictly: padding is required, the unused bits of the last character
 #' must be zero, and whitespace is an error too. Padding is required with
-#' the URL alphabet as well, so text written with `pad = FALSE` decodes
-#' only in forgiving mode.
+#' the URL alphabet as well, unless `pad = FALSE`: then padding is an error
+#' instead, and an unpadded text is read just as strictly. That is the
+#' Base64url of JOSE (RFC 7515 section 2) and of JWTs, where each value has
+#' exactly one accepted encoding, the one `base64_encode(pad = FALSE)`
+#' writes.
 #'
 #' @param x For `base64_encode()`, a raw vector, or a single string, which
 #'   is encoded as its UTF-8 bytes. For `base64_decode()`, a single string
@@ -18,7 +21,10 @@
 #' @param url Which alphabet: `FALSE` (the default) for the standard one
 #'   with `+` and `/`, `TRUE` for the URL- and filename-safe one with `-`
 #'   and `_`. `base64_decode()` also takes `NA`, which accepts either.
-#' @param pad Whether `base64_encode()` writes `=` padding.
+#' @param pad Whether `base64_encode()` writes `=` padding. For
+#'   `base64_decode()` with `forgiving = FALSE`, whether padding is required
+#'   (`TRUE`, the default) or refused (`FALSE`); forgiving decoding accepts
+#'   either, so `pad = FALSE` needs `forgiving = FALSE`.
 #' @param line_length `NULL` (the default) for one line, or a whole number of
 #'   at least 4, one Base64 quantum: a line feed (`"\n"`) is written after
 #'   every `line_length` characters, as MIME and PEM do with 76 and 64. A
@@ -46,6 +52,8 @@
 #'   base64_decode("aGVsbG8", forgiving = FALSE),   # padding is required
 #'   zuutf_base64_error = function(e) e$offset
 #' )
+#' # Unpadded Base64url, read strictly, as JOSE and JWTs use it
+#' base64_decode("aGVsbG8", url = TRUE, forgiving = FALSE, pad = FALSE)
 base64_encode <- function(x, url = FALSE, pad = TRUE, line_length = NULL) {
   call <- sys.call()
   check_flag(url, "url", call = call)
@@ -85,12 +93,19 @@ base64_encode <- function(x, url = FALSE, pad = TRUE, line_length = NULL) {
 
 #' @rdname base64_encode
 #' @export
-base64_decode <- function(x, url = FALSE, forgiving = TRUE) {
+base64_decode <- function(x, url = FALSE, forgiving = TRUE, pad = TRUE) {
   call <- sys.call()
   if (!is.logical(url) || length(url) != 1L) {
     abort_invalid_argument("`url` must be TRUE, FALSE or NA", call = call)
   }
   check_flag(forgiving, "forgiving", call = call)
+  check_flag(pad, "pad", call = call)
+  if (!pad && forgiving) {
+    abort_invalid_argument(
+      "`pad = FALSE` applies to strict decoding; set `forgiving = FALSE`",
+      call = call
+    )
+  }
   x <- base64_input(x, utf8 = FALSE, call = call)
   check_kernel(call)
   # simdutf_base64_options: default 0, URL 1, either alphabet 8
@@ -101,7 +116,7 @@ base64_decode <- function(x, url = FALSE, forgiving = TRUE) {
   } else {
     0L
   }
-  run_base64(.Call(zut_base64_decode, x, options, !forgiving), call)
+  run_base64(.Call(zut_base64_decode, x, options, !forgiving, pad), call)
 }
 
 # One raw vector or one string (design §5, D14). A string to encode is

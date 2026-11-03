@@ -216,3 +216,54 @@ test_that("arguments are checked", {
   Encoding(b) <- "bytes"
   expect_error(base64_encode(b), class = "zuutf_invalid_argument")
 })
+
+test_that("strict decoding with pad = FALSE refuses padding and reads unpadded text", {
+  # The Base64url of JOSE and JWTs: no padding, no whitespace, zero unused
+  # bits, so each value has exactly one accepted encoding (#55).
+  strict <- function(s, url = TRUE) {
+    base64_decode(s, url = url, forgiving = FALSE, pad = FALSE)
+  }
+  offset_of <- function(s) {
+    tryCatch(strict(s), zuutf_base64_error = function(e) e$offset)
+  }
+  for (n in 0:40) {
+    x <- as.raw(seq_len(n) %% 256)
+    unpadded <- base64_encode(x, url = TRUE, pad = FALSE)
+    expect_identical(strict(unpadded), x, info = n)
+    expect_identical(
+      strict(unpadded),
+      base64_decode(
+        base64_encode(x, url = TRUE),
+        url = TRUE,
+        forgiving = FALSE
+      ),
+      info = n
+    )
+  }
+  expect_identical(strict(""), raw())
+  expect_identical(rawToChar(strict("aGVsbG8")), "hello")
+  expect_identical(offset_of("aGVsbG8="), 8L) # padding refused
+  expect_identical(offset_of("aGVsbA=="), 7L)
+  expect_identical(offset_of("aG=sbG8"), 3L)
+  expect_identical(offset_of("aGVsb"), 5L) # one-character final quantum
+  expect_identical(offset_of("aGVsbG9"), 7L) # non-zero unused bits
+  expect_identical(offset_of("aGVsbB"), 6L)
+  expect_identical(offset_of("aGVs bG8"), 5L) # whitespace
+  expect_identical(offset_of("aGVsbG8\n"), 8L)
+  expect_identical(offset_of("aG+sbG8"), 3L) # standard alphabet under url
+  expect_identical(rawToChar(strict("aGVsbG8", url = FALSE)), "hello")
+  expect_identical(strict("-_8", url = NA), as.raw(c(0xfb, 0xff)))
+})
+
+test_that("pad = FALSE needs strict decoding", {
+  expect_error(
+    base64_decode("aGVsbG8", pad = FALSE),
+    class = "zuutf_invalid_argument"
+  )
+  for (bad in list(NA, "no", c(TRUE, FALSE))) {
+    expect_error(
+      base64_decode("aGVsbG8=", forgiving = FALSE, pad = bad),
+      class = "zuutf_invalid_argument"
+    )
+  }
+})

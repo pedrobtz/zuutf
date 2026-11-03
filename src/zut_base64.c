@@ -105,18 +105,42 @@ simdutf_result zut_base64_decode_core(const char *p, size_t n, char *out,
   return r;
 }
 
-/* options: a simdutf_base64_options value; strict: RFC 4648 read strictly. */
-SEXP zut_base64_decode(SEXP x, SEXP options, SEXP strict) {
+/* options: a simdutf_base64_options value; strict: RFC 4648 read strictly;
+ * pad: with strict, FALSE requires the absence of padding (Base64url as JOSE
+ * uses it). simdutf's strict last chunk requires padding, so an unpadded
+ * text is checked for '=' and for a one-character final quantum here, then
+ * padded in a private copy: simdutf still checks the alphabet and that the
+ * unused bits are zero, and offsets stay those of the caller's text. */
+SEXP zut_base64_decode(SEXP x, SEXP options, SEXP strict, SEXP pad) {
   const char *p;
   size_t n;
   bytes_of(x, &p, &n);
+  int is_strict = Rf_asLogical(strict) == TRUE;
+  if (is_strict && Rf_asLogical(pad) == FALSE) {
+    for (size_t i = 0; i < n; i++) {
+      if (p[i] == '=') {
+        return result(R_NilValue, ZUT_B64_INVALID, i);
+      }
+    }
+    if (n % 4 == 1) {
+      return result(R_NilValue, ZUT_B64_INVALID, n - 1);
+    }
+    if (n % 4 != 0) {
+      size_t padded = n + (4 - n % 4);
+      char *q = R_alloc(padded, 1);
+      memcpy(q, p, n);
+      memset(q + n, '=', padded - n);
+      p = q;
+      n = padded;
+    }
+  }
 
   size_t cap = simdutf_maximal_binary_length_from_base64(p, n);
   SEXP buf = PROTECT(Rf_allocVector(RAWSXP, (R_xlen_t) (cap ? cap : 1)));
   size_t outlen = cap;
   simdutf_result r = zut_base64_decode_core(p, n, (char *) RAW(buf), &outlen,
                                             Rf_asInteger(options),
-                                            Rf_asLogical(strict) == TRUE);
+                                            is_strict);
   SEXP out;
   switch (r.error) {
   case SIMDUTF_ERROR_SUCCESS: {

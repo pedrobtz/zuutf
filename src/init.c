@@ -16,7 +16,7 @@ static const R_CallMethodDef call_methods[] = {
   {"zut_convert", (DL_FUNC) &zut_convert, 6},
   {"zut_detect", (DL_FUNC) &zut_detect, 1},
   {"zut_base64_encode", (DL_FUNC) &zut_base64_encode, 3},
-  {"zut_base64_decode", (DL_FUNC) &zut_base64_decode, 3},
+  {"zut_base64_decode", (DL_FUNC) &zut_base64_decode, 4},
   {NULL, NULL, 0}
 };
 
