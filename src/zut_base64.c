@@ -116,6 +116,7 @@ SEXP zut_base64_decode(SEXP x, SEXP options, SEXP strict, SEXP pad) {
   size_t n;
   bytes_of(x, &p, &n);
   int is_strict = Rf_asLogical(strict) == TRUE;
+  int nprotect = 0;
   if (is_strict && Rf_asLogical(pad) == FALSE) {
     for (size_t i = 0; i < n; i++) {
       if (p[i] == '=') {
@@ -126,11 +127,14 @@ SEXP zut_base64_decode(SEXP x, SEXP options, SEXP strict, SEXP pad) {
       return result(R_NilValue, ZUT_B64_INVALID, n - 1);
     }
     if (n % 4 != 0) {
+      /* an R vector, not R_alloc(): the copy is reclaimed whatever the
+       * caller, also outside .Call(), as in the fuzz harness (#57) */
       size_t padded = n + (4 - n % 4);
-      char *q = R_alloc(padded, 1);
-      memcpy(q, p, n);
-      memset(q + n, '=', padded - n);
-      p = q;
+      SEXP copy = PROTECT(Rf_allocVector(RAWSXP, (R_xlen_t) padded));
+      nprotect++;
+      memcpy(RAW(copy), p, n);
+      memset(RAW(copy) + n, '=', padded - n);
+      p = (const char *) RAW(copy);
       n = padded;
     }
   }
@@ -161,6 +165,6 @@ SEXP zut_base64_decode(SEXP x, SEXP options, SEXP strict, SEXP pad) {
     out = result(R_NilValue, ZUT_B64_INTERNAL, 0);
     break;
   }
-  UNPROTECT(1);
+  UNPROTECT(1 + nprotect);
   return out;
 }
