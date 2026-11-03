@@ -7,7 +7,7 @@
 \usage{
 base64_encode(x, url = FALSE, pad = TRUE, line_length = NULL)
 
-base64_decode(x, url = FALSE, forgiving = TRUE)
+base64_decode(x, url = FALSE, forgiving = TRUE, pad = TRUE)
 }
 \arguments{
 \item{x}{For \code{base64_encode()}, a raw vector, or a single string, which
@@ -18,7 +18,10 @@ or a raw vector holding the Base64 text.}
 with \code{+} and \code{/}, \code{TRUE} for the URL- and filename-safe one with \code{-}
 and \verb{_}. \code{base64_decode()} also takes \code{NA}, which accepts either.}
 
-\item{pad}{Whether \code{base64_encode()} writes \code{=} padding.}
+\item{pad}{Whether \code{base64_encode()} writes \code{=} padding. For
+\code{base64_decode()} with \code{forgiving = FALSE}, whether padding is required
+(\code{TRUE}, the default) or refused (\code{FALSE}); forgiving decoding accepts
+either, so \code{pad = FALSE} needs \code{forgiving = FALSE}.}
 
 \item{line_length}{\code{NULL} (the default) for one line, or a whole number of
 at least 4, one Base64 quantum: a line feed (\code{"\\n"}) is written after
@@ -45,8 +48,11 @@ return) is skipped, padding is optional, and a final quantum of a single
 character is an error. \code{forgiving = FALSE} reads RFC 4648 section 3.3
 strictly: padding is required, the unused bits of the last character
 must be zero, and whitespace is an error too. Padding is required with
-the URL alphabet as well, so text written with \code{pad = FALSE} decodes
-only in forgiving mode.
+the URL alphabet as well, unless \code{pad = FALSE}: then padding is an error
+instead, and an unpadded text is read just as strictly. That is the
+Base64url of JOSE (RFC 7515 section 2) and of JWTs, where each value has
+exactly one accepted encoding, the one \code{base64_encode(pad = FALSE)}
+writes.
 }
 \examples{
 base64_encode(charToRaw("hello"))
@@ -62,6 +68,8 @@ tryCatch(
   base64_decode("aGVsbG8", forgiving = FALSE),   # padding is required
   zuutf_base64_error = function(e) e$offset
 )
+# Unpadded Base64url, read strictly, as JOSE and JWTs use it
+base64_decode("aGVsbG8", url = TRUE, forgiving = FALSE, pad = FALSE)
 }
 \seealso{
 \link{zuutf_error} for the condition classes.

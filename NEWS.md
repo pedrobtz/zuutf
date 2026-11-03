@@ -29,6 +29,10 @@ the first error is.
   alphabets (either at once on decode with `url = NA`), padding, line
   wrapping at 4 characters or more, and forgiving (WHATWG) or strict (RFC 4648) decoding.
 
+* Strict decoding takes `pad = FALSE` to refuse padding instead of requiring
+  it: the unpadded Base64url of JOSE and JWTs, read with one accepted
+  encoding per value (#55).
+
 ## For other packages
 
 * A registered C table, `zuutf_api_v1`, declared in the installed header
