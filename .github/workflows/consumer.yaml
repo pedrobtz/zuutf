@@ -8,8 +8,8 @@
 # only the installed inst/include/zuutf.h can satisfy its #include, and the
 # installed header is compiled standalone as C99 and C++17 under -Werror.
 on:
-  push:
-    branches: [main, master]
+  # No `push:`: a pull request already checks its merge with main,
+  # and the schedule checks main (r-actions README, "Pushes to main").
   pull_request:
     types: [opened, synchronize, reopened, labeled]
   workflow_dispatch:

@@ -4,8 +4,8 @@
 # macOS (arm64). Each leg also reports install time, object size and the
 # export list for design §12.2.
 on:
-  push:
-    branches: [main, master]
+  # No `push:`: a pull request already checks its merge with main,
+  # and the schedule checks main (r-actions README, "Pushes to main").
   pull_request:
     types: [opened, synchronize, reopened, labeled]
 
