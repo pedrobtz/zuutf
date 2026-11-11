@@ -15,3 +15,8 @@
 ^\.gitattributes$
 ^doc$
 ^Meta$
+^\.superpowers$
+^\.worktrees$
+^CLAUDE\.md$
+^AGENTS\.md$
+^CRAN-SUBMISSION$
