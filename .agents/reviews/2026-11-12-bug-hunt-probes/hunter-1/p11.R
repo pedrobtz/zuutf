@@ -1,0 +1,7 @@
+.libPaths("/private/tmp/claude-501/-Users-pbtz-src-github-com-pedrobtz/432a5e20-13bd-4b69-acab-05b86173939e/scratchpad/hunt/lib")
+library(zuutf)
+m <- function(e) cat(tryCatch({e; "no error"}, error = conditionMessage), "\n")
+m(utf_detect("abc")); m(utf_detect(1L)); m(utf_convert(1L, "UTF-8", "UTF-8")); m(utf_decode(1L))
+m(utf_length_as("a", "UTF-16LE", "UTF-8")); b <- "a\xff"; Encoding(b) <- "bytes"; m(utf_encode(b)); m(utf_length_as(b, to = "UTF-8"))
+m(utf_decode(list(as.raw(1), "a")))
+r <- tryCatch(zuutf:::raise_status(c(1, 2^31 + 5, 1, 1), "UTF-8", NULL), error = function(e) class(e)); print(r)
