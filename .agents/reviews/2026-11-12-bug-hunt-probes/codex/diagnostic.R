@@ -1,0 +1,11 @@
+.libPaths('/private/tmp/claude-501/-Users-pbtz-src-github-com-pedrobtz/432a5e20-13bd-4b69-acab-05b86173939e/scratchpad/hunt-codex/lib')
+library(zuutf)
+catch<-function(expr)tryCatch(expr,error=identity)
+e<-catch(utf_length_as('A',from='Latin-1',to='UTF-8'))
+cat('initial:',conditionMessage(e),'\n')
+cat('suggested retry:',conditionMessage(catch(utf_length_as('A',from='Latin-1',to='UTF-8',useBytes=TRUE))),'\n')
+x<-rawToChar(as.raw(0xe9));Encoding(x)<-'bytes'
+cat('utf_encode bytes:',conditionMessage(catch(utf_encode(x))),'\n')
+cat('utf_encode suggested retry:',conditionMessage(catch(utf_encode(x,useBytes=TRUE))),'\n')
+cat('utf_length_as bytes:',conditionMessage(catch(utf_length_as(x,to='UTF-8'))),'\n')
+stopifnot(inherits(e,'zuutf_invalid_argument'),!('encoding'%in%names(formals(utf_length_as))),!('useBytes'%in%names(formals(utf_length_as))),!('useBytes'%in%names(formals(utf_encode))))
