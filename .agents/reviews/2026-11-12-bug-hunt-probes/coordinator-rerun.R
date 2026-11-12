@@ -1,0 +1,10 @@
+.libPaths("/private/tmp/claude-501/-Users-pbtz-src-github-com-pedrobtz/432a5e20-13bd-4b69-acab-05b86173939e/scratchpad/hunt/lib"); library(zuutf)
+t <- function(e) tryCatch(e, error=function(e) paste0("ERR[", class(e)[1], "] ", conditionMessage(e)))
+x <- "﻿abc"
+cat("F2:", utf_count(x), nchar(x), "| enc:", t(paste(utf_encode(x,"UTF-8"), collapse=" ")), "| b64:", base64_encode(x), "\n")
+cat("F3a:", t(utf_length_as("a", "UTF-16LE", "UTF-8")), "\n")
+b <- "a\xff"; Encoding(b) <- "bytes"; cat("F3b:", t(utf_encode(b)), "\n")
+cat("F4:", t(utf_detect("abc")), "\n")
+cat("F5:", t(zuutf:::raise_status(c(1, 2^31 + 5, 1, 1), "UTF-8", NULL)), "\n")
+for (s in c("AA===","AAA==")) cat("F6", s, tryCatch(base64_decode(s), error=function(e) e$offset), "\n")
+u <- rawToChar(as.raw(c(0x63,0xc3,0xa9))); cat("F1:", Sys.getlocale("LC_CTYPE"), utf_count(u), utf_valid("\xe9"), base64_encode(u), "\n")
