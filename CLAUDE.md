@@ -221,6 +221,10 @@ The package's own workflows (design §10, §12):
   oracle on every kernel.
 - `benchmarks.yaml`: on dispatch or the `benchmarks` label only; not a gate.
 - `pkgdown.yaml`: the site.
+- `cran-release.yaml`: on a push to `main` that changes `CRAN-SUBMISSION`,
+  tags the submitted commit and opens the `.9000` bump (shared
+  `workflow.md`). `CRAN-SUBMISSION` is committed, and ignored only by
+  `.Rbuildignore`.
 
 ## Vendored native code
 
