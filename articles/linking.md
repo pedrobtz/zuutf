@@ -109,7 +109,7 @@ reports:
 ``` r
 
 zuutf::zuutf_info()$kernel
-#> [1] "icelake"
+#> [1] "haswell"
 ```
 
 `SIMDUTF_FORCE_IMPLEMENTATION` makes simdutf use the kernel it names

@@ -39,7 +39,7 @@ info <- zuutf_info()
 info$simdutf
 #> [1] "9.2.1"
 info$kernel
-#> [1] "icelake"
+#> [1] "haswell"
 info$kernels
 #>       name
 #> 1  icelake
@@ -50,7 +50,7 @@ info$kernels
 #> 2                                                          Intel/AMD AVX2
 #> 3                                         Generic fallback implementation
 #>   supported
-#> 1      TRUE
+#> 1     FALSE
 #> 2      TRUE
 #> 3      TRUE
 ```
