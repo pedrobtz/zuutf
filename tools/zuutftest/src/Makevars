@@ -1,1 +1,4 @@
 # Nothing is linked: the table is reached through R_GetCCallable().
+# -pthread for src/threads.c only; winpthreads provides it under Rtools.
+PKG_CFLAGS = -pthread
+PKG_LIBS = -pthread

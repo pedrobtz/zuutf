@@ -433,6 +433,12 @@ getter registered as `zuutf_api_v1`, as zuxml's is. Rules, all `zuxml`'s
 - All members are pure functions of their arguments. The first call from
   any thread runs CPU detection, which simdutf makes thread-safe; none
   calls into R, so a consumer may call them off the main thread.
+  `tools/zuutftest` tests that claim (#85, for zugodb's worker threads):
+  2 to 32 threads call every read-only member at once, on shared and on
+  different buffers, and every result, output hash and guard byte is
+  compared with a single-threaded run. One run is in a fresh process, so
+  the threads' calls are the first and race on the kernel choice.
+  ThreadSanitizer over zuutf and simdutf found no race on 2026-11-23.
 - `tools/zuutftest` is the consumer fixture (R10.4): it calls every
   member through `zuutf_api_get()`, carries a frozen copy of the 0.1.0
   table whose member offsets must match the current header, and is
