@@ -29,7 +29,7 @@ segmentation, or encodings beyond Latin-1 and the UTFs.
 Two documents outrank this file. [.agents/design.md](.agents/design.md) is
 the specification, numbered §1–§17: every statement in it is a decision, and
 open questions live only in its §16. [.agents/roadmap.md](.agents/roadmap.md)
-sequences it into Stages 0–7, each with exit criteria. Both were adopted on
+sequences it into Stages 0–10, each with exit criteria. Both were adopted on
 2026-10-13 from
 [RFC 0024](https://github.com/pedrobtz/packages/blob/main/rfcs/not-started/0024-zuutf-unicode-transcoding.md)
 in `pedrobtz/packages`. `CLAUDE.md` orients, the design decides, the roadmap
@@ -50,9 +50,11 @@ exported and documented, the C table `zuutf_api_v1` is consumed by
 and the zufast oracle on every kernel. After Stage 7 the critical review
 (#49–#51), the CRAN review (#53) and the fixes it led to (#55 strict
 unpadded Base64url, #57 the unpadded-decode copy as an R vector) are merged.
-What remains is the submission itself (issue #10), which is the maintainer's
-decision, and #59 (gate the jobs that run on documentation-only pull
-requests).
+The roadmap was re-planned on 2026-11-12 after the assurance pass (#64–#68)
+and the bug hunt (#70–#75, #77): Stage 8 (assurance and CI economy, #78),
+Stage 9 (the bug-hunt fixes, #79) and Stage 10 (a second review, #80) come
+before the submission (#10), which is the maintainer's decision. #85, the
+threaded test of the C table that zugodb needs, is merged (2026-11-23).
 
 Update this paragraph at the end of every stage.
 
@@ -60,8 +62,9 @@ Update this paragraph at the end of every stage.
 
 The current version's parent issue is
 [#1](https://github.com/pedrobtz/zuutf/issues/1) for `v0.1.0`, with the
-stages #2–#9 (eight stages, 0 to 7) and the submission #10. Sibling packages that
-depend on this one before CRAN does: none recorded yet; `tools/zuutftest` is
+stages #2–#9 and #78–#80 (eleven stages, 0 to 10) and the submission #10.
+Sibling packages that wait on 0.1.0: zujose (`Imports`), zugodb (the C
+table, from worker threads) and zumime (`Suggests`). `tools/zuutftest` is
 the in-repository consumer.
 
 The C table in `inst/include/zuutf.h` (Stage 5) is ABI from the moment a

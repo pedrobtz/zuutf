@@ -286,6 +286,15 @@ other name is `zuutf_invalid_argument` (Stage 2, 2026-10-13). `utf_is_ascii()` r
 the bytes of every string as they are, since ASCII is the same in UTF-8
 and every native encoding R supports.
 
+*Decided 2026-11-12 (#72).* A native string is converted by `enc2utf8()`
+only where that is exact: in a session whose charset is UTF-8 or
+Latin-1. Elsewhere, a C or POSIX locale for one, `enc2utf8()` writes
+each non-ASCII byte as the text `<xx>`. So a native string with a
+non-ASCII byte is refused there with `zuutf_invalid_argument`, naming
+`useBytes = TRUE` and `Encoding<-` as the ways out. ASCII native strings
+are unaffected. This applies to every function that takes character
+input, `base64_encode()` included.
+
 **Base64** takes one string or one raw vector and returns one string
 (encode) or one raw vector (decode); a vector of strings is a job for
 `lapply()`. A string given to `base64_encode()` is encoded as its UTF-8
@@ -301,7 +310,9 @@ caller's `gsub()`.
   element `index`, the byte `offset` in the input's units and the
   `encoding`; `"replace"` substitutes U+FFFD, one per maximal invalid
   subpart as the WHATWG decoder does (one per unpaired surrogate in
-  UTF-16, one per out-of-range unit in UTF-32); `"na"` returns `NA` for
+  UTF-16, one per out-of-range unit in UTF-32, and one for an unpaired
+  high surrogate together with an odd byte that ends the input, as
+  WHATWG's single end-of-queue error; *decided 2026-11-12*, #71); `"na"` returns `NA` for
   that element. With a Latin-1 target, code points above U+00FF are
   "invalid" for these policies and `"replace"` writes `?` (0x3F), as
   `iconv(sub = "?")` would, because Latin-1 has no U+FFFD.
@@ -327,7 +338,10 @@ caller's `gsub()`.
   use it to choose. Output never carries a BOM; a caller who wants one
   prepends it. Validation, `utf_count()` and `utf_length_as()` skip a
   matching BOM the same way, so §9's offsets and the counts never include
-  it.
+  it. *Decided 2026-11-12 (#70):* all of this applies to raw input only.
+  In a character string U+FEFF is a character, as `nchar()` counts it,
+  so `utf_encode()` writes it, and `utf_count()`, `utf_length_as()` and
+  the validation offsets count it.
 - **UTF-32 byte order (D13).** simdutf's UTF-32 functions take native
   `char32_t`, and the C API has no UTF-32BE entry points (*verified
   2026-10-13*). The non-native order is byte-swapped in the glue into a

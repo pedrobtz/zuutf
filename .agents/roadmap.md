@@ -1,6 +1,10 @@
 # zuutf: roadmap
 
-Status: draft 2026-10-13. Implements [design.md](design.md).
+Status: draft 2026-10-13; re-planned 2026-11-12, after the assurance pass
+(#64-#68) and the bug hunt (#70-#75, #77) found work to do before the
+submission. Stages 8-10 were added with the fewest pull requests the work
+allows, since the account's runners are shared. Implements
+[design.md](design.md).
 Target: v0.1.0, the first CRAN release.
 Tracking: [v0.1.0 (#1)](https://github.com/pedrobtz/zuutf/issues/1), with one sub-issue per
 stage; [CRAN-submission (#10)](https://github.com/pedrobtz/zuutf/issues/10).
@@ -16,16 +20,19 @@ written. Sections marked § are in design.md.
 
 ## Stages
 
-| Stage | Title | Issue | Pull request | Done |
-| --- | --- | --- | --- | --- |
-| 0 | [Package identity](#stage-0--package-identity) | [#2](https://github.com/pedrobtz/zuutf/issues/2) | [#12](https://github.com/pedrobtz/zuutf/pull/12) | 2026-10-13 |
-| 1 | [Vendor simdutf and the Windows go/no-go](#stage-1--vendor-simdutf-and-the-windows-gono-go) | [#3](https://github.com/pedrobtz/zuutf/issues/3) | [#14](https://github.com/pedrobtz/zuutf/pull/14) | 2026-10-13 |
-| 2 | [Validation, counts and kernel reporting](#stage-2--validation-counts-and-kernel-reporting) | [#4](https://github.com/pedrobtz/zuutf/issues/4) | [#15](https://github.com/pedrobtz/zuutf/pull/15), [#16](https://github.com/pedrobtz/zuutf/pull/16) | 2026-10-13 |
-| 3 | [Conversion](#stage-3--conversion) | [#5](https://github.com/pedrobtz/zuutf/issues/5) | [#17](https://github.com/pedrobtz/zuutf/pull/17) | 2026-10-13 |
-| 4 | [Base64](#stage-4--base64) | [#6](https://github.com/pedrobtz/zuutf/issues/6) | [#18](https://github.com/pedrobtz/zuutf/pull/18) | 2026-10-13 |
-| 5 | [The C table and the consumer fixture](#stage-5--the-c-table-and-the-consumer-fixture) | [#7](https://github.com/pedrobtz/zuutf/issues/7) | [#19](https://github.com/pedrobtz/zuutf/pull/19) | 2026-10-13 |
-| 6 | [Oracles, hostile input, fuzzing and benchmarks](#stage-6--oracles-hostile-input-fuzzing-and-benchmarks) | [#8](https://github.com/pedrobtz/zuutf/issues/8) | [#21](https://github.com/pedrobtz/zuutf/pull/21) | 2026-10-13 |
-| 7 | [v0.1.0 readiness](#stage-7--v010-readiness) | [#9](https://github.com/pedrobtz/zuutf/issues/9) | [#22](https://github.com/pedrobtz/zuutf/pull/22) | 2026-10-13 |
+| Stage | Title | CI | Issue | Pull request | Done |
+| --- | --- | --- | --- | --- | --- |
+| 0 | [Package identity](#stage-0--package-identity) | – | [#2](https://github.com/pedrobtz/zuutf/issues/2) | [#12](https://github.com/pedrobtz/zuutf/pull/12) | 2026-10-13 |
+| 1 | [Vendor simdutf and the Windows go/no-go](#stage-1--vendor-simdutf-and-the-windows-gono-go) | – | [#3](https://github.com/pedrobtz/zuutf/issues/3) | [#14](https://github.com/pedrobtz/zuutf/pull/14) | 2026-10-13 |
+| 2 | [Validation, counts and kernel reporting](#stage-2--validation-counts-and-kernel-reporting) | – | [#4](https://github.com/pedrobtz/zuutf/issues/4) | [#15](https://github.com/pedrobtz/zuutf/pull/15), [#16](https://github.com/pedrobtz/zuutf/pull/16) | 2026-10-13 |
+| 3 | [Conversion](#stage-3--conversion) | – | [#5](https://github.com/pedrobtz/zuutf/issues/5) | [#17](https://github.com/pedrobtz/zuutf/pull/17) | 2026-10-13 |
+| 4 | [Base64](#stage-4--base64) | – | [#6](https://github.com/pedrobtz/zuutf/issues/6) | [#18](https://github.com/pedrobtz/zuutf/pull/18) | 2026-10-13 |
+| 5 | [The C table and the consumer fixture](#stage-5--the-c-table-and-the-consumer-fixture) | – | [#7](https://github.com/pedrobtz/zuutf/issues/7) | [#19](https://github.com/pedrobtz/zuutf/pull/19) | 2026-10-13 |
+| 6 | [Oracles, hostile input, fuzzing and benchmarks](#stage-6--oracles-hostile-input-fuzzing-and-benchmarks) | – | [#8](https://github.com/pedrobtz/zuutf/issues/8) | [#21](https://github.com/pedrobtz/zuutf/pull/21) | 2026-10-13 |
+| 7 | [v0.1.0 readiness](#stage-7--v010-readiness) | – | [#9](https://github.com/pedrobtz/zuutf/issues/9) | [#22](https://github.com/pedrobtz/zuutf/pull/22) | 2026-10-13 |
+| 8 | [Assurance and CI economy](#stage-8--assurance-and-ci-economy) | quick | [#78](https://github.com/pedrobtz/zuutf/issues/78) | | |
+| 9 | [Fixes from the bug hunt](#stage-9--fixes-from-the-bug-hunt) | full | [#79](https://github.com/pedrobtz/zuutf/issues/79) | | |
+| 10 | [Review](#stage-10--review) | full | [#80](https://github.com/pedrobtz/zuutf/issues/80) | | |
 
 ## Stage 0 — Package identity
 
@@ -385,6 +392,165 @@ installed-size INFO and the Windows outcome.
 
 **Design.** §13, §14.
 
+**CI tiers (2026-11-12).** Stages 0-7 predate the column. Stages 8 and 10
+follow the CI policy of `pkg-roadmap`. Stage 9's full-profile run, with a
+dispatched step-20 gctorture run, stands in for a separate `Full CI`
+stage: Stage 7 already did readiness, and a stage of its own would cost
+one more pull request on the shared runners for no extra check.
+
+## Stage 8 — Assurance and CI economy
+
+**Issue.** [#78](https://github.com/pedrobtz/zuutf/issues/78), sub-issue of [v0.1.0](https://github.com/pedrobtz/zuutf/issues/1).
+
+**CI.** `quick`. It adds workflows that run on a schedule or by dispatch,
+and gates existing jobs. The package code does not change.
+
+**Goal.** Documentation-only pull requests stop using runners. Every
+required check of `.claude/shared/assurance.md` is wired and backed by
+`.agents/assurance.md`, so Stage 9 is measured by them.
+
+**Work.**
+- #59: a `changes` job calling r-actions' `changes.yml`, and the gate on
+  `consumer.yaml`, `hardening.yaml` (`canaries`, `oracle`) and
+  `kernel-matrix.yaml`. Done first, so the roadmap and report pull
+  requests after it cost no runners.
+- The assurance file and its caller from #69, folded in here, with
+  `ungated-jobs: fail`. #69 is closed in favour of this pull request.
+- #64: `alloc-failure.yml` called from `native-checks.yaml`, on the
+  schedule and by dispatch.
+- #65: a C test binary for Mull. The three fuzz harnesses are built as
+  replay drivers over their seed corpora (`tools/fuzz`, `-runs=0`, with
+  `rfuzz.c`'s embedded R), and `mutation.yml` runs them on the schedule
+  and by dispatch. The first report is read; survivors that show a
+  missing oracle are filed.
+- #66: `reach-floor` set per fuzz target, a few points under what the
+  last scheduled run reached.
+- This roadmap's re-plan, committed on the same branch.
+
+**Tests.**
+- Gating: the `changes` job's output, seen in two runs. A Markdown-only
+  commit skips the four jobs. A commit to `src/` runs them.
+- alloc-failure: a dispatched run on the branch reports no leak or
+  crash. Planted once, a `malloc()` scratch in `zut_scratch_alloc()` that
+  is freed after the loop is reported (then reverted).
+- mutation: a dispatched run kills the hand-made `<` to `<=` mutant in
+  `find_nul()` (`zut_convert.c`) before the survivors are trusted.
+- fuzz-reach: with the floor set, a harness that returns before calling
+  `zut_convert()` turns the reach step red (tried once, reverted).
+
+**Exit criteria.**
+- `assurance.yml` green with `ungated-jobs: fail`. `.agents/assurance.md`
+  rows for alloc-failure, mutation and fuzz-reach say `done`.
+- Each **Tests.** line was seen: the skip and the run, the planted
+  leak, the killed mutant and the red floor, with the run links in the
+  pull request.
+- The quick profile is green on the pull request.
+- Closes #59, #64, #65, #66.
+
+**Design.** §10, §12.2.
+
+## Stage 9 — Fixes from the bug hunt
+
+**Issue.** [#79](https://github.com/pedrobtz/zuutf/issues/79), sub-issue of [v0.1.0](https://github.com/pedrobtz/zuutf/issues/1).
+
+**CI.** `full` — it changes the conversion and Base64 decoders, which read
+untrusted input, and the C limits on output sizes. ASan, valgrind, the
+fuzz targets, and a dispatched step-20 gctorture run before it merges.
+
+**Goal.** Every finding of the 2026-11-12 bug hunt is fixed, the size
+limits are tested at their edges, and the design records the three
+decisions the hunt raised. The package is a release candidate again.
+
+**Work.**
+- The decisions of 2026-11-12 in design §5 and §6, already recorded,
+  are what #70, #71 and #72 implement.
+- #70: the BOM skip applies to raw input only. In a character string
+  U+FEFF is text (`zut_convert.c`, `zut_validate.c`, `zut_count.c`).
+- #71: one U+FFFD for a trailing unpaired high surrogate plus an odd
+  byte; the roxygen sentence in `R/convert.R` matches.
+- #72: a native non-ASCII string in a session whose charset is neither
+  UTF-8 nor Latin-1 is refused with `zuutf_invalid_argument`
+  (`prepare_input()`, `base64_input()`).
+- #73: the shared input checks take the caller's argument names and
+  remedies; `check_bytes_input()` gets a raw-only message.
+- #74: `raise_status()` formats the index with `%s`.
+- #75: the Base64 error offset is the minimum over the pre-scans and
+  simdutf, and `last_significant()` points at the leftover character.
+- #77: `zuutf_info()`'s roxygen matches design §12.2.
+- #67, #68: an internal output limit, `INT_MAX` by default, that tests can
+  lower through an unexported setter. It is used by `zut_base64_encode()`
+  and `zut_convert()`.
+- `NEWS.md` under the unreleased `# zuutf 0.1.0` heading; `man/`
+  regenerated.
+
+**Tests.**
+- #70: random strings with U+FEFF first, second and nowhere.
+  `utf_encode()` against `iconv(toRaw = TRUE)`, `utf_count()` against
+  `nchar()`, `utf_length_as()` against the encoded length, and
+  `utf_error_at()` against the byte position. Raw input with a BOM keeps
+  today's skip. In `test-convert.R` and `test-count.R`.
+- #71: UTF-16LE and UTF-16BE ending in each of {nothing, high surrogate,
+  low surrogate} × {0, 1 trailing byte}, under `"replace"`, against
+  Python's decoder output stored as a fixture with its generator in
+  `tools/fixtures/` (as `whatwg-decode.js` is). In `test-convert.R`.
+- #72: the native-string tests rerun under `LC_ALL=C` and a Latin-1
+  locale, in subprocesses started with `system2(R.home("bin/Rscript"))`,
+  expecting `zuutf_invalid_argument` for non-ASCII native strings under C,
+  and the UTF-8 session's answers under Latin-1, in a new
+  `test-locale.R`. Skipped on CRAN.
+- #73: a snapshot of every exported function's refusal message for each
+  refused input class, in `test-messages.R`.
+- #74: `raise_status()` and `run_base64()` with an index and an offset of
+  2^31 + 5, expecting the zuutf classes, in `test-conditions.R`.
+- #75: one bad character and one whitespace or `=` at every pair of
+  positions, in all nine modes, expecting the smaller position. The C
+  table's offset must equal the R offset minus one. In `test-base64.R`.
+- #77: under a forced kernel the processor cannot run,
+  `zuutf_info()$kernel` reports its name, in `test-conditions.R`.
+- #67, #68: with the limit lowered to `m`, outputs of `m - 1`, `m` and
+  `m + 1` characters or bytes through every sizing path (Base64 padded,
+  unpadded and with `line_length`; conversion from UTF-8, UTF-16LE,
+  UTF-32BE and Latin-1, and under `"replace"`). `m` succeeds,
+  `m + 1` raises `zuutf_size_error`, and `utf_length_as()` agrees. In a
+  new `test-limits.R`.
+
+**Exit criteria.**
+- Every **Tests.** line exists, compares against the named oracle, and was
+  seen to fail on `7ec8d2b` (or before its fix).
+- `.agents/assurance.md`: the two limit rows say `done`, and the marked-
+  encoding row names the new locale test.
+- A full-profile run green on the pull request, and a dispatched one green
+  on the merge commit. A dispatched step-20 gctorture run green on the
+  pull request's last commit.
+- `NEWS.md` lists the user-visible changes (#70, #71, #72, #75).
+- Closes #67, #68, #70, #71, #72, #73, #74, #75, #77.
+
+**Design.** §5, §6, §9, §12.2.
+
+## Stage 10 — Review
+
+**Issue.** [#80](https://github.com/pedrobtz/zuutf/issues/80), sub-issue of [v0.1.0](https://github.com/pedrobtz/zuutf/issues/1).
+
+**CI.** `full`. No pull request unless the reviews find something.
+
+**Goal.** The changed release candidate is reviewed again before the
+submission.
+
+**Work.**
+1. `pkg-critical-review` on the default branch after Stage 9. Its
+   blocking and required findings become sub-issues of this stage's
+   issue and are fixed together in one pull request.
+2. `pkg-cran-review`, after those fixes, so it sees the submitted code.
+
+**Exit criteria.**
+- Every blocking and required review issue closed, and the
+  `pkg-cran-review` table clean.
+- `NEWS.md` reflects any user-visible fix.
+- A full-profile run green on the default branch; its head becomes the
+  release commit named in #10.
+
+**Design.** §13, §14.
+
 ## After 0.1.0
 
 - Streaming conversion over connections and a `readLines()`-style reader
@@ -394,6 +560,12 @@ installed-size INFO and the Windows outcome.
   replacement and `validate_utf8_with_counts`, so the §6 loop can use
   them (§8).
 - zufast's own header-only SIMD validator: not zuutf's decision (§16 Q2).
+
+## Blocking open questions
+
+None. The three questions the 2026-11-12 bug hunt raised were decided the
+same day and are recorded in design.md: #70 in §6 (BOM), #71 in §6
+(Errors) and #72 in §5 (Character input).
 
 ## Open questions
 
