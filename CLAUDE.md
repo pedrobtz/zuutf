@@ -211,7 +211,8 @@ The package's own workflows (design §10, §12):
   slow sweeps.
 - `consumer.yaml`: `tools/zuutftest` installed from outside the source tree
   against the installed header, which is also compiled standalone as C99 and
-  C++17 under `-Werror` (alignment rule R10.4).
+  C++17 under `-Werror` (alignment rule R10.4). Its `test-threads.R` checks
+  the header's "any thread" rule (design §7, #85).
 - `hardening.yaml`: canaries, libFuzzer (five minutes a target on pull
   requests and pushes, an hour nightly and on dispatch) and the zufast
   oracle on every kernel.

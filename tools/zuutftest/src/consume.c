@@ -59,6 +59,10 @@ FROZEN(kernel_ok);
 _Static_assert(sizeof(zuutf_api) >= sizeof(zuutf_api_0_1_0),
                "zuutf_api lost a member: members are never removed");
 
+/* For src/threads.c: zuutf_api_get() is static to this file, the one that
+ * defines it. */
+const zuutf_api *ztt_api(void) { return zuutf_api_get(); }
+
 static const zuutf_api *api(void) {
   const zuutf_api *a = zuutf_api_get();
   if (a == NULL) {
@@ -205,6 +209,8 @@ SEXP ztt_base64_decode(SEXP x, SEXP flags, SEXP cap) {
   return out;
 }
 
+SEXP ztt_threads(SEXP inputs, SEXP nthreads, SEXP rounds);
+
 static const R_CallMethodDef calls[] = {
   {"ztt_struct_size", (DL_FUNC) &ztt_struct_size, 0},
   {"ztt_kernel", (DL_FUNC) &ztt_kernel, 0},
@@ -215,6 +221,7 @@ static const R_CallMethodDef calls[] = {
   {"ztt_convert", (DL_FUNC) &ztt_convert, 3},
   {"ztt_base64_encode", (DL_FUNC) &ztt_base64_encode, 3},
   {"ztt_base64_decode", (DL_FUNC) &ztt_base64_decode, 3},
+  {"ztt_threads", (DL_FUNC) &ztt_threads, 3},
   {NULL, NULL, 0}
 };
 
